@@ -11,6 +11,10 @@ import AuditLogs from './pages/AuditLogs';
 import Suppliers from './pages/Suppliers';
 import PurchaseOrders from './pages/PurchaseOrders';
 import GoodsReceipts from './pages/GoodsReceipts';
+import Reports from './pages/Reports';
+import FinancialReports from './pages/FinancialReports';
+import InventoryReports from './pages/InventoryReports';
+import PurchaseReports from './pages/PurchaseReports';
 import __Layout from './Layout.jsx';
 
 
@@ -28,6 +32,10 @@ export const PAGES = {
     "Suppliers": Suppliers,
     "PurchaseOrders": PurchaseOrders,
     "GoodsReceipts": GoodsReceipts,
+    "Reports": Reports,
+    "FinancialReports": FinancialReports,
+    "InventoryReports": InventoryReports,
+    "PurchaseReports": PurchaseReports,
 }
 
 export const pagesConfig = {

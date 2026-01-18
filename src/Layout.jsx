@@ -27,7 +27,8 @@ import {
   Menu,
   LogOut,
   ChevronRight,
-  Building2
+  Building2,
+  BarChart3
 } from 'lucide-react';
 
 const navigation = [
@@ -55,6 +56,16 @@ const navigation = [
       { name: 'Suppliers', page: 'Suppliers' },
       { name: 'Purchase Orders', page: 'PurchaseOrders' },
       { name: 'Goods Receipts', page: 'GoodsReceipts' },
+    ]
+  },
+  { 
+    name: 'Reports', 
+    icon: BarChart3, 
+    children: [
+      { name: 'Reports Hub', page: 'Reports' },
+      { name: 'Financial Reports', page: 'FinancialReports' },
+      { name: 'Inventory Reports', page: 'InventoryReports' },
+      { name: 'Purchase Reports', page: 'PurchaseReports' },
     ]
   },
   { name: 'Approvals', icon: CheckSquare, page: 'Approvals' },
