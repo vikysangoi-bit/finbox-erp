@@ -48,6 +48,15 @@ const navigation = [
       { name: 'Transactions', page: 'InventoryTransactions' },
     ]
   },
+  { 
+    name: 'Procurement', 
+    icon: FileText, 
+    children: [
+      { name: 'Suppliers', page: 'Suppliers' },
+      { name: 'Purchase Orders', page: 'PurchaseOrders' },
+      { name: 'Goods Receipts', page: 'GoodsReceipts' },
+    ]
+  },
   { name: 'Approvals', icon: CheckSquare, page: 'Approvals' },
   { name: 'Currencies', icon: Coins, page: 'Currencies' },
   { name: 'Documents', icon: FolderOpen, page: 'Documents' },

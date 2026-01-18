@@ -8,6 +8,10 @@ import Currencies from './pages/Currencies';
 import Documents from './pages/Documents';
 import Users from './pages/Users';
 import AuditLogs from './pages/AuditLogs';
+import Suppliers from './pages/Suppliers';
+import PurchaseOrders from './pages/PurchaseOrders';
+import GoodsReceipts from './pages/GoodsReceipts';
+import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
@@ -21,9 +25,13 @@ export const PAGES = {
     "Documents": Documents,
     "Users": Users,
     "AuditLogs": AuditLogs,
+    "Suppliers": Suppliers,
+    "PurchaseOrders": PurchaseOrders,
+    "GoodsReceipts": GoodsReceipts,
 }
 
 export const pagesConfig = {
     mainPage: "Dashboard",
     Pages: PAGES,
+    Layout: __Layout,
 };

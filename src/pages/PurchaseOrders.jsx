@@ -1,0 +1,408 @@
+import React, { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { base44 } from "@/api/base44Client";
+import PageHeader from "@/components/shared/PageHeader";
+import SearchFilter from "@/components/shared/SearchFilter";
+import DataTable from "@/components/shared/DataTable";
+import StatusBadge from "@/components/shared/StatusBadge";
+import EmptyState from "@/components/shared/EmptyState";
+import PurchaseOrderForm from "@/components/purchaseorders/PurchaseOrderForm";
+import GoodsReceiptForm from "@/components/purchaseorders/GoodsReceiptForm";
+import ConfirmDialog from "@/components/shared/ConfirmDialog";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Card } from "@/components/ui/card";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
+import { MoreHorizontal, Pencil, Trash2, FileText, Send, Eye, Package, CheckCircle } from "lucide-react";
+import { format } from "date-fns";
+
+export default function PurchaseOrders() {
+  const [showForm, setShowForm] = useState(false);
+  const [editingPO, setEditingPO] = useState(null);
+  const [deletePO, setDeletePO] = useState(null);
+  const [viewPO, setViewPO] = useState(null);
+  const [receivingPO, setReceivingPO] = useState(null);
+  const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+
+  const queryClient = useQueryClient();
+
+  const { data: pos = [], isLoading } = useQuery({
+    queryKey: ['purchase-orders'],
+    queryFn: () => base44.entities.PurchaseOrder.list('-created_date')
+  });
+
+  const { data: user } = useQuery({
+    queryKey: ['current-user'],
+    queryFn: () => base44.auth.me()
+  });
+
+  const createMutation = useMutation({
+    mutationFn: (data) => base44.entities.PurchaseOrder.create(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['purchase-orders'] });
+      setShowForm(false);
+    }
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: ({ id, data }) => base44.entities.PurchaseOrder.update(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['purchase-orders'] });
+      setShowForm(false);
+      setEditingPO(null);
+    }
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id) => base44.entities.PurchaseOrder.delete(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['purchase-orders'] });
+      setDeletePO(null);
+    }
+  });
+
+  const submitForApproval = async (po) => {
+    await base44.entities.PurchaseOrder.update(po.id, {
+      status: 'pending_approval',
+      submitted_by: user?.email,
+      submitted_at: new Date().toISOString()
+    });
+    
+    await base44.entities.ApprovalRequest.create({
+      entity_type: 'purchase_order',
+      entity_id: po.id,
+      title: `Purchase Order: ${po.po_number}`,
+      description: `PO for ${po.supplier_name} - ${po.items?.length || 0} items`,
+      amount: po.total_amount,
+      currency: po.currency,
+      status: 'pending',
+      submitted_by: user?.email,
+      submitted_by_name: user?.full_name,
+      submitted_at: new Date().toISOString()
+    });
+    
+    queryClient.invalidateQueries({ queryKey: ['purchase-orders'] });
+    queryClient.invalidateQueries({ queryKey: ['approval-requests'] });
+  };
+
+  const filteredPOs = pos.filter(po => {
+    const matchesSearch = 
+      po.po_number?.toLowerCase().includes(search.toLowerCase()) ||
+      po.supplier_name?.toLowerCase().includes(search.toLowerCase());
+    const matchesStatus = statusFilter === 'all' || po.status === statusFilter;
+    return matchesSearch && matchesStatus;
+  });
+
+  const generatePONumber = () => {
+    const count = pos.length + 1;
+    return `PO-${new Date().getFullYear()}-${String(count).padStart(5, '0')}`;
+  };
+
+  const columns = [
+    { 
+      header: "PO Number", 
+      render: (row) => <span className="font-mono font-medium text-slate-900">{row.po_number || '-'}</span>
+    },
+    { 
+      header: "Date", 
+      render: (row) => row.po_date ? format(new Date(row.po_date), 'MMM d, yyyy') : '-'
+    },
+    { 
+      header: "Supplier", 
+      render: (row) => (
+        <div>
+          <span className="font-medium text-slate-900">{row.supplier_name}</span>
+          <p className="text-xs text-slate-500">{row.supplier_code}</p>
+        </div>
+      )
+    },
+    { 
+      header: "Items", 
+      render: (row) => (
+        <Badge variant="outline">{row.items?.length || 0} items</Badge>
+      )
+    },
+    { 
+      header: "Total Amount", 
+      render: (row) => (
+        <span className="font-medium">
+          {row.currency} {(row.total_amount || 0).toFixed(2)}
+        </span>
+      )
+    },
+    { 
+      header: "Delivery Date", 
+      render: (row) => row.delivery_date ? format(new Date(row.delivery_date), 'MMM d, yyyy') : '-'
+    },
+    { 
+      header: "Status", 
+      render: (row) => <StatusBadge status={row.status || 'draft'} />
+    },
+    {
+      header: "",
+      cellClassName: "text-right",
+      render: (row) => (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon" className="h-8 w-8">
+              <MoreHorizontal className="w-4 h-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={() => setViewPO(row)}>
+              <Eye className="w-4 h-4 mr-2" />
+              View Details
+            </DropdownMenuItem>
+            {row.status === 'draft' && (
+              <>
+                <DropdownMenuItem onClick={() => { setEditingPO(row); setShowForm(true); }}>
+                  <Pencil className="w-4 h-4 mr-2" />
+                  Edit
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => submitForApproval(row)}>
+                  <Send className="w-4 h-4 mr-2" />
+                  Submit for Approval
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => setDeletePO(row)} className="text-rose-600">
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Delete
+                </DropdownMenuItem>
+              </>
+            )}
+            {(row.status === 'approved' || row.status === 'partially_received') && (
+              <DropdownMenuItem onClick={() => setReceivingPO(row)}>
+                <Package className="w-4 h-4 mr-2" />
+                Receive Goods
+              </DropdownMenuItem>
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      )
+    }
+  ];
+
+  const handleSave = (data) => {
+    if (editingPO) {
+      updateMutation.mutate({ id: editingPO.id, data });
+    } else {
+      createMutation.mutate({ 
+        ...data, 
+        po_number: generatePONumber(), 
+        status: 'draft' 
+      });
+    }
+  };
+
+  const handleReceiveGoods = async (receiptData) => {
+    // Create goods receipt
+    const receipt = await base44.entities.GoodsReceipt.create({
+      ...receiptData,
+      receipt_number: `GR-${new Date().getFullYear()}-${String(Math.floor(Math.random() * 10000)).padStart(5, '0')}`,
+      status: 'completed',
+      received_by: user?.email
+    });
+
+    // Update inventory for each item
+    for (const item of receiptData.items) {
+      if (item.received_quantity > 0) {
+        // Create inventory transaction
+        await base44.entities.InventoryTransaction.create({
+          transaction_number: `TXN-${new Date().getFullYear()}-${String(Math.floor(Math.random() * 10000)).padStart(5, '0')}`,
+          transaction_date: receiptData.receipt_date,
+          type: 'receipt',
+          item_id: item.item_id,
+          item_sku: item.item_sku,
+          item_name: item.item_name,
+          quantity: item.received_quantity,
+          unit_cost: item.unit_price,
+          total_cost: item.total,
+          currency: receiptData.currency,
+          reference: receiptData.po_number,
+          to_location: item.warehouse_location,
+          reason: `Goods receipt from PO ${receiptData.po_number}`,
+          status: 'completed'
+        });
+
+        // Update inventory item quantity
+        const invItem = await base44.entities.InventoryItem.filter({ id: item.item_id });
+        if (invItem.length > 0) {
+          await base44.entities.InventoryItem.update(item.item_id, {
+            quantity_on_hand: invItem[0].quantity_on_hand + item.received_quantity,
+            total_value: (invItem[0].quantity_on_hand + item.received_quantity) * invItem[0].unit_cost
+          });
+        }
+      }
+    }
+
+    // Update PO status and received quantities
+    const totalOrdered = receivingPO.items.reduce((sum, item) => sum + item.quantity, 0);
+    const totalReceived = receivingPO.items.reduce((sum, item) => sum + (item.received_quantity || 0), 0) + 
+                          receiptData.items.reduce((sum, item) => sum + item.received_quantity, 0);
+    
+    const newStatus = totalReceived >= totalOrdered ? 'fully_received' : 'partially_received';
+    
+    const updatedItems = receivingPO.items.map(poItem => {
+      const receivedItem = receiptData.items.find(r => r.item_id === poItem.item_id);
+      return {
+        ...poItem,
+        received_quantity: (poItem.received_quantity || 0) + (receivedItem?.received_quantity || 0)
+      };
+    });
+
+    await base44.entities.PurchaseOrder.update(receivingPO.id, {
+      status: newStatus,
+      items: updatedItems
+    });
+
+    // Update supplier balance
+    const suppliers = await base44.entities.Supplier.filter({ id: receivingPO.supplier_id });
+    if (suppliers.length > 0) {
+      await base44.entities.Supplier.update(receivingPO.supplier_id, {
+        current_balance: (suppliers[0].current_balance || 0) + receiptData.total_amount
+      });
+    }
+
+    queryClient.invalidateQueries({ queryKey: ['purchase-orders'] });
+    queryClient.invalidateQueries({ queryKey: ['inventory-items'] });
+    queryClient.invalidateQueries({ queryKey: ['inventory-transactions'] });
+    queryClient.invalidateQueries({ queryKey: ['suppliers'] });
+    setReceivingPO(null);
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 p-4 md:p-8">
+      <div className="max-w-7xl mx-auto space-y-6">
+        <PageHeader 
+          title="Purchase Orders" 
+          subtitle="Manage purchase orders and procurement"
+          onAdd={() => { setEditingPO(null); setShowForm(true); }}
+          addLabel="New PO"
+        />
+
+        <SearchFilter
+          searchValue={search}
+          onSearchChange={setSearch}
+          searchPlaceholder="Search by PO number, supplier..."
+          filters={[
+            {
+              key: 'status',
+              value: statusFilter,
+              onChange: setStatusFilter,
+              placeholder: 'Status',
+              options: [
+                { value: 'draft', label: 'Draft' },
+                { value: 'pending_approval', label: 'Pending Approval' },
+                { value: 'approved', label: 'Approved' },
+                { value: 'partially_received', label: 'Partially Received' },
+                { value: 'fully_received', label: 'Fully Received' },
+                { value: 'cancelled', label: 'Cancelled' },
+              ]
+            }
+          ]}
+        />
+
+        {!isLoading && pos.length === 0 ? (
+          <EmptyState
+            icon={FileText}
+            title="No purchase orders"
+            description="Create your first purchase order to start procurement."
+            actionLabel="Create PO"
+            onAction={() => setShowForm(true)}
+          />
+        ) : (
+          <DataTable 
+            columns={columns} 
+            data={filteredPOs} 
+            isLoading={isLoading}
+            emptyMessage="No purchase orders match your search"
+          />
+        )}
+
+        <PurchaseOrderForm
+          open={showForm}
+          onOpenChange={setShowForm}
+          po={editingPO}
+          onSave={handleSave}
+          isLoading={createMutation.isPending || updateMutation.isPending}
+        />
+
+        <GoodsReceiptForm
+          open={!!receivingPO}
+          onOpenChange={() => setReceivingPO(null)}
+          po={receivingPO}
+          onSave={handleReceiveGoods}
+          isLoading={false}
+        />
+
+        <ConfirmDialog
+          open={!!deletePO}
+          onOpenChange={() => setDeletePO(null)}
+          title="Delete Purchase Order"
+          description={`Are you sure you want to delete PO ${deletePO?.po_number}?`}
+          confirmLabel="Delete"
+          onConfirm={() => deleteMutation.mutate(deletePO.id)}
+          variant="destructive"
+        />
+
+        {/* View PO Dialog */}
+        <Dialog open={!!viewPO} onOpenChange={() => setViewPO(null)}>
+          <DialogContent className="max-w-3xl">
+            <DialogHeader>
+              <DialogTitle>Purchase Order Details - {viewPO?.po_number}</DialogTitle>
+            </DialogHeader>
+            {viewPO && (
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm text-slate-500">Supplier</p>
+                    <p className="font-medium">{viewPO.supplier_name}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-slate-500">PO Date</p>
+                    <p className="font-medium">{viewPO.po_date ? format(new Date(viewPO.po_date), 'MMM d, yyyy') : '-'}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-slate-500">Delivery Date</p>
+                    <p className="font-medium">{viewPO.delivery_date ? format(new Date(viewPO.delivery_date), 'MMM d, yyyy') : '-'}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-slate-500">Status</p>
+                    <StatusBadge status={viewPO.status} />
+                  </div>
+                </div>
+
+                <Card className="p-4">
+                  <h4 className="font-semibold mb-3">Items</h4>
+                  <div className="space-y-2">
+                    {viewPO.items?.map((item, i) => (
+                      <div key={i} className="grid grid-cols-5 gap-2 text-sm py-2 border-b last:border-0">
+                        <span className="col-span-2">{item.item_name}</span>
+                        <span className="text-right">{item.quantity} {item.unit}</span>
+                        <span className="text-right">{viewPO.currency} {item.unit_price?.toFixed(2)}</span>
+                        <span className="text-right font-medium">{viewPO.currency} {item.total?.toFixed(2)}</span>
+                      </div>
+                    ))}
+                    <div className="grid grid-cols-5 gap-2 pt-2 font-semibold">
+                      <span className="col-span-4 text-right">Total:</span>
+                      <span className="text-right">{viewPO.currency} {viewPO.total_amount?.toFixed(2)}</span>
+                    </div>
+                  </div>
+                </Card>
+
+                {viewPO.notes && (
+                  <div>
+                    <p className="text-sm text-slate-500">Notes</p>
+                    <p className="text-sm">{viewPO.notes}</p>
+                  </div>
+                )}
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+      </div>
+    </div>
+  );
+}

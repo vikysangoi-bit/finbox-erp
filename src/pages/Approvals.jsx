@@ -50,6 +50,12 @@ export default function Approvals() {
           approved_by: user?.email,
           approved_at: new Date().toISOString()
         });
+      } else if (request.entity_type === 'purchase_order') {
+        await base44.entities.PurchaseOrder.update(request.entity_id, {
+          status: 'approved',
+          approved_by: user?.email,
+          approved_at: new Date().toISOString()
+        });
       }
 
       // Log audit
@@ -90,6 +96,13 @@ export default function Approvals() {
         });
       } else if (request.entity_type === 'inventory_transaction') {
         await base44.entities.InventoryTransaction.update(request.entity_id, {
+          status: 'rejected',
+          approved_by: user?.email,
+          approved_at: new Date().toISOString(),
+          rejection_reason: reason
+        });
+      } else if (request.entity_type === 'purchase_order') {
+        await base44.entities.PurchaseOrder.update(request.entity_id, {
           status: 'rejected',
           approved_by: user?.email,
           approved_at: new Date().toISOString(),
