@@ -7,13 +7,15 @@ import DataTable from "@/components/shared/DataTable";
 import StatusBadge from "@/components/shared/StatusBadge";
 import EmptyState from "@/components/shared/EmptyState";
 import AccountForm from "@/components/accounts/AccountForm";
+import BulkUploadDialog from "@/components/shared/BulkUploadDialog";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, Pencil, Trash2, BookOpen } from "lucide-react";
+import { MoreHorizontal, Pencil, Trash2, BookOpen, Upload } from "lucide-react";
 import ConfirmDialog from "@/components/shared/ConfirmDialog";
 
 export default function ChartOfAccounts() {
   const [showForm, setShowForm] = useState(false);
+  const [showBulkUpload, setShowBulkUpload] = useState(false);
   const [editingAccount, setEditingAccount] = useState(null);
   const [deleteAccount, setDeleteAccount] = useState(null);
   const [search, setSearch] = useState('');
@@ -139,7 +141,12 @@ export default function ChartOfAccounts() {
           subtitle="Manage your accounting structure"
           onAdd={() => { setEditingAccount(null); setShowForm(true); }}
           addLabel="New Account"
-        />
+        >
+          <Button variant="outline" onClick={() => setShowBulkUpload(true)} className="border-slate-200">
+            <Upload className="w-4 h-4 mr-2" />
+            Bulk Upload
+          </Button>
+        </PageHeader>
 
         <SearchFilter
           searchValue={search}
@@ -196,6 +203,34 @@ export default function ChartOfAccounts() {
           confirmLabel="Delete"
           onConfirm={() => deleteMutation.mutate(deleteAccount.id)}
           variant="destructive"
+        />
+
+        <BulkUploadDialog
+          open={showBulkUpload}
+          onOpenChange={setShowBulkUpload}
+          entityName="Account"
+          schema={{
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                code: { type: "string" },
+                name: { type: "string" },
+                type: { type: "string", enum: ["asset", "liability", "equity", "revenue", "expense"] },
+                category: { type: "string" },
+                currency: { type: "string" },
+                opening_balance: { type: "number" },
+                is_active: { type: "boolean" }
+              },
+              required: ["code", "name", "type", "category"]
+            }
+          }}
+          templateData={[
+            'code,name,type,category,currency,opening_balance,is_active',
+            '1000,Cash,asset,current_asset,USD,50000,true',
+            '2000,Accounts Payable,liability,current_liability,USD,0,true'
+          ]}
+          onSuccess={() => queryClient.invalidateQueries({ queryKey: ['accounts'] })}
         />
       </div>
     </div>

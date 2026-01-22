@@ -8,17 +8,19 @@ import StatusBadge from "@/components/shared/StatusBadge";
 import EmptyState from "@/components/shared/EmptyState";
 import PurchaseOrderForm from "@/components/purchaseorders/PurchaseOrderForm";
 import GoodsReceiptForm from "@/components/purchaseorders/GoodsReceiptForm";
+import BulkUploadDialog from "@/components/shared/BulkUploadDialog";
 import ConfirmDialog from "@/components/shared/ConfirmDialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Card } from "@/components/ui/card";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, Pencil, Trash2, FileText, Send, Eye, Package, CheckCircle } from "lucide-react";
+import { MoreHorizontal, Pencil, Trash2, FileText, Send, Eye, Package, CheckCircle, Upload } from "lucide-react";
 import { format } from "date-fns";
 
 export default function PurchaseOrders() {
   const [showForm, setShowForm] = useState(false);
+  const [showBulkUpload, setShowBulkUpload] = useState(false);
   const [editingPO, setEditingPO] = useState(null);
   const [deletePO, setDeletePO] = useState(null);
   const [viewPO, setViewPO] = useState(null);
@@ -280,7 +282,12 @@ export default function PurchaseOrders() {
           subtitle="Manage purchase orders and procurement"
           onAdd={() => { setEditingPO(null); setShowForm(true); }}
           addLabel="New PO"
-        />
+        >
+          <Button variant="outline" onClick={() => setShowBulkUpload(true)} className="border-slate-200">
+            <Upload className="w-4 h-4 mr-2" />
+            Bulk Upload
+          </Button>
+        </PageHeader>
 
         <SearchFilter
           searchValue={search}

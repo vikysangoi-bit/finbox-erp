@@ -7,14 +7,16 @@ import DataTable from "@/components/shared/DataTable";
 import StatusBadge from "@/components/shared/StatusBadge";
 import EmptyState from "@/components/shared/EmptyState";
 import InventoryItemForm from "@/components/inventory/InventoryItemForm";
+import BulkUploadDialog from "@/components/shared/BulkUploadDialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, Pencil, Trash2, Package, AlertTriangle } from "lucide-react";
+import { MoreHorizontal, Pencil, Trash2, Package, AlertTriangle, Upload } from "lucide-react";
 import ConfirmDialog from "@/components/shared/ConfirmDialog";
 
 export default function Inventory() {
   const [showForm, setShowForm] = useState(false);
+  const [showBulkUpload, setShowBulkUpload] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
   const [deleteItem, setDeleteItem] = useState(null);
   const [search, setSearch] = useState('');
@@ -151,7 +153,12 @@ export default function Inventory() {
           subtitle="Manage stock and materials"
           onAdd={() => { setEditingItem(null); setShowForm(true); }}
           addLabel="New Item"
-        />
+        >
+          <Button variant="outline" onClick={() => setShowBulkUpload(true)} className="border-slate-200">
+            <Upload className="w-4 h-4 mr-2" />
+            Bulk Upload
+          </Button>
+        </PageHeader>
 
         <SearchFilter
           searchValue={search}
@@ -208,6 +215,38 @@ export default function Inventory() {
           confirmLabel="Delete"
           onConfirm={() => deleteMutation.mutate(deleteItem.id)}
           variant="destructive"
+        />
+
+        <BulkUploadDialog
+          open={showBulkUpload}
+          onOpenChange={setShowBulkUpload}
+          entityName="InventoryItem"
+          schema={{
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                sku: { type: "string" },
+                name: { type: "string" },
+                category: { type: "string", enum: ["fabric", "trims", "accessories", "packaging", "finished_goods", "work_in_progress"] },
+                sub_category: { type: "string" },
+                unit: { type: "string" },
+                quantity_on_hand: { type: "number" },
+                reorder_level: { type: "number" },
+                unit_cost: { type: "number" },
+                currency: { type: "string" },
+                warehouse_location: { type: "string" },
+                is_active: { type: "boolean" }
+              },
+              required: ["sku", "name", "category", "unit"]
+            }
+          }}
+          templateData={[
+            'sku,name,category,sub_category,unit,quantity_on_hand,reorder_level,unit_cost,currency,warehouse_location,is_active',
+            'FAB-001,Cotton Fabric,fabric,Cotton,meters,1000,200,5.50,USD,A-1-1,true',
+            'TRM-001,Buttons,trims,Buttons,pieces,5000,1000,0.10,USD,B-1-1,true'
+          ]}
+          onSuccess={() => queryClient.invalidateQueries({ queryKey: ['inventory-items'] })}
         />
       </div>
     </div>

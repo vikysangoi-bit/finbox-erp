@@ -7,14 +7,16 @@ import DataTable from "@/components/shared/DataTable";
 import StatusBadge from "@/components/shared/StatusBadge";
 import EmptyState from "@/components/shared/EmptyState";
 import SupplierForm from "@/components/suppliers/SupplierForm";
+import BulkUploadDialog from "@/components/shared/BulkUploadDialog";
 import ConfirmDialog from "@/components/shared/ConfirmDialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, Pencil, Trash2, Building2, Star, Mail, Phone } from "lucide-react";
+import { MoreHorizontal, Pencil, Trash2, Building2, Star, Mail, Phone, Upload } from "lucide-react";
 
 export default function Suppliers() {
   const [showForm, setShowForm] = useState(false);
+  const [showBulkUpload, setShowBulkUpload] = useState(false);
   const [editingSupplier, setEditingSupplier] = useState(null);
   const [deleteSupplier, setDeleteSupplier] = useState(null);
   const [search, setSearch] = useState('');
@@ -180,7 +182,12 @@ export default function Suppliers() {
           subtitle="Manage your supplier network"
           onAdd={() => { setEditingSupplier(null); setShowForm(true); }}
           addLabel="New Supplier"
-        />
+        >
+          <Button variant="outline" onClick={() => setShowBulkUpload(true)} className="border-slate-200">
+            <Upload className="w-4 h-4 mr-2" />
+            Bulk Upload
+          </Button>
+        </PageHeader>
 
         <SearchFilter
           searchValue={search}
@@ -237,6 +244,39 @@ export default function Suppliers() {
           confirmLabel="Delete"
           onConfirm={() => deleteMutation.mutate(deleteSupplier.id)}
           variant="destructive"
+        />
+
+        <BulkUploadDialog
+          open={showBulkUpload}
+          onOpenChange={setShowBulkUpload}
+          entityName="Supplier"
+          schema={{
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                code: { type: "string" },
+                name: { type: "string" },
+                contact_person: { type: "string" },
+                email: { type: "string" },
+                phone: { type: "string" },
+                city: { type: "string" },
+                country: { type: "string" },
+                payment_terms: { type: "string" },
+                currency: { type: "string" },
+                credit_limit: { type: "number" },
+                category: { type: "string" },
+                is_active: { type: "boolean" }
+              },
+              required: ["code", "name"]
+            }
+          }}
+          templateData={[
+            'code,name,contact_person,email,phone,city,country,payment_terms,currency,credit_limit,category,is_active',
+            'SUP-001,ABC Textiles,John Doe,john@abc.com,+1234567890,Mumbai,India,net_30,USD,50000,fabric,true',
+            'SUP-002,XYZ Trims,Jane Smith,jane@xyz.com,+0987654321,Dhaka,Bangladesh,net_45,USD,30000,trims,true'
+          ]}
+          onSuccess={() => queryClient.invalidateQueries({ queryKey: ['suppliers'] })}
         />
       </div>
     </div>

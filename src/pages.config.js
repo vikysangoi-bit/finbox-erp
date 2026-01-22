@@ -1,41 +1,41 @@
-import Dashboard from './pages/Dashboard';
-import ChartOfAccounts from './pages/ChartOfAccounts';
-import JournalEntries from './pages/JournalEntries';
-import Inventory from './pages/Inventory';
-import InventoryTransactions from './pages/InventoryTransactions';
 import Approvals from './pages/Approvals';
-import Currencies from './pages/Currencies';
-import Documents from './pages/Documents';
-import Users from './pages/Users';
 import AuditLogs from './pages/AuditLogs';
-import Suppliers from './pages/Suppliers';
-import PurchaseOrders from './pages/PurchaseOrders';
-import GoodsReceipts from './pages/GoodsReceipts';
-import Reports from './pages/Reports';
+import ChartOfAccounts from './pages/ChartOfAccounts';
+import Currencies from './pages/Currencies';
+import Dashboard from './pages/Dashboard';
+import Documents from './pages/Documents';
 import FinancialReports from './pages/FinancialReports';
+import GoodsReceipts from './pages/GoodsReceipts';
+import Inventory from './pages/Inventory';
 import InventoryReports from './pages/InventoryReports';
+import InventoryTransactions from './pages/InventoryTransactions';
+import JournalEntries from './pages/JournalEntries';
+import PurchaseOrders from './pages/PurchaseOrders';
 import PurchaseReports from './pages/PurchaseReports';
+import Reports from './pages/Reports';
+import Suppliers from './pages/Suppliers';
+import Users from './pages/Users';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
-    "Dashboard": Dashboard,
-    "ChartOfAccounts": ChartOfAccounts,
-    "JournalEntries": JournalEntries,
-    "Inventory": Inventory,
-    "InventoryTransactions": InventoryTransactions,
     "Approvals": Approvals,
-    "Currencies": Currencies,
-    "Documents": Documents,
-    "Users": Users,
     "AuditLogs": AuditLogs,
-    "Suppliers": Suppliers,
-    "PurchaseOrders": PurchaseOrders,
-    "GoodsReceipts": GoodsReceipts,
-    "Reports": Reports,
+    "ChartOfAccounts": ChartOfAccounts,
+    "Currencies": Currencies,
+    "Dashboard": Dashboard,
+    "Documents": Documents,
     "FinancialReports": FinancialReports,
+    "GoodsReceipts": GoodsReceipts,
+    "Inventory": Inventory,
     "InventoryReports": InventoryReports,
+    "InventoryTransactions": InventoryTransactions,
+    "JournalEntries": JournalEntries,
+    "PurchaseOrders": PurchaseOrders,
     "PurchaseReports": PurchaseReports,
+    "Reports": Reports,
+    "Suppliers": Suppliers,
+    "Users": Users,
 }
 
 export const pagesConfig = {
