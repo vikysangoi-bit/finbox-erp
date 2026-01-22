@@ -409,6 +409,36 @@ export default function PurchaseOrders() {
             )}
           </DialogContent>
         </Dialog>
+
+        <BulkUploadDialog
+          open={showBulkUpload}
+          onOpenChange={setShowBulkUpload}
+          entityName="PurchaseOrder"
+          schema={{
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                po_number: { type: "string" },
+                po_date: { type: "string" },
+                supplier_id: { type: "string" },
+                supplier_code: { type: "string" },
+                supplier_name: { type: "string" },
+                delivery_date: { type: "string" },
+                currency: { type: "string" },
+                items: { type: "array" },
+                total_amount: { type: "number" },
+                status: { type: "string" }
+              },
+              required: ["po_date", "supplier_id"]
+            }
+          }}
+          templateData={[
+            'po_number,po_date,supplier_name,total_amount,currency,status',
+            'Note: For complex PO uploads with line items, please use the individual PO form'
+          ]}
+          onSuccess={() => queryClient.invalidateQueries({ queryKey: ['purchase-orders'] })}
+        />
       </div>
     </div>
   );
