@@ -36,6 +36,21 @@ export default function BulkUploadDialog({ open, onOpenChange, entityName, schem
   };
 
   const downloadErrorFile = () => {
+    // Handle file-level errors
+    if (result?.isFileError) {
+      const errorContent = `File Upload Error Report\n\nError Type: Invalid File\nError Details: ${result.error}\n\nCommon Issues:\n- File format not supported (use CSV or Excel)\n- File is corrupted or empty\n- Column headers don't match the template\n- Data format doesn't match the expected schema\n\nPlease:\n1. Download the template file\n2. Ensure your data matches the template format\n3. Save as CSV or Excel format\n4. Try uploading again`;
+      
+      const blob = new Blob([errorContent], { type: 'text/plain' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${entityName}_file_error_${new Date().toISOString().split('T')[0]}.txt`;
+      a.click();
+      window.URL.revokeObjectURL(url);
+      return;
+    }
+
+    // Handle row-level errors
     if (errors.length === 0) return;
 
     const headers = ['Row Number', 'Error Reason', 'Data'];
@@ -75,7 +90,7 @@ export default function BulkUploadDialog({ open, onOpenChange, entityName, schem
       setProgress(60);
 
       if (extractResult.status === 'error') {
-        setResult({ success: false, error: extractResult.details });
+        setResult({ success: false, error: extractResult.details, isFileError: true });
         setUploading(false);
         return;
       }
@@ -193,17 +208,19 @@ export default function BulkUploadDialog({ open, onOpenChange, entityName, schem
                 </AlertDescription>
               </Alert>
               
-              {errors.length > 0 && (
+              {(errors.length > 0 || result.isFileError) && (
                 <div className="border-2 border-rose-200 rounded-lg p-4 bg-rose-50">
                   <div className="flex items-start gap-3">
                     <AlertCircle className="w-5 h-5 text-rose-600 mt-0.5 flex-shrink-0" />
                     <div className="flex-1 space-y-3">
                       <div>
                         <p className="font-semibold text-rose-900 text-sm mb-1">
-                          {errors.length} rows failed to upload
+                          {result.isFileError ? 'File upload failed' : `${errors.length} rows failed to upload`}
                         </p>
                         <p className="text-rose-700 text-xs">
-                          Download the error file to see which rows failed and why.
+                          {result.isFileError 
+                            ? 'Download the error report to understand why the file was rejected.'
+                            : 'Download the error file to see which rows failed and why.'}
                         </p>
                       </div>
                       <Button 
@@ -211,7 +228,7 @@ export default function BulkUploadDialog({ open, onOpenChange, entityName, schem
                         className="w-full bg-rose-600 hover:bg-rose-700 text-white"
                       >
                         <Download className="w-4 h-4 mr-2" />
-                        Download Error File with Reasons
+                        Download Error Report
                       </Button>
                     </div>
                   </div>
