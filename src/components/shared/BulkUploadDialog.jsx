@@ -90,8 +90,23 @@ export default function BulkUploadDialog({ open, onOpenChange, entityName, schem
       setProgress(60);
 
       if (extractResult.status === 'error') {
-        setResult({ success: false, error: extractResult.details, isFileError: true });
+        const errorResult = { success: false, error: extractResult.details, isFileError: true };
+        setResult(errorResult);
         setUploading(false);
+        
+        // Auto-download error file
+        setTimeout(() => {
+          const errorContent = `File Upload Error Report\n\nError Type: Invalid File\nError Details: ${extractResult.details}\n\nCommon Issues:\n- File format not supported (use CSV or Excel)\n- File is corrupted or empty\n- Column headers don't match the template\n- Data format doesn't match the expected schema\n\nPlease:\n1. Download the template file\n2. Ensure your data matches the template format\n3. Save as CSV or Excel format\n4. Try uploading again`;
+          
+          const blob = new Blob([errorContent], { type: 'text/plain' });
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `${entityName}_file_error_${new Date().toISOString().split('T')[0]}.txt`;
+          a.click();
+          window.URL.revokeObjectURL(url);
+        }, 500);
+        
         return;
       }
 
@@ -133,6 +148,25 @@ export default function BulkUploadDialog({ open, onOpenChange, entityName, schem
           setProgress(0);
         }, 1500);
       } else {
+        // Auto-download error file for row-level errors
+        setTimeout(() => {
+          const headers = ['Row Number', 'Error Reason', 'Data'];
+          const rows = errorList.map(err => [
+            err.row,
+            err.error,
+            JSON.stringify(err.data)
+          ]);
+          
+          const csvContent = [headers, ...rows].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
+          const blob = new Blob([csvContent], { type: 'text/csv' });
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `${entityName}_upload_errors_${new Date().toISOString().split('T')[0]}.csv`;
+          a.click();
+          window.URL.revokeObjectURL(url);
+        }, 500);
+        
         onSuccess();
       }
 
