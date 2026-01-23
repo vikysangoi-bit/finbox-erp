@@ -32,8 +32,8 @@ export default function PurchaseOrderForm({ open, onOpenChange, po, onSave, isLo
   });
 
   const { data: suppliers = [] } = useQuery({
-    queryKey: ['suppliers'],
-    queryFn: () => base44.entities.Supplier.filter({ is_active: true })
+    queryKey: ['supplier-accounts'],
+    queryFn: () => base44.entities.Account.filter({ type: 'expense', is_active: true })
   });
 
   const { data: inventoryItems = [] } = useQuery({
@@ -76,10 +76,10 @@ export default function PurchaseOrderForm({ open, onOpenChange, po, onSave, isLo
       setForm({
         ...form,
         supplier_id: supplierId,
-        supplier_code: supplier.code,
-        supplier_name: supplier.name,
-        payment_terms: supplier.payment_terms,
-        currency: supplier.currency
+        supplier_code: supplier.code || '',
+        supplier_name: supplier.name || '',
+        payment_terms: supplier.payment_terms || '',
+        currency: supplier.currency || 'USD'
       });
     }
   };

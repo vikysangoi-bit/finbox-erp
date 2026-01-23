@@ -41,7 +41,7 @@ export default function InventoryItemForm({ open, onOpenChange, item, onSave, is
     warehouse_location: '',
     supplier: '',
     color: '',
-    width: '',
+    size: '',
     gsm: '',
     composition: '',
     is_active: true,
@@ -65,7 +65,7 @@ export default function InventoryItemForm({ open, onOpenChange, item, onSave, is
         warehouse_location: '',
         supplier: '',
         color: '',
-        width: '',
+        size: '',
         gsm: '',
         composition: '',
         is_active: true,
@@ -223,11 +223,11 @@ export default function InventoryItemForm({ open, onOpenChange, item, onSave, is
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="width">Width</Label>
+                <Label htmlFor="size">Size</Label>
                 <Input
-                  id="width"
-                  value={form.width || ''}
-                  onChange={(e) => setForm({ ...form, width: e.target.value })}
+                  id="size"
+                  value={form.size || ''}
+                  onChange={(e) => setForm({ ...form, size: e.target.value })}
                   placeholder='e.g., 58"'
                 />
               </div>
