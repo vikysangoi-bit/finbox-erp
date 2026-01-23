@@ -51,12 +51,16 @@ export default function AccountForm({ open, onOpenChange, account, accounts = []
     is_active: true,
     description: '',
     contact_type: '',
-    contact: '',
+    contact_person: '',
     phone: '',
     email: '',
     account_address: '',
     country: '',
-    region: ''
+    region: '',
+    payment_terms: '',
+    credit_limit: 0,
+    tax_id: '',
+    supplier_category: ''
   });
 
   useEffect(() => {
@@ -76,12 +80,16 @@ export default function AccountForm({ open, onOpenChange, account, accounts = []
         is_active: true,
         description: '',
         contact_type: '',
-        contact: '',
+        contact_person: '',
         phone: '',
         email: '',
         account_address: '',
         country: '',
-        region: ''
+        region: '',
+        payment_terms: '',
+        credit_limit: 0,
+        tax_id: '',
+        supplier_category: ''
       });
     }
   }, [account, open]);
@@ -248,11 +256,11 @@ export default function AccountForm({ open, onOpenChange, account, accounts = []
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="contact">Contact Person</Label>
+                <Label htmlFor="contact_person">Contact Person</Label>
                 <Input
-                  id="contact"
-                  value={form.contact || ''}
-                  onChange={(e) => setForm({ ...form, contact: e.target.value })}
+                  id="contact_person"
+                  value={form.contact_person || ''}
+                  onChange={(e) => setForm({ ...form, contact_person: e.target.value })}
                   placeholder="e.g., John Doe"
                 />
               </div>
@@ -311,6 +319,79 @@ export default function AccountForm({ open, onOpenChange, account, accounts = []
                 />
               </div>
             </div>
+          </div>
+
+          <div className="border-t pt-4 mt-4">
+            <h4 className="font-semibold mb-3 text-slate-900">Financial Information</h4>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Payment Terms</Label>
+                <Select 
+                  value={form.payment_terms || 'none'} 
+                  onValueChange={(v) => setForm({ ...form, payment_terms: v === 'none' ? '' : v })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select payment terms" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">None</SelectItem>
+                    <SelectItem value="net_7">Net 7</SelectItem>
+                    <SelectItem value="net_15">Net 15</SelectItem>
+                    <SelectItem value="net_30">Net 30</SelectItem>
+                    <SelectItem value="net_45">Net 45</SelectItem>
+                    <SelectItem value="net_60">Net 60</SelectItem>
+                    <SelectItem value="net_90">Net 90</SelectItem>
+                    <SelectItem value="cod">Cash on Delivery</SelectItem>
+                    <SelectItem value="advance">Advance Payment</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="credit_limit">Credit Limit</Label>
+                <Input
+                  id="credit_limit"
+                  type="number"
+                  step="0.01"
+                  value={form.credit_limit || 0}
+                  onChange={(e) => setForm({ ...form, credit_limit: parseFloat(e.target.value) || 0 })}
+                  placeholder="0.00"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2 mt-4">
+              <Label htmlFor="tax_id">Tax ID / VAT Number</Label>
+              <Input
+                id="tax_id"
+                value={form.tax_id || ''}
+                onChange={(e) => setForm({ ...form, tax_id: e.target.value })}
+                placeholder="e.g., 12-3456789"
+              />
+            </div>
+
+            {form.type === 'expense' && (
+              <div className="space-y-2 mt-4">
+                <Label>Supplier Category</Label>
+                <Select 
+                  value={form.supplier_category || 'none'} 
+                  onValueChange={(v) => setForm({ ...form, supplier_category: v === 'none' ? '' : v })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">None</SelectItem>
+                    <SelectItem value="fabric">Fabric</SelectItem>
+                    <SelectItem value="trims">Trims</SelectItem>
+                    <SelectItem value="accessories">Accessories</SelectItem>
+                    <SelectItem value="packaging">Packaging</SelectItem>
+                    <SelectItem value="services">Services</SelectItem>
+                    <SelectItem value="other">Other</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
           </div>
 
           <div className="flex items-center justify-between pt-4 border-t">
