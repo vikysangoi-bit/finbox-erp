@@ -13,12 +13,14 @@ export default function BulkUploadDialog({ open, onOpenChange, entityName, schem
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [result, setResult] = useState(null);
+  const [errors, setErrors] = useState([]);
 
   const handleFileChange = (e) => {
     const selectedFile = e.target.files?.[0];
     if (selectedFile) {
       setFile(selectedFile);
       setResult(null);
+      setErrors([]);
     }
   };
 
@@ -29,6 +31,26 @@ export default function BulkUploadDialog({ open, onOpenChange, entityName, schem
     const a = document.createElement('a');
     a.href = url;
     a.download = `${entityName}_template.csv`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+  };
+
+  const downloadErrorFile = () => {
+    if (errors.length === 0) return;
+
+    const headers = ['Row Number', 'Error Reason', 'Data'];
+    const rows = errors.map(err => [
+      err.row,
+      err.error,
+      JSON.stringify(err.data)
+    ]);
+    
+    const csvContent = [headers, ...rows].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${entityName}_upload_errors_${new Date().toISOString().split('T')[0]}.csv`;
     a.click();
     window.URL.revokeObjectURL(url);
   };
@@ -58,20 +80,46 @@ export default function BulkUploadDialog({ open, onOpenChange, entityName, schem
         return;
       }
 
-      // Bulk create records
+      // Bulk create records with error tracking
       const data = Array.isArray(extractResult.output) ? extractResult.output : [extractResult.output];
-      await base44.entities[entityName].bulkCreate(data);
+      const errorList = [];
+      let successCount = 0;
+
+      for (let i = 0; i < data.length; i++) {
+        try {
+          await base44.entities[entityName].create(data[i]);
+          successCount++;
+        } catch (error) {
+          errorList.push({
+            row: i + 2, // +2 because row 1 is header, and array is 0-indexed
+            data: data[i],
+            error: error.message || 'Unknown error'
+          });
+        }
+        setProgress(60 + (40 * (i + 1) / data.length));
+      }
       
       setProgress(100);
-      setResult({ success: true, count: data.length });
+      setErrors(errorList);
+      setResult({ 
+        success: errorList.length === 0, 
+        count: successCount,
+        totalRows: data.length,
+        errorCount: errorList.length
+      });
       
-      setTimeout(() => {
+      if (errorList.length === 0) {
+        setTimeout(() => {
+          onSuccess();
+          onOpenChange(false);
+          setFile(null);
+          setResult(null);
+          setErrors([]);
+          setProgress(0);
+        }, 1500);
+      } else {
         onSuccess();
-        onOpenChange(false);
-        setFile(null);
-        setResult(null);
-        setProgress(0);
-      }, 1500);
+      }
 
     } catch (error) {
       setResult({ success: false, error: error.message });
@@ -124,19 +172,36 @@ export default function BulkUploadDialog({ open, onOpenChange, entityName, schem
           )}
 
           {result && (
-            <Alert variant={result.success ? "default" : "destructive"}>
-              {result.success ? (
-                <CheckCircle className="h-4 w-4" />
-              ) : (
-                <AlertCircle className="h-4 w-4" />
+            <div className="space-y-2">
+              <Alert variant={result.success ? "default" : "destructive"}>
+                {result.success ? (
+                  <CheckCircle className="h-4 w-4" />
+                ) : (
+                  <AlertCircle className="h-4 w-4" />
+                )}
+                <AlertDescription>
+                  {result.error ? (
+                    `Error: ${result.error}`
+                  ) : result.success ? (
+                    `Successfully uploaded ${result.count} of ${result.totalRows} records!`
+                  ) : (
+                    `Uploaded ${result.count} of ${result.totalRows} records. ${result.errorCount} failed.`
+                  )}
+                </AlertDescription>
+              </Alert>
+              
+              {errors.length > 0 && (
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={downloadErrorFile}
+                  className="w-full text-rose-600 border-rose-200 hover:bg-rose-50"
+                >
+                  <Download className="w-4 h-4 mr-2" />
+                  Download Error Report ({errors.length} errors)
+                </Button>
               )}
-              <AlertDescription>
-                {result.success 
-                  ? `Successfully uploaded ${result.count} records!`
-                  : `Error: ${result.error}`
-                }
-              </AlertDescription>
-            </Alert>
+            </div>
           )}
         </div>
 
