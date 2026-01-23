@@ -63,14 +63,14 @@ export default function AccountForm({ open, onOpenChange, account, accounts = []
     supplier_category: ''
   });
   
-  const [showSubCategory, setShowSubCategory] = useState(false);
+  const [accountLevel, setAccountLevel] = useState('main');
 
   useEffect(() => {
     if (account) {
       setForm(account);
-      setShowSubCategory(!!account.parent_account_id);
+      setAccountLevel(account.parent_account_id ? 'sub' : 'main');
     } else {
-      setShowSubCategory(false);
+      setAccountLevel('main');
       setForm({
         code: '',
         name: '',
@@ -188,35 +188,46 @@ export default function AccountForm({ open, onOpenChange, account, accounts = []
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <div className="flex items-center justify-between mb-2">
-                <Label>Sub-Category</Label>
-                <Switch
-                  checked={showSubCategory}
-                  onCheckedChange={(v) => {
-                    setShowSubCategory(v);
-                    if (!v) setForm({ ...form, parent_account_id: '' });
-                  }}
-                />
-              </div>
-              {showSubCategory && (
+          <div className="space-y-4">
+            <div className="space-y-3">
+              <Label>Account Level</Label>
+              <RadioGroup 
+                value={accountLevel} 
+                onValueChange={(v) => {
+                  setAccountLevel(v);
+                  if (v === 'main') setForm({ ...form, parent_account_id: '' });
+                }}
+              >
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="main" id="main" />
+                  <Label htmlFor="main" className="font-normal cursor-pointer">Main Account</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="sub" id="sub" />
+                  <Label htmlFor="sub" className="font-normal cursor-pointer">Sub-Category</Label>
+                </div>
+              </RadioGroup>
+            </div>
+
+            {accountLevel === 'sub' && (
+              <div className="space-y-2">
+                <Label>Parent Account</Label>
                 <Select 
-                  value={form.parent_account_id || 'none'} 
-                  onValueChange={(v) => setForm({ ...form, parent_account_id: v === 'none' ? '' : v })}
+                  value={form.parent_account_id || ''} 
+                  onValueChange={(v) => setForm({ ...form, parent_account_id: v })}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select parent account" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="none">None</SelectItem>
                     {parentAccounts.map((a) => (
                       <SelectItem key={a.id} value={a.id}>{a.code} - {a.name}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
-              )}
-            </div>
+              </div>
+            )}
+
             <div className="space-y-2">
               <Label>Currency</Label>
               <CurrencySelect 
