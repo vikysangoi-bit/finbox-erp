@@ -41,13 +41,22 @@ export default function AccountForm({ open, onOpenChange, account, accounts = []
   const [form, setForm] = useState({
     code: '',
     name: '',
+    brand_name: '',
+    alias: '',
     type: 'asset',
     category: 'current_asset',
     parent_account_id: '',
     currency: 'USD',
     opening_balance: 0,
     is_active: true,
-    description: ''
+    description: '',
+    contact_type: '',
+    contact: '',
+    phone: '',
+    email: '',
+    account_address: '',
+    country: '',
+    region: ''
   });
 
   useEffect(() => {
@@ -57,13 +66,22 @@ export default function AccountForm({ open, onOpenChange, account, accounts = []
       setForm({
         code: '',
         name: '',
+        brand_name: '',
+        alias: '',
         type: 'asset',
         category: 'current_asset',
         parent_account_id: '',
         currency: 'USD',
         opening_balance: 0,
         is_active: true,
-        description: ''
+        description: '',
+        contact_type: '',
+        contact: '',
+        phone: '',
+        email: '',
+        account_address: '',
+        country: '',
+        region: ''
       });
     }
   }, [account, open]);
@@ -77,7 +95,7 @@ export default function AccountForm({ open, onOpenChange, account, accounts = []
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg">
+      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{account ? 'Edit Account' : 'New Account'}</DialogTitle>
         </DialogHeader>
@@ -101,6 +119,27 @@ export default function AccountForm({ open, onOpenChange, account, accounts = []
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
                 placeholder="e.g., Cash in Bank"
                 required
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="brand_name">Brand Name</Label>
+              <Input
+                id="brand_name"
+                value={form.brand_name || ''}
+                onChange={(e) => setForm({ ...form, brand_name: e.target.value })}
+                placeholder="e.g., ABC Corporation"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="alias">Alias</Label>
+              <Input
+                id="alias"
+                value={form.alias || ''}
+                onChange={(e) => setForm({ ...form, alias: e.target.value })}
+                placeholder="e.g., Short name"
               />
             </div>
           </div>
@@ -186,7 +225,95 @@ export default function AccountForm({ open, onOpenChange, account, accounts = []
             />
           </div>
 
-          <div className="flex items-center justify-between">
+          <div className="border-t pt-4 mt-4">
+            <h4 className="font-semibold mb-3 text-slate-900">Contact Information</h4>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Contact Type</Label>
+                <Select 
+                  value={form.contact_type || 'none'} 
+                  onValueChange={(v) => setForm({ ...form, contact_type: v === 'none' ? '' : v })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">None</SelectItem>
+                    <SelectItem value="customer">Customer</SelectItem>
+                    <SelectItem value="vendor">Vendor</SelectItem>
+                    <SelectItem value="employee">Employee</SelectItem>
+                    <SelectItem value="other">Other</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="contact">Contact Person</Label>
+                <Input
+                  id="contact"
+                  value={form.contact || ''}
+                  onChange={(e) => setForm({ ...form, contact: e.target.value })}
+                  placeholder="e.g., John Doe"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4 mt-4">
+              <div className="space-y-2">
+                <Label htmlFor="phone">Phone</Label>
+                <Input
+                  id="phone"
+                  value={form.phone || ''}
+                  onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                  placeholder="e.g., +1234567890"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={form.email || ''}
+                  onChange={(e) => setForm({ ...form, email: e.target.value })}
+                  placeholder="e.g., contact@example.com"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2 mt-4">
+              <Label htmlFor="account_address">Address</Label>
+              <Textarea
+                id="account_address"
+                value={form.account_address || ''}
+                onChange={(e) => setForm({ ...form, account_address: e.target.value })}
+                rows={2}
+                placeholder="Enter address"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4 mt-4">
+              <div className="space-y-2">
+                <Label htmlFor="country">Country</Label>
+                <Input
+                  id="country"
+                  value={form.country || ''}
+                  onChange={(e) => setForm({ ...form, country: e.target.value })}
+                  placeholder="e.g., United States"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="region">Region</Label>
+                <Input
+                  id="region"
+                  value={form.region || ''}
+                  onChange={(e) => setForm({ ...form, region: e.target.value })}
+                  placeholder="e.g., California"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between pt-4 border-t">
             <Label htmlFor="is_active">Active Account</Label>
             <Switch
               id="is_active"
