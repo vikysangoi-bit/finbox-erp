@@ -142,14 +142,18 @@ export default function ChartOfAccounts() {
           onAdd={() => { setEditingAccount(null); setShowForm(true); }}
           addLabel="New Account"
           onExport={() => {
-            const headers = ['Code', 'Name', 'Brand Name', 'Alias', 'Type', 'Category', 'Currency', 'Opening Balance', 'Current Balance', 'Is Active', 'Description', 'Contact Type', 'Contact Person', 'Phone', 'Email', 'Address', 'Country', 'Region', 'Payment Terms', 'Credit Limit', 'Tax ID', 'Supplier Category'];
-            const rows = filteredAccounts.map(a => [
-              a.code, a.name, a.brand_name || '', a.alias || '', a.type, a.category, a.currency || 'USD', 
-              a.opening_balance || 0, a.current_balance || 0, a.is_active ? 'Yes' : 'No', a.description || '', 
-              a.contact_type || '', a.contact_person || '', a.phone || '', a.email || '', 
-              a.account_address || '', a.country || '', a.region || '', a.payment_terms || '', 
-              a.credit_limit || 0, a.tax_id || '', a.supplier_category || ''
-            ]);
+            const headers = ['Code', 'Name', 'Brand Name', 'Alias', 'Account Level', 'Parent Account', 'Type', 'Category', 'Currency', 'Opening Balance', 'Current Balance', 'Is Active', 'Description', 'Contact Type', 'Contact Person', 'Phone', 'Email', 'Address', 'Country', 'Region', 'Payment Terms', 'Credit Limit', 'Tax ID', 'Supplier Category'];
+            const rows = filteredAccounts.map(a => {
+              const parentAccount = a.parent_account_id ? accounts.find(acc => acc.id === a.parent_account_id) : null;
+              const accountLevel = a.parent_account_id ? 'Sub-Category' : 'Main';
+              return [
+                a.code, a.name, a.brand_name || '', a.alias || '', accountLevel, parentAccount?.name || '', a.type, a.category, a.currency || 'USD', 
+                a.opening_balance || 0, a.current_balance || 0, a.is_active ? 'Yes' : 'No', a.description || '', 
+                a.contact_type || '', a.contact_person || '', a.phone || '', a.email || '', 
+                a.account_address || '', a.country || '', a.region || '', a.payment_terms || '', 
+                a.credit_limit || 0, a.tax_id || '', a.supplier_category || ''
+              ];
+            });
             const csv = [headers, ...rows].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
             const blob = new Blob([csv], { type: 'text/csv' });
             const url = window.URL.createObjectURL(blob);
