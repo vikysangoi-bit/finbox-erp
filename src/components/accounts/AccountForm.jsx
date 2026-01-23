@@ -42,26 +42,26 @@ export default function AccountForm({ open, onOpenChange, account, accounts = []
   const [form, setForm] = useState({
     code: '',
     name: '',
-    brand_name: '',
+    brand: '',
     alias: '',
     type: 'asset',
     category: 'current_asset',
-    parent_account_id: '',
+    parentAccount: '',
     currency: 'USD',
-    opening_balance: 0,
-    is_active: true,
+    openingBalance: 0,
+    active: true,
     description: '',
-    contact_type: '',
-    contact_person: '',
+    contactType: '',
+    contactPerson: '',
     phone: '',
     email: '',
-    account_address: '',
+    address: '',
     country: '',
     region: '',
-    payment_terms: '',
-    credit_limit: 0,
-    tax_id: '',
-    supplier_category: ''
+    paymentTerms: '',
+    creditLimit: 0,
+    taxId: '',
+    supplierCategory: ''
   });
   
   const [accountLevel, setAccountLevel] = useState('main');
@@ -69,32 +69,32 @@ export default function AccountForm({ open, onOpenChange, account, accounts = []
   useEffect(() => {
     if (account) {
       setForm(account);
-      setAccountLevel(account.parent_account_id ? 'sub' : 'main');
+      setAccountLevel(account.parentAccount ? 'sub' : 'main');
     } else {
       setAccountLevel('main');
       setForm({
         code: '',
         name: '',
-        brand_name: '',
+        brand: '',
         alias: '',
         type: 'asset',
         category: 'current_asset',
-        parent_account_id: '',
+        parentAccount: '',
         currency: 'USD',
-        opening_balance: 0,
-        is_active: true,
+        openingBalance: 0,
+        active: true,
         description: '',
-        contact_type: '',
-        contact_person: '',
+        contactType: '',
+        contactPerson: '',
         phone: '',
         email: '',
-        account_address: '',
+        address: '',
         country: '',
         region: '',
-        payment_terms: '',
-        credit_limit: 0,
-        tax_id: '',
-        supplier_category: ''
+        paymentTerms: '',
+        creditLimit: 0,
+        taxId: '',
+        supplierCategory: ''
       });
     }
   }, [account, open]);
@@ -138,11 +138,11 @@ export default function AccountForm({ open, onOpenChange, account, accounts = []
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="brand_name">Brand Name</Label>
+              <Label htmlFor="brand">Brand</Label>
               <Input
-                id="brand_name"
-                value={form.brand_name || ''}
-                onChange={(e) => setForm({ ...form, brand_name: e.target.value })}
+                id="brand"
+                value={form.brand || ''}
+                onChange={(e) => setForm({ ...form, brand: e.target.value })}
                 placeholder="e.g., ABC Corporation"
               />
             </div>
@@ -196,7 +196,7 @@ export default function AccountForm({ open, onOpenChange, account, accounts = []
                 value={accountLevel} 
                 onValueChange={(v) => {
                   setAccountLevel(v);
-                  if (v === 'main') setForm({ ...form, parent_account_id: '' });
+                  if (v === 'main') setForm({ ...form, parentAccount: '' });
                 }}
               >
                 <div className="flex items-center space-x-2">
@@ -214,8 +214,8 @@ export default function AccountForm({ open, onOpenChange, account, accounts = []
               <div className="space-y-2">
                 <Label>Parent Account</Label>
                 <Select 
-                  value={form.parent_account_id || ''} 
-                  onValueChange={(v) => setForm({ ...form, parent_account_id: v })}
+                  value={form.parentAccount || ''} 
+                  onValueChange={(v) => setForm({ ...form, parentAccount: v })}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select parent account" />
@@ -240,13 +240,13 @@ export default function AccountForm({ open, onOpenChange, account, accounts = []
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="opening_balance">Opening Balance</Label>
+            <Label htmlFor="openingBalance">Opening Balance</Label>
             <Input
-              id="opening_balance"
+              id="openingBalance"
               type="number"
               step="0.01"
-              value={form.opening_balance}
-              onChange={(e) => setForm({ ...form, opening_balance: parseFloat(e.target.value) || 0 })}
+              value={form.openingBalance}
+              onChange={(e) => setForm({ ...form, openingBalance: parseFloat(e.target.value) || 0 })}
             />
           </div>
 
@@ -267,8 +267,8 @@ export default function AccountForm({ open, onOpenChange, account, accounts = []
               <div className="space-y-2">
                 <Label>Contact Type</Label>
                 <Select 
-                  value={form.contact_type || 'none'} 
-                  onValueChange={(v) => setForm({ ...form, contact_type: v === 'none' ? '' : v })}
+                  value={form.contactType || 'none'} 
+                  onValueChange={(v) => setForm({ ...form, contactType: v === 'none' ? '' : v })}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select type" />
@@ -282,11 +282,11 @@ export default function AccountForm({ open, onOpenChange, account, accounts = []
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="contact_person">Contact Person</Label>
+                <Label htmlFor="contactPerson">Contact Person</Label>
                 <Input
-                  id="contact_person"
-                  value={form.contact_person || ''}
-                  onChange={(e) => setForm({ ...form, contact_person: e.target.value })}
+                  id="contactPerson"
+                  value={form.contactPerson || ''}
+                  onChange={(e) => setForm({ ...form, contactPerson: e.target.value })}
                   placeholder="e.g., John Doe"
                 />
               </div>
@@ -315,11 +315,11 @@ export default function AccountForm({ open, onOpenChange, account, accounts = []
             </div>
 
             <div className="space-y-2 mt-4">
-              <Label htmlFor="account_address">Address</Label>
+              <Label htmlFor="address">Address</Label>
               <Textarea
-                id="account_address"
-                value={form.account_address || ''}
-                onChange={(e) => setForm({ ...form, account_address: e.target.value })}
+                id="address"
+                value={form.address || ''}
+                onChange={(e) => setForm({ ...form, address: e.target.value })}
                 rows={2}
                 placeholder="Enter address"
               />
@@ -354,8 +354,8 @@ export default function AccountForm({ open, onOpenChange, account, accounts = []
               <div className="space-y-2">
                 <Label>Payment Terms</Label>
                 <Select 
-                  value={form.payment_terms || 'none'} 
-                  onValueChange={(v) => setForm({ ...form, payment_terms: v === 'none' ? '' : v })}
+                  value={form.paymentTerms || 'none'} 
+                  onValueChange={(v) => setForm({ ...form, paymentTerms: v === 'none' ? '' : v })}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select payment terms" />
@@ -374,24 +374,24 @@ export default function AccountForm({ open, onOpenChange, account, accounts = []
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="credit_limit">Credit Limit</Label>
+                <Label htmlFor="creditLimit">Credit Limit</Label>
                 <Input
-                  id="credit_limit"
+                  id="creditLimit"
                   type="number"
                   step="0.01"
-                  value={form.credit_limit || 0}
-                  onChange={(e) => setForm({ ...form, credit_limit: parseFloat(e.target.value) || 0 })}
+                  value={form.creditLimit || 0}
+                  onChange={(e) => setForm({ ...form, creditLimit: parseFloat(e.target.value) || 0 })}
                   placeholder="0.00"
                 />
               </div>
             </div>
 
             <div className="space-y-2 mt-4">
-              <Label htmlFor="tax_id">Tax ID / VAT Number</Label>
+              <Label htmlFor="taxId">Tax ID / VAT Number</Label>
               <Input
-                id="tax_id"
-                value={form.tax_id || ''}
-                onChange={(e) => setForm({ ...form, tax_id: e.target.value })}
+                id="taxId"
+                value={form.taxId || ''}
+                onChange={(e) => setForm({ ...form, taxId: e.target.value })}
                 placeholder="e.g., 12-3456789"
               />
             </div>
@@ -400,8 +400,8 @@ export default function AccountForm({ open, onOpenChange, account, accounts = []
               <div className="space-y-2 mt-4">
                 <Label>Supplier Category</Label>
                 <Select 
-                  value={form.supplier_category || 'none'} 
-                  onValueChange={(v) => setForm({ ...form, supplier_category: v === 'none' ? '' : v })}
+                  value={form.supplierCategory || 'none'} 
+                  onValueChange={(v) => setForm({ ...form, supplierCategory: v === 'none' ? '' : v })}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select category" />
@@ -421,11 +421,11 @@ export default function AccountForm({ open, onOpenChange, account, accounts = []
           </div>
 
           <div className="flex items-center justify-between pt-4 border-t">
-            <Label htmlFor="is_active">Active Account</Label>
+            <Label htmlFor="active">Active Account</Label>
             <Switch
-              id="is_active"
-              checked={form.is_active}
-              onCheckedChange={(v) => setForm({ ...form, is_active: v })}
+              id="active"
+              checked={form.active}
+              onCheckedChange={(v) => setForm({ ...form, active: v })}
             />
           </div>
 

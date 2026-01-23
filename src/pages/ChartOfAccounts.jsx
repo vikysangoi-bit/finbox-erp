@@ -89,13 +89,13 @@ export default function ChartOfAccounts() {
       header: "Balance", 
       render: (row) => (
         <span className="font-medium text-slate-900">
-          {(row.current_balance || 0).toLocaleString('en-US', { style: 'currency', currency: row.currency || 'USD' })}
+          {(row.currentBalance || 0).toLocaleString('en-US', { style: 'currency', currency: row.currency || 'USD' })}
         </span>
       )
     },
     { 
       header: "Status", 
-      render: (row) => <StatusBadge status={row.is_active ? 'active' : 'inactive'} />
+      render: (row) => <StatusBadge status={row.active ? 'active' : 'inactive'} />
     },
     {
       header: "",
@@ -129,7 +129,7 @@ export default function ChartOfAccounts() {
     if (editingAccount) {
       updateMutation.mutate({ id: editingAccount.id, data });
     } else {
-      createMutation.mutate({ ...data, current_balance: data.opening_balance });
+      createMutation.mutate({ ...data, currentBalance: data.openingBalance });
     }
   };
 
@@ -142,16 +142,16 @@ export default function ChartOfAccounts() {
           onAdd={() => { setEditingAccount(null); setShowForm(true); }}
           addLabel="New Account"
           onExport={() => {
-            const headers = ['Code', 'Name', 'Brand Name', 'Alias', 'Account Level', 'Parent Account', 'Type', 'Category', 'Currency', 'Opening Balance', 'Current Balance', 'Is Active', 'Description', 'Contact Type', 'Contact Person', 'Phone', 'Email', 'Address', 'Country', 'Region', 'Payment Terms', 'Credit Limit', 'Tax ID', 'Supplier Category'];
+            const headers = ['code', 'name', 'brand', 'alias', 'level', 'parent', 'type', 'category', 'currency', 'openingBalance', 'currentBalance', 'active', 'description', 'contactType', 'contactPerson', 'phone', 'email', 'address', 'country', 'region', 'paymentTerms', 'creditLimit', 'taxId', 'supplierCategory'];
             const rows = filteredAccounts.map(a => {
-              const parentAccount = a.parent_account_id ? accounts.find(acc => acc.id === a.parent_account_id) : null;
-              const accountLevel = a.parent_account_id ? 'Sub-Category' : 'Main';
+              const parentAccount = a.parentAccount ? accounts.find(acc => acc.id === a.parentAccount) : null;
+              const accountLevel = a.parentAccount ? 'sub' : 'main';
               return [
-                a.code, a.name, a.brand_name || '', a.alias || '', accountLevel, parentAccount?.name || '', a.type, a.category, a.currency || 'USD', 
-                a.opening_balance || 0, a.current_balance || 0, a.is_active ? 'Yes' : 'No', a.description || '', 
-                a.contact_type || '', a.contact_person || '', a.phone || '', a.email || '', 
-                a.account_address || '', a.country || '', a.region || '', a.payment_terms || '', 
-                a.credit_limit || 0, a.tax_id || '', a.supplier_category || ''
+                a.code, a.name, a.brand || '', a.alias || '', accountLevel, parentAccount?.name || '', a.type, a.category, a.currency || 'USD', 
+                a.openingBalance || 0, a.currentBalance || 0, a.active ? 'true' : 'false', a.description || '', 
+                a.contactType || '', a.contactPerson || '', a.phone || '', a.email || '', 
+                a.address || '', a.country || '', a.region || '', a.paymentTerms || '', 
+                a.creditLimit || 0, a.taxId || '', a.supplierCategory || ''
               ];
             });
             const csv = [headers, ...rows].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
@@ -237,36 +237,36 @@ export default function ChartOfAccounts() {
               properties: {
                 code: { type: "string" },
                 name: { type: "string" },
-                brand_name: { type: "string" },
+                brand: { type: "string" },
                 alias: { type: "string" },
-                account_level: { type: "string" },
-                parent_account_id: { type: "string" },
+                level: { type: "string" },
+                parent: { type: "string" },
                 type: { type: "string", enum: ["asset", "liability", "equity", "revenue", "expense"] },
                 category: { type: "string" },
                 currency: { type: "string" },
-                opening_balance: { type: "number" },
-                is_active: { type: "boolean" },
+                openingBalance: { type: "number" },
+                active: { type: "boolean" },
                 description: { type: "string" },
-                contact_type: { type: "string" },
-                contact_person: { type: "string" },
+                contactType: { type: "string" },
+                contactPerson: { type: "string" },
                 phone: { type: "string" },
                 email: { type: "string" },
-                account_address: { type: "string" },
+                address: { type: "string" },
                 country: { type: "string" },
                 region: { type: "string" },
-                payment_terms: { type: "string" },
-                credit_limit: { type: "number" },
-                tax_id: { type: "string" },
-                supplier_category: { type: "string" }
+                paymentTerms: { type: "string" },
+                creditLimit: { type: "number" },
+                taxId: { type: "string" },
+                supplierCategory: { type: "string" }
               },
               required: ["code", "name", "type", "category"]
             }
           }}
           templateData={[
-            'code,name,brand_name,alias,account_level,parent_account_id,type,category,currency,opening_balance,is_active,description,contact_type,contact_person,phone,email,account_address,country,region,payment_terms,credit_limit,tax_id,supplier_category',
-            '1000,Cash,,,Main,,asset,current_asset,USD,50000,true,Cash account,,,,,,,,,,,',
-            '2000,Accounts Payable,,,Main,,liability,current_liability,USD,0,true,Accounts payable,,,,,,,,,,,',
-            '1001,Petty Cash,,,Sub-Category,1000,asset,current_asset,USD,1000,true,Petty cash account,,,,,,,,,,,'
+            'code,name,brand,alias,level,parent,type,category,currency,openingBalance,active,description,contactType,contactPerson,phone,email,address,country,region,paymentTerms,creditLimit,taxId,supplierCategory',
+            '1000,Cash,,,main,,asset,current_asset,USD,50000,true,Cash account,,,,,,,,,,,',
+            '2000,Accounts Payable,,,main,,liability,current_liability,USD,0,true,Accounts payable,,,,,,,,,,,',
+            '1001,Petty Cash,,,sub,1000,asset,current_asset,USD,1000,true,Petty cash account,,,,,,,,,,,'
           ]}
           onSuccess={() => queryClient.invalidateQueries({ queryKey: ['accounts'] })}
         />
