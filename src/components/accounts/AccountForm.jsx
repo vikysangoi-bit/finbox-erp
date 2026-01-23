@@ -62,11 +62,15 @@ export default function AccountForm({ open, onOpenChange, account, accounts = []
     tax_id: '',
     supplier_category: ''
   });
+  
+  const [showSubCategory, setShowSubCategory] = useState(false);
 
   useEffect(() => {
     if (account) {
       setForm(account);
+      setShowSubCategory(!!account.parent_account_id);
     } else {
+      setShowSubCategory(false);
       setForm({
         code: '',
         name: '',
@@ -186,21 +190,32 @@ export default function AccountForm({ open, onOpenChange, account, accounts = []
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label>Parent Account</Label>
-              <Select 
-                value={form.parent_account_id || 'none'} 
-                onValueChange={(v) => setForm({ ...form, parent_account_id: v === 'none' ? '' : v })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="None" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">None</SelectItem>
-                  {parentAccounts.map((a) => (
-                    <SelectItem key={a.id} value={a.id}>{a.code} - {a.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <div className="flex items-center justify-between mb-2">
+                <Label>Sub-Category</Label>
+                <Switch
+                  checked={showSubCategory}
+                  onCheckedChange={(v) => {
+                    setShowSubCategory(v);
+                    if (!v) setForm({ ...form, parent_account_id: '' });
+                  }}
+                />
+              </div>
+              {showSubCategory && (
+                <Select 
+                  value={form.parent_account_id || 'none'} 
+                  onValueChange={(v) => setForm({ ...form, parent_account_id: v === 'none' ? '' : v })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select parent account" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">None</SelectItem>
+                    {parentAccounts.map((a) => (
+                      <SelectItem key={a.id} value={a.id}>{a.code} - {a.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
             </div>
             <div className="space-y-2">
               <Label>Currency</Label>
