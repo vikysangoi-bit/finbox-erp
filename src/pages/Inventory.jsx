@@ -153,6 +153,22 @@ export default function Inventory() {
           subtitle="Manage stock and materials"
           onAdd={() => { setEditingItem(null); setShowForm(true); }}
           addLabel="New Item"
+          onExport={() => {
+            const headers = ['SKU', 'Name', 'Category', 'Sub Category', 'Unit', 'Quantity', 'Reorder Level', 'Unit Cost', 'Currency', 'Total Value', 'Warehouse Location', 'Supplier', 'Color', 'Size', 'GSM', 'Composition', 'Is Active', 'Notes'];
+            const rows = filteredItems.map(i => [
+              i.sku, i.name, i.category, i.sub_category || '', i.unit, i.quantity_on_hand || 0, 
+              i.reorder_level || 0, i.unit_cost || 0, i.currency || 'USD', i.total_value || 0, 
+              i.warehouse_location || '', i.supplier || '', i.color || '', i.size || '', i.gsm || '', 
+              i.composition || '', i.is_active ? 'Yes' : 'No', i.notes || ''
+            ]);
+            const csv = [headers, ...rows].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `inventory_${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+          }}
         >
           <Button variant="outline" onClick={() => setShowBulkUpload(true)} className="border-slate-200">
             <Upload className="w-4 h-4 mr-2" />
@@ -242,9 +258,9 @@ export default function Inventory() {
             }
           }}
           templateData={[
-            'sku,name,category,sub_category,unit,quantity_on_hand,reorder_level,unit_cost,currency,warehouse_location,is_active',
-            'FAB-001,Cotton Fabric,fabric,Cotton,meters,1000,200,5.50,USD,A-1-1,true',
-            'TRM-001,Buttons,trims,Buttons,pieces,5000,1000,0.10,USD,B-1-1,true'
+            'sku,name,category,sub_category,unit,quantity_on_hand,reorder_level,unit_cost,currency,warehouse_location,supplier,color,size,gsm,composition,is_active,notes',
+            'FAB-001,Cotton Fabric,fabric,Cotton,meters,1000,200,5.50,USD,A-1-1,ABC Fabrics,White,150cm,180,100% Cotton,true,',
+            'TRM-001,Buttons,trims,Buttons,pieces,5000,1000,0.10,USD,B-1-1,XYZ Trims,Black,1cm,,,true,'
           ]}
           onSuccess={() => queryClient.invalidateQueries({ queryKey: ['inventory-items'] })}
         />

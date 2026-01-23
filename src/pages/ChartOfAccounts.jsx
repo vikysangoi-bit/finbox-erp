@@ -141,6 +141,23 @@ export default function ChartOfAccounts() {
           subtitle="Manage your accounting structure"
           onAdd={() => { setEditingAccount(null); setShowForm(true); }}
           addLabel="New Account"
+          onExport={() => {
+            const headers = ['Code', 'Name', 'Brand Name', 'Alias', 'Type', 'Category', 'Currency', 'Opening Balance', 'Current Balance', 'Is Active', 'Description', 'Contact Type', 'Contact Person', 'Phone', 'Email', 'Address', 'Country', 'Region', 'Payment Terms', 'Credit Limit', 'Tax ID', 'Supplier Category'];
+            const rows = filteredAccounts.map(a => [
+              a.code, a.name, a.brand_name || '', a.alias || '', a.type, a.category, a.currency || 'USD', 
+              a.opening_balance || 0, a.current_balance || 0, a.is_active ? 'Yes' : 'No', a.description || '', 
+              a.contact_type || '', a.contact_person || '', a.phone || '', a.email || '', 
+              a.account_address || '', a.country || '', a.region || '', a.payment_terms || '', 
+              a.credit_limit || 0, a.tax_id || '', a.supplier_category || ''
+            ]);
+            const csv = [headers, ...rows].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `chart_of_accounts_${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+          }}
         >
           <Button variant="outline" onClick={() => setShowBulkUpload(true)} className="border-slate-200">
             <Upload className="w-4 h-4 mr-2" />
@@ -226,9 +243,9 @@ export default function ChartOfAccounts() {
             }
           }}
           templateData={[
-            'code,name,type,category,currency,opening_balance,is_active',
-            '1000,Cash,asset,current_asset,USD,50000,true',
-            '2000,Accounts Payable,liability,current_liability,USD,0,true'
+            'code,name,brand_name,alias,parent_account_id,type,category,currency,opening_balance,is_active,description,contact_type,contact_person,phone,email,account_address,country,region,payment_terms,credit_limit,tax_id,supplier_category',
+            '1000,Cash,,,asset,current_asset,USD,50000,true,Cash account,,,,,,,,,,,',
+            '2000,Accounts Payable,,,liability,current_liability,USD,0,true,Accounts payable,,,,,,,,,,,'
           ]}
           onSuccess={() => queryClient.invalidateQueries({ queryKey: ['accounts'] })}
         />
