@@ -237,11 +237,27 @@ export default function ChartOfAccounts() {
               properties: {
                 code: { type: "string" },
                 name: { type: "string" },
+                brand_name: { type: "string" },
+                alias: { type: "string" },
+                account_level: { type: "string" },
+                parent_account_id: { type: "string" },
                 type: { type: "string", enum: ["asset", "liability", "equity", "revenue", "expense"] },
                 category: { type: "string" },
                 currency: { type: "string" },
                 opening_balance: { type: "number" },
-                is_active: { type: "boolean" }
+                is_active: { type: "boolean" },
+                description: { type: "string" },
+                contact_type: { type: "string" },
+                contact_person: { type: "string" },
+                phone: { type: "string" },
+                email: { type: "string" },
+                account_address: { type: "string" },
+                country: { type: "string" },
+                region: { type: "string" },
+                payment_terms: { type: "string" },
+                credit_limit: { type: "number" },
+                tax_id: { type: "string" },
+                supplier_category: { type: "string" }
               },
               required: ["code", "name", "type", "category"]
             }
