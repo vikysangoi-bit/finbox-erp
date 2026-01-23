@@ -172,7 +172,7 @@ export default function BulkUploadDialog({ open, onOpenChange, entityName, schem
           )}
 
           {result && (
-            <div className="space-y-2">
+            <div className="space-y-3">
               <Alert variant={result.success ? "default" : "destructive"}>
                 {result.success ? (
                   <CheckCircle className="h-4 w-4" />
@@ -185,21 +185,37 @@ export default function BulkUploadDialog({ open, onOpenChange, entityName, schem
                   ) : result.success ? (
                     `Successfully uploaded ${result.count} of ${result.totalRows} records!`
                   ) : (
-                    `Uploaded ${result.count} of ${result.totalRows} records. ${result.errorCount} failed.`
+                    <div className="space-y-1">
+                      <div>Uploaded {result.count} of {result.totalRows} records.</div>
+                      <div className="font-semibold text-rose-700">{result.errorCount} rows failed - download error file below for details.</div>
+                    </div>
                   )}
                 </AlertDescription>
               </Alert>
               
               {errors.length > 0 && (
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={downloadErrorFile}
-                  className="w-full text-rose-600 border-rose-200 hover:bg-rose-50"
-                >
-                  <Download className="w-4 h-4 mr-2" />
-                  Download Error Report ({errors.length} errors)
-                </Button>
+                <div className="border-2 border-rose-200 rounded-lg p-4 bg-rose-50">
+                  <div className="flex items-start gap-3">
+                    <AlertCircle className="w-5 h-5 text-rose-600 mt-0.5 flex-shrink-0" />
+                    <div className="flex-1 space-y-3">
+                      <div>
+                        <p className="font-semibold text-rose-900 text-sm mb-1">
+                          {errors.length} rows failed to upload
+                        </p>
+                        <p className="text-rose-700 text-xs">
+                          Download the error file to see which rows failed and why.
+                        </p>
+                      </div>
+                      <Button 
+                        onClick={downloadErrorFile}
+                        className="w-full bg-rose-600 hover:bg-rose-700 text-white"
+                      >
+                        <Download className="w-4 h-4 mr-2" />
+                        Download Error File with Reasons
+                      </Button>
+                    </div>
+                  </div>
+                </div>
               )}
             </div>
           )}
