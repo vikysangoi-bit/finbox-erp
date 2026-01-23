@@ -142,18 +142,8 @@ export default function ChartOfAccounts() {
           onAdd={() => { setEditingAccount(null); setShowForm(true); }}
           addLabel="New Account"
           onExport={() => {
-            const headers = ['code', 'name', 'brand', 'alias', 'level', 'parent', 'type', 'category', 'currency', 'openingBalance', 'currentBalance', 'active', 'description', 'contactType', 'contactPerson', 'phone', 'email', 'address', 'country', 'region', 'paymentTerms', 'creditLimit', 'taxId', 'supplierCategory'];
-            const rows = filteredAccounts.map(a => {
-              const parentAccount = a.parentAccount ? accounts.find(acc => acc.id === a.parentAccount) : null;
-              const accountLevel = a.parentAccount ? 'sub' : 'main';
-              return [
-                a.code, a.name, a.brand || '', a.alias || '', accountLevel, parentAccount?.name || '', a.type, a.category, a.currency || 'USD', 
-                a.openingBalance || 0, a.currentBalance || 0, a.active ? 'true' : 'false', a.description || '', 
-                a.contactType || '', a.contactPerson || '', a.phone || '', a.email || '', 
-                a.address || '', a.country || '', a.region || '', a.paymentTerms || '', 
-                a.creditLimit || 0, a.taxId || '', a.supplierCategory || ''
-              ];
-            });
+            const headers = ['code', 'name', 'type', 'category'];
+            const rows = filteredAccounts.map(a => [a.code, a.name, a.type, a.category]);
             const csv = [headers, ...rows].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
             const blob = new Blob([csv], { type: 'text/csv' });
             const url = window.URL.createObjectURL(blob);
@@ -237,36 +227,19 @@ export default function ChartOfAccounts() {
               properties: {
                 code: { type: "string" },
                 name: { type: "string" },
-                brand: { type: "string" },
-                alias: { type: "string" },
-                level: { type: "string" },
-                parent: { type: "string" },
                 type: { type: "string", enum: ["asset", "liability", "equity", "revenue", "expense"] },
-                category: { type: "string" },
-                currency: { type: "string" },
-                openingBalance: { type: "number" },
-                active: { type: "boolean" },
-                description: { type: "string" },
-                contactType: { type: "string" },
-                contactPerson: { type: "string" },
-                phone: { type: "string" },
-                email: { type: "string" },
-                address: { type: "string" },
-                country: { type: "string" },
-                region: { type: "string" },
-                paymentTerms: { type: "string" },
-                creditLimit: { type: "number" },
-                taxId: { type: "string" },
-                supplierCategory: { type: "string" }
+                category: { type: "string", enum: ["current_asset", "fixed_asset", "current_liability", "long_term_liability", "equity", "operating_revenue", "other_revenue", "cost_of_goods", "operating_expense", "other_expense"] }
               },
               required: ["code", "name", "type", "category"]
             }
           }}
           templateData={[
-            'code,name,brand,alias,level,parent,type,category,currency,openingBalance,active,description,contactType,contactPerson,phone,email,address,country,region,paymentTerms,creditLimit,taxId,supplierCategory',
-            '1000,Cash,,,main,,asset,current_asset,USD,50000,true,Cash account,,,,,,,,,,,',
-            '2000,Accounts Payable,,,main,,liability,current_liability,USD,0,true,Accounts payable,,,,,,,,,,,',
-            '1001,Petty Cash,,,sub,1000,asset,current_asset,USD,1000,true,Petty cash account,,,,,,,,,,,'
+            'code,name,type,category',
+            '1000,Cash,asset,current_asset',
+            '2000,Accounts Payable,liability,current_liability',
+            '3000,Sales Revenue,revenue,operating_revenue',
+            '4000,Cost of Goods Sold,expense,cost_of_goods',
+            '5000,Operating Expenses,expense,operating_expense'
           ]}
           onSuccess={() => queryClient.invalidateQueries({ queryKey: ['accounts'] })}
         />
