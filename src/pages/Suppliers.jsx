@@ -182,6 +182,22 @@ export default function Suppliers() {
           subtitle="Manage your supplier network"
           onAdd={() => { setEditingSupplier(null); setShowForm(true); }}
           addLabel="New Supplier"
+          onExport={() => {
+            const headers = ['Code', 'Name', 'Contact Person', 'Email', 'Phone', 'Address', 'City', 'Country', 'Payment Terms', 'Currency', 'Credit Limit', 'Current Balance', 'Tax ID', 'Category', 'Rating', 'Is Active', 'Notes'];
+            const rows = filteredSuppliers.map(s => [
+              s.code, s.name, s.contact_person || '', s.email || '', s.phone || '', s.address || '', 
+              s.city || '', s.country || '', s.payment_terms || '', s.currency || 'USD', s.credit_limit || 0, 
+              s.current_balance || 0, s.tax_id || '', s.category || '', s.rating || '', 
+              s.is_active ? 'Yes' : 'No', s.notes || ''
+            ]);
+            const csv = [headers, ...rows].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `suppliers_${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+          }}
         >
           <Button variant="outline" onClick={() => setShowBulkUpload(true)} className="border-slate-200">
             <Upload className="w-4 h-4 mr-2" />
@@ -272,9 +288,9 @@ export default function Suppliers() {
             }
           }}
           templateData={[
-            'code,name,contact_person,email,phone,city,country,payment_terms,currency,credit_limit,category,is_active',
-            'SUP-001,ABC Textiles,John Doe,john@abc.com,+1234567890,Mumbai,India,net_30,USD,50000,fabric,true',
-            'SUP-002,XYZ Trims,Jane Smith,jane@xyz.com,+0987654321,Dhaka,Bangladesh,net_45,USD,30000,trims,true'
+            'code,name,contact_person,email,phone,address,city,country,payment_terms,currency,credit_limit,tax_id,category,rating,is_active,notes',
+            'SUP-001,ABC Textiles,John Doe,john@abc.com,+1234567890,123 Main St,Mumbai,India,net_30,USD,50000,TAX123,fabric,4,true,',
+            'SUP-002,XYZ Trims,Jane Smith,jane@xyz.com,+0987654321,456 Market Rd,Dhaka,Bangladesh,net_45,USD,30000,TAX456,trims,5,true,'
           ]}
           onSuccess={() => queryClient.invalidateQueries({ queryKey: ['suppliers'] })}
         />

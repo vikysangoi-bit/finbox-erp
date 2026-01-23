@@ -190,6 +190,20 @@ export default function JournalEntries() {
           subtitle="Record and manage accounting entries"
           onAdd={() => { setEditingEntry(null); setShowForm(true); }}
           addLabel="New Entry"
+          onExport={() => {
+            const headers = ['Entry Number', 'Entry Date', 'Description', 'Reference', 'Currency', 'Total Debit', 'Total Credit', 'Status'];
+            const rows = filteredEntries.map(e => [
+              e.entry_number || '', e.entry_date || '', e.description || '', e.reference || '', 
+              e.currency || 'USD', e.total_debit || 0, e.total_credit || 0, e.status || 'draft'
+            ]);
+            const csv = [headers, ...rows].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `journal_entries_${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+          }}
         />
 
         <SearchFilter

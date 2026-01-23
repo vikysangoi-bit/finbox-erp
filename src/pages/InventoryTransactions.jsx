@@ -199,6 +199,21 @@ export default function InventoryTransactions() {
           subtitle="Track stock movements and adjustments"
           onAdd={() => { setEditingTransaction(null); setShowForm(true); }}
           addLabel="New Transaction"
+          onExport={() => {
+            const headers = ['Transaction Number', 'Transaction Date', 'Type', 'Item SKU', 'Item Name', 'Quantity', 'Unit Cost', 'Total Cost', 'Currency', 'Reference', 'From Location', 'To Location', 'Reason', 'Status'];
+            const rows = filteredTransactions.map(t => [
+              t.transaction_number || '', t.transaction_date || '', t.type || '', t.item_sku || '', 
+              t.item_name || '', t.quantity || 0, t.unit_cost || 0, t.total_cost || 0, t.currency || 'USD', 
+              t.reference || '', t.from_location || '', t.to_location || '', t.reason || '', t.status || 'draft'
+            ]);
+            const csv = [headers, ...rows].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `inventory_transactions_${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+          }}
         />
 
         <SearchFilter
