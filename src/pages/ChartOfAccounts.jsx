@@ -247,9 +247,10 @@ export default function ChartOfAccounts() {
             }
           }}
           templateData={[
-            'code,name,brand_name,alias,parent_account_id,type,category,currency,opening_balance,is_active,description,contact_type,contact_person,phone,email,account_address,country,region,payment_terms,credit_limit,tax_id,supplier_category',
-            '1000,Cash,,,asset,current_asset,USD,50000,true,Cash account,,,,,,,,,,,',
-            '2000,Accounts Payable,,,liability,current_liability,USD,0,true,Accounts payable,,,,,,,,,,,'
+            'code,name,brand_name,alias,account_level,parent_account_id,type,category,currency,opening_balance,is_active,description,contact_type,contact_person,phone,email,account_address,country,region,payment_terms,credit_limit,tax_id,supplier_category',
+            '1000,Cash,,,Main,,asset,current_asset,USD,50000,true,Cash account,,,,,,,,,,,',
+            '2000,Accounts Payable,,,Main,,liability,current_liability,USD,0,true,Accounts payable,,,,,,,,,,,',
+            '1001,Petty Cash,,,Sub-Category,1000,asset,current_asset,USD,1000,true,Petty cash account,,,,,,,,,,,'
           ]}
           onSuccess={() => queryClient.invalidateQueries({ queryKey: ['accounts'] })}
         />
