@@ -248,10 +248,9 @@ export default function AccountForm({ open, onOpenChange, account, accounts = []
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="none">None</SelectItem>
-                    <SelectItem value="customer">Customer</SelectItem>
-                    <SelectItem value="vendor">Vendor</SelectItem>
-                    <SelectItem value="employee">Employee</SelectItem>
-                    <SelectItem value="other">Other</SelectItem>
+                    <SelectItem value="business">Business</SelectItem>
+                    <SelectItem value="finance">Finance</SelectItem>
+                    <SelectItem value="operations">Operations</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
