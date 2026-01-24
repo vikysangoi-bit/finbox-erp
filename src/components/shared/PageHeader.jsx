@@ -32,7 +32,7 @@ export default function PageHeader({
           </Button>
         )}
         {onAdd && (
-          <Button onClick={onAdd} className="bg-slate-900 hover:bg-slate-800">
+          <Button onClick={onAdd} className="bg-[#0f172a] hover:bg-[#1e3a5f]">
             <Plus className="w-4 h-4 mr-2" />
             {addLabel}
           </Button>
