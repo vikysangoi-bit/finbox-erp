@@ -127,137 +127,160 @@ export default function SalesOrderForm({ open, onOpenChange, order, accounts = [
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{viewMode ? 'View Sales Order' : (order ? 'Edit Sales Order' : 'New Sales Order')}</DialogTitle>
+          <DialogTitle className="text-2xl font-bold text-center">ORDER FORM</DialogTitle>
         </DialogHeader>
         
-        <form onSubmit={handleSubmit}>
-          <Tabs defaultValue="basic" className="w-full">
-            <TabsList className="grid w-full grid-cols-4">
-              <TabsTrigger value="basic">Basic Info</TabsTrigger>
-              <TabsTrigger value="customer">Customer</TabsTrigger>
-              <TabsTrigger value="terms">Terms</TabsTrigger>
-              <TabsTrigger value="service">Service</TabsTrigger>
-            </TabsList>
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Section A: Client & Order Form Details */}
+          <div className="border-2 border-slate-900 rounded-lg p-6 space-y-4">
+            <h3 className="text-lg font-bold text-slate-900 pb-2 border-b-2 border-slate-900">
+              A. Client & Order Form Details
+            </h3>
 
-            <TabsContent value="basic" className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>RFQID</Label>
-                  <Input value={form.RFQID} onChange={(e) => setForm({ ...form, RFQID: e.target.value })} disabled={viewMode} />
+            <div className="grid grid-cols-2 gap-x-8 gap-y-4">
+              {/* Left Column */}
+              <div className="space-y-4">
+                <div className="flex items-start gap-3">
+                  <Label className="w-32 text-sm font-semibold pt-2 shrink-0">Client Name</Label>
+                  <span className="pt-2">:</span>
+                  <Select value={form.customerCode} onValueChange={handleCustomerCodeChange} disabled={viewMode}>
+                    <SelectTrigger className="flex-1">
+                      <SelectValue placeholder="Select customer" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {accounts.filter(a => a.type === 'revenue').map((acc) => (
+                        <SelectItem key={acc.id} value={acc.code}>{acc.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
-                <div className="space-y-2">
-                  <Label>Order Form No *</Label>
-                  <Input value={form.orderFormNo} onChange={(e) => setForm({ ...form, orderFormNo: e.target.value })} required disabled={viewMode} />
-                </div>
-              </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Order Form Value</Label>
-                  <Input type="number" step="0.01" value={form.orderFormValue} onChange={(e) => setForm({ ...form, orderFormValue: parseFloat(e.target.value) || 0 })} disabled={viewMode} />
+                <div className="flex items-start gap-3">
+                  <Label className="w-32 text-sm font-semibold pt-2 shrink-0">Brand/Trade Name</Label>
+                  <span className="pt-2">:</span>
+                  <Input value={form.customerBrand} disabled className="flex-1 bg-slate-50" />
                 </div>
-                <div className="space-y-2">
-                  <Label>Currency</Label>
-                  <Input value={form.currency} onChange={(e) => setForm({ ...form, currency: e.target.value })} disabled={viewMode} />
-                </div>
-              </div>
 
-              <div className="space-y-2">
-                <Label>Status</Label>
-                <Select value={form.status} onValueChange={(v) => setForm({ ...form, status: v })} disabled={viewMode}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="draft">Draft</SelectItem>
-                    <SelectItem value="pending_approval">Pending Approval</SelectItem>
-                    <SelectItem value="approved">Approved</SelectItem>
-                    <SelectItem value="active">Active</SelectItem>
-                    <SelectItem value="completed">Completed</SelectItem>
-                    <SelectItem value="cancelled">Cancelled</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label>Attachments</Label>
-                {!viewMode && <Input type="file" onChange={handleFileUpload} />}
-                {form.attachments?.map((att, idx) => (
-                  <div key={idx} className="text-sm text-slate-600">
-                    <a href={att.url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
-                      {att.name}
-                    </a>
-                  </div>
-                ))}
-              </div>
-            </TabsContent>
-
-            <TabsContent value="customer" className="space-y-4">
-              <div className="space-y-2">
-                <Label>Customer Code *</Label>
-                <Select value={form.customerCode} onValueChange={handleCustomerCodeChange} disabled={viewMode}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select customer" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {accounts.filter(a => a.type === 'revenue').map((acc) => (
-                      <SelectItem key={acc.id} value={acc.code}>{acc.code} - {acc.name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Customer Name</Label>
-                  <Input value={form.customerName} disabled className="bg-slate-100" />
+                <div className="flex items-start gap-3">
+                  <Label className="w-32 text-sm font-semibold pt-2 shrink-0">Billing Address</Label>
+                  <span className="pt-2">:</span>
+                  <Textarea value={form.customerAddress} disabled className="flex-1 bg-slate-50" rows={2} />
                 </div>
-                <div className="space-y-2">
-                  <Label>Brand</Label>
-                  <Input value={form.customerBrand} disabled className="bg-slate-100" />
-                </div>
-              </div>
 
-              <div className="space-y-2">
-                <Label>Address</Label>
-                <Textarea value={form.customerAddress} disabled className="bg-slate-100" rows={2} />
-              </div>
+                <div className="flex items-start gap-3">
+                  <Label className="w-32 text-sm font-semibold pt-2 shrink-0">Tax Details</Label>
+                  <span className="pt-2">:</span>
+                  <Input value={form.customerGstId ? `GST: ${form.customerGstId}` : ''} disabled className="flex-1 bg-slate-50" />
+                </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Country</Label>
-                  <Input value={form.customerCountry} disabled className="bg-slate-100" />
+                <div className="flex items-start gap-3">
+                  <Label className="w-32 text-sm font-semibold pt-2 shrink-0">Billing Email</Label>
+                  <span className="pt-2">:</span>
+                  <Input value={form.contactPersonEmail} onChange={(e) => setForm({ ...form, contactPersonEmail: e.target.value })} disabled={viewMode} className="flex-1" />
                 </div>
-                <div className="space-y-2">
-                  <Label>GST ID</Label>
-                  <Input value={form.customerGstId} disabled className="bg-slate-100" />
-                </div>
-              </div>
 
-              <div className="grid grid-cols-3 gap-4">
-                <div className="space-y-2">
-                  <Label>Contact Person</Label>
-                  <Input value={form.contactPersonName} onChange={(e) => setForm({ ...form, contactPersonName: e.target.value })} disabled={viewMode} />
+                <div className="flex items-start gap-3">
+                  <Label className="w-32 text-sm font-semibold pt-2 shrink-0">Order Form Term</Label>
+                  <span className="pt-2">:</span>
+                  <Select value={form.orderTerm} onValueChange={(v) => setForm({ ...form, orderTerm: v })} disabled={viewMode}>
+                    <SelectTrigger className="flex-1">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="1_year">6 Months</SelectItem>
+                      <SelectItem value="1_year">1 Year</SelectItem>
+                      <SelectItem value="2_years">2 Years</SelectItem>
+                      <SelectItem value="3_years">3 Years</SelectItem>
+                      <SelectItem value="5_years">5 Years</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
-                <div className="space-y-2">
-                  <Label>Email</Label>
-                  <Input type="email" value={form.contactPersonEmail} onChange={(e) => setForm({ ...form, contactPersonEmail: e.target.value })} disabled={viewMode} />
-                </div>
-                <div className="space-y-2">
-                  <Label>Phone</Label>
-                  <Input value={form.contactPersonPhone} onChange={(e) => setForm({ ...form, contactPersonPhone: e.target.value })} disabled={viewMode} />
-                </div>
-              </div>
-            </TabsContent>
 
-            <TabsContent value="terms" className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Payment Term</Label>
-                  <Select value={form.paymentTerm} onValueChange={(v) => setForm({ ...form, paymentTerm: v })} disabled={viewMode}>
+                <div className="flex items-start gap-3">
+                  <Label className="w-32 text-sm font-semibold pt-2 shrink-0">PO Required</Label>
+                  <span className="pt-2">:</span>
+                  <Select value="No" disabled className="flex-1">
                     <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Yes">Yes</SelectItem>
+                      <SelectItem value="No">No</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {/* Right Column */}
+              <div className="space-y-4">
+                <div className="flex items-start gap-3">
+                  <Label className="w-40 text-sm font-semibold pt-2 shrink-0">Order Form No</Label>
+                  <span className="pt-2">:</span>
+                  <Input value={form.orderFormNo} onChange={(e) => setForm({ ...form, orderFormNo: e.target.value })} required disabled={viewMode} className="flex-1" />
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <Label className="w-40 text-sm font-semibold pt-2 shrink-0">Billing Currency</Label>
+                  <span className="pt-2">:</span>
+                  <Input value={form.currency} onChange={(e) => setForm({ ...form, currency: e.target.value })} disabled={viewMode} className="flex-1" />
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <Label className="w-40 text-sm font-semibold pt-2 shrink-0">Service Period</Label>
+                  <span className="pt-2">:</span>
+                  <div className="flex-1 space-y-2">
+                    <div className="flex items-center gap-2">
+                      <Label className="text-xs">Start:</Label>
+                      <Input type="date" value={form.startDate} onChange={(e) => setForm({ ...form, startDate: e.target.value })} disabled={viewMode} />
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Label className="text-xs">End:</Label>
+                      <Input type="date" value={form.endDate} onChange={(e) => setForm({ ...form, endDate: e.target.value })} disabled={viewMode} />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <Label className="w-40 text-sm font-semibold pt-2 shrink-0">Sales Channel</Label>
+                  <span className="pt-2">:</span>
+                  <Select value={form.leadSource} onValueChange={(v) => setForm({ ...form, leadSource: v })} disabled={viewMode}>
+                    <SelectTrigger className="flex-1"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Direct">Direct</SelectItem>
+                      <SelectItem value="Indirect">Indirect</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <Label className="w-40 text-sm font-semibold pt-2 shrink-0">Order Form Value</Label>
+                  <span className="pt-2">:</span>
+                  <Input type="number" step="0.01" value={form.orderFormValue} onChange={(e) => setForm({ ...form, orderFormValue: parseFloat(e.target.value) || 0 })} disabled={viewMode} className="flex-1" />
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <Label className="w-40 text-sm font-semibold pt-2 shrink-0">Auto Renewal</Label>
+                  <span className="pt-2">:</span>
+                  <Select value={form.autoRenewal} onValueChange={(v) => setForm({ ...form, autoRenewal: v })} disabled={viewMode}>
+                    <SelectTrigger className="flex-1"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Yes">Yes</SelectItem>
+                      <SelectItem value="No">No</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <Label className="w-40 text-sm font-semibold pt-2 shrink-0">Renewal Frequency</Label>
+                  <span className="pt-2">:</span>
+                  <Input value="NA" disabled className="flex-1 bg-slate-50" />
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <Label className="w-40 text-sm font-semibold pt-2 shrink-0">Payment Terms</Label>
+                  <span className="pt-2">:</span>
+                  <Select value={form.paymentTerm} onValueChange={(v) => setForm({ ...form, paymentTerm: v })} disabled={viewMode}>
+                    <SelectTrigger className="flex-1"><SelectValue /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="full_advance">Full Advance</SelectItem>
                       <SelectItem value="net_7">Net 7</SelectItem>
@@ -268,143 +291,167 @@ export default function SalesOrderForm({ open, onOpenChange, order, accounts = [
                     </SelectContent>
                   </Select>
                 </div>
-                <div className="space-y-2">
-                  <Label>Payment Term From</Label>
-                  <Input value={form.paymentTermFrom} onChange={(e) => setForm({ ...form, paymentTermFrom: e.target.value })} disabled={viewMode} />
+              </div>
+            </div>
+
+            {/* Client & Sales Representative */}
+            <div className="grid grid-cols-2 gap-x-8 gap-y-3 mt-6 pt-6 border-t-2 border-slate-200">
+              <div className="space-y-2">
+                <h4 className="font-bold text-sm">Client Representative</h4>
+                <div className="flex items-center gap-2 text-sm">
+                  <span className="font-semibold">Name:</span>
+                  <Input value={form.contactPersonName} onChange={(e) => setForm({ ...form, contactPersonName: e.target.value })} disabled={viewMode} className="flex-1" />
+                </div>
+                <div className="flex items-center gap-2 text-sm">
+                  <span className="font-semibold">Mobile:</span>
+                  <Input value={form.contactPersonPhone} onChange={(e) => setForm({ ...form, contactPersonPhone: e.target.value })} disabled={viewMode} className="flex-1" />
+                </div>
+                <div className="flex items-center gap-2 text-sm">
+                  <span className="font-semibold">Email:</span>
+                  <Input type="email" value={form.contactPersonEmail} onChange={(e) => setForm({ ...form, contactPersonEmail: e.target.value })} disabled={viewMode} className="flex-1" />
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label>Expected Delivery</Label>
-                <Input type="date" value={form.expectedDelivery} onChange={(e) => setForm({ ...form, expectedDelivery: e.target.value })} disabled={viewMode} />
-              </div>
-
-              <div className="grid grid-cols-3 gap-4">
-                <div className="space-y-2">
-                  <Label>Order Term</Label>
-                  <Select value={form.orderTerm} onValueChange={(v) => setForm({ ...form, orderTerm: v })} disabled={viewMode}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="1_year">1 Year</SelectItem>
-                      <SelectItem value="2_years">2 Years</SelectItem>
-                      <SelectItem value="3_years">3 Years</SelectItem>
-                      <SelectItem value="5_years">5 Years</SelectItem>
-                    </SelectContent>
-                  </Select>
+                <h4 className="font-bold text-sm">Sales Representative</h4>
+                <div className="flex items-center gap-2 text-sm">
+                  <span className="font-semibold">Name:</span>
+                  <Input value={form.salesPersonName} onChange={(e) => setForm({ ...form, salesPersonName: e.target.value })} disabled={viewMode} className="flex-1" />
                 </div>
-                <div className="space-y-2">
-                  <Label>Start Date</Label>
-                  <Input type="date" value={form.startDate} onChange={(e) => setForm({ ...form, startDate: e.target.value })} disabled={viewMode} />
-                </div>
-                <div className="space-y-2">
-                  <Label>End Date</Label>
-                  <Input type="date" value={form.endDate} onChange={(e) => setForm({ ...form, endDate: e.target.value })} disabled={viewMode} />
+                <div className="flex items-center gap-2 text-sm">
+                  <span className="font-semibold">Email:</span>
+                  <Input value={form.partnerName} onChange={(e) => setForm({ ...form, partnerName: e.target.value })} disabled={viewMode} placeholder="partner@example.com" className="flex-1" />
                 </div>
               </div>
+            </div>
+          </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Auto Renewal</Label>
-                  <Select value={form.autoRenewal} onValueChange={(v) => setForm({ ...form, autoRenewal: v })} disabled={viewMode}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Yes">Yes</SelectItem>
-                      <SelectItem value="No">No</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label>Lead Source</Label>
-                  <Select value={form.leadSource} onValueChange={(v) => setForm({ ...form, leadSource: v })} disabled={viewMode}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Direct">Direct</SelectItem>
-                      <SelectItem value="Indirect">Indirect</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+          {/* Section B: Service Details */}
+          <div className="border-2 border-slate-900 rounded-lg p-6 space-y-4">
+            <div className="flex items-center justify-between pb-2 border-b-2 border-slate-900">
+              <h3 className="text-lg font-bold text-slate-900">B. Service Details</h3>
+              <div className="text-sm">
+                <span className="font-semibold">Bundle Service: </span>
+                <Input value={form.RFQID} onChange={(e) => setForm({ ...form, RFQID: e.target.value })} disabled={viewMode} className="inline-block w-32 h-8" placeholder="No" />
               </div>
+            </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Partner Name</Label>
-                  <Input value={form.partnerName} onChange={(e) => setForm({ ...form, partnerName: e.target.value })} disabled={viewMode} />
-                </div>
-                <div className="space-y-2">
-                  <Label>Sales Person</Label>
-                  <Input value={form.salesPersonName} onChange={(e) => setForm({ ...form, salesPersonName: e.target.value })} disabled={viewMode} />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label>Special Terms</Label>
-                <Textarea value={form.specialTerms} onChange={(e) => setForm({ ...form, specialTerms: e.target.value })} rows={3} disabled={viewMode} />
-              </div>
-            </TabsContent>
-
-            <TabsContent value="service" className="space-y-4">
-              <div className="grid grid-cols-3 gap-4">
-                <div className="space-y-2">
-                  <Label>Service Name</Label>
-                  <Select value={form.serviceName} onValueChange={(v) => setForm({ ...form, serviceName: v })} disabled={viewMode}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="DaaS">DaaS</SelectItem>
-                      <SelectItem value="GaaS">GaaS</SelectItem>
-                      <SelectItem value="Snap">Snap</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label>UOM</Label>
-                  <Select value={form.uom} onValueChange={(v) => setForm({ ...form, uom: v })} disabled={viewMode}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="SKU">SKU</SelectItem>
-                      <SelectItem value="Tech_pack">Tech Pack</SelectItem>
-                      <SelectItem value="Qty">Qty</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label>Unit Price</Label>
-                  <Input type="number" step="0.01" value={form.unitPrice} onChange={(e) => setForm({ ...form, unitPrice: parseFloat(e.target.value) || 0 })} disabled={viewMode} />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label>Billing Frequency</Label>
-                <Select value={form.billingFrequency} onValueChange={(v) => setForm({ ...form, billingFrequency: v })} disabled={viewMode}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
+            <div className="space-y-3">
+              <div className="flex items-center gap-3">
+                <Label className="text-sm font-semibold w-32">Service Name</Label>
+                <Select value={form.serviceName} onValueChange={(v) => setForm({ ...form, serviceName: v })} disabled={viewMode}>
+                  <SelectTrigger className="flex-1">
+                    <SelectValue />
+                  </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="One_Time">One Time</SelectItem>
-                    <SelectItem value="ARR">ARR</SelectItem>
-                    <SelectItem value="MRR">MRR</SelectItem>
+                    <SelectItem value="DaaS">DaaS</SelectItem>
+                    <SelectItem value="GaaS">GaaS</SelectItem>
+                    <SelectItem value="Snap">Snap</SelectItem>
+                    <SelectItem value="AI Photoshoot">AI Photoshoot</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
-              <div className="space-y-2">
-                <Label>Inclusions</Label>
-                <Textarea value={form.inclusions} onChange={(e) => setForm({ ...form, inclusions: e.target.value })} rows={3} disabled={viewMode} />
+              {/* Service Details Table */}
+              <div className="border border-slate-300 rounded-lg overflow-hidden">
+                <div className="grid grid-cols-5 bg-slate-100 border-b border-slate-300">
+                  <div className="p-3 border-r border-slate-300 font-bold text-sm">Fee Type</div>
+                  <div className="p-3 border-r border-slate-300 font-bold text-sm">Billing Cycle</div>
+                  <div className="p-3 border-r border-slate-300 font-bold text-sm">Commercial Value</div>
+                  <div className="p-3 border-r border-slate-300 font-bold text-sm">Inclusions</div>
+                  <div className="p-3 font-bold text-sm">Terms</div>
+                </div>
+                <div className="grid grid-cols-5">
+                  <div className="p-3 border-r border-slate-300">
+                    <Select value={form.uom} onValueChange={(v) => setForm({ ...form, uom: v })} disabled={viewMode}>
+                      <SelectTrigger className="border-0 h-8 p-0">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="One-Time Fee">One-Time Fee</SelectItem>
+                        <SelectItem value="SKU">Per SKU</SelectItem>
+                        <SelectItem value="Tech_pack">Per Tech Pack</SelectItem>
+                        <SelectItem value="Qty">Per Quantity</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="p-3 border-r border-slate-300">
+                    <Select value={form.billingFrequency} onValueChange={(v) => setForm({ ...form, billingFrequency: v })} disabled={viewMode}>
+                      <SelectTrigger className="border-0 h-8 p-0">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="One_Time">One Time</SelectItem>
+                        <SelectItem value="ARR">Annual</SelectItem>
+                        <SelectItem value="MRR">Monthly</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="p-3 border-r border-slate-300">
+                    <Input type="number" step="0.01" value={form.unitPrice} onChange={(e) => setForm({ ...form, unitPrice: parseFloat(e.target.value) || 0 })} disabled={viewMode} className="border-0 h-8 p-0" />
+                  </div>
+                  <div className="p-3 border-r border-slate-300">
+                    <Textarea value={form.inclusions} onChange={(e) => setForm({ ...form, inclusions: e.target.value })} disabled={viewMode} rows={2} className="border-0 p-0 text-sm" placeholder="e.g., 1 Lifestyle Shoot + 6 Studio Shoot" />
+                  </div>
+                  <div className="p-3">
+                    <Textarea value={form.specialTerms} onChange={(e) => setForm({ ...form, specialTerms: e.target.value })} disabled={viewMode} rows={2} className="border-0 p-0 text-sm" placeholder="e.g., 50% On Execution" />
+                  </div>
+                </div>
               </div>
 
-              <div className="space-y-2">
-                <Label>Notes</Label>
-                <Textarea value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} rows={2} disabled={viewMode} />
+              <div className="space-y-2 pt-4">
+                <Label className="text-sm font-semibold">Additional Notes</Label>
+                <Textarea value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} disabled={viewMode} rows={3} placeholder="Any additional terms or notes..." />
               </div>
-            </TabsContent>
-          </Tabs>
 
-          <DialogFooter className="mt-6">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-              {viewMode ? 'Close' : 'Cancel'}
-            </Button>
-            {!viewMode && (
-              <Button type="submit" disabled={isLoading} className="bg-slate-900 hover:bg-slate-800">
-                {isLoading ? 'Saving...' : (order ? 'Update' : 'Create')}
+              {form.attachments?.length > 0 && (
+                <div className="space-y-2 pt-2">
+                  <Label className="text-sm font-semibold">Attachments</Label>
+                  <div className="flex flex-wrap gap-2">
+                    {form.attachments.map((att, idx) => (
+                      <a key={idx} href={att.url} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-600 hover:underline bg-blue-50 px-3 py-1 rounded-full">
+                        {att.name}
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {!viewMode && (
+                <div className="pt-2">
+                  <Input type="file" onChange={handleFileUpload} />
+                </div>
+              )}
+            </div>
+          </div>
+
+          <DialogFooter className="flex items-center justify-between pt-4">
+            <div className="space-y-1">
+              <Label className="text-xs text-slate-500">Status</Label>
+              <Select value={form.status} onValueChange={(v) => setForm({ ...form, status: v })} disabled={viewMode}>
+                <SelectTrigger className="w-48">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="draft">Draft</SelectItem>
+                  <SelectItem value="pending_approval">Pending Approval</SelectItem>
+                  <SelectItem value="approved">Approved</SelectItem>
+                  <SelectItem value="active">Active</SelectItem>
+                  <SelectItem value="completed">Completed</SelectItem>
+                  <SelectItem value="cancelled">Cancelled</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex gap-3">
+              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+                {viewMode ? 'Close' : 'Cancel'}
               </Button>
-            )}
+              {!viewMode && (
+                <Button type="submit" disabled={isLoading} className="bg-slate-900 hover:bg-slate-800">
+                  {isLoading ? 'Saving...' : (order ? 'Update Order Form' : 'Create Order Form')}
+                </Button>
+              )}
+            </div>
           </DialogFooter>
         </form>
       </DialogContent>
