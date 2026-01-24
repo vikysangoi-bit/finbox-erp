@@ -18,6 +18,7 @@ import Suppliers from './pages/Suppliers';
 import Users from './pages/Users';
 import Invoices from './pages/Invoices';
 import Receipts from './pages/Receipts';
+import CreditNotes from './pages/CreditNotes';
 import __Layout from './Layout.jsx';
 
 
@@ -42,6 +43,7 @@ export const PAGES = {
     "Users": Users,
     "Invoices": Invoices,
     "Receipts": Receipts,
+    "CreditNotes": CreditNotes,
 }
 
 export const pagesConfig = {
