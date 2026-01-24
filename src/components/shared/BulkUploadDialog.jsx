@@ -191,7 +191,7 @@ export default function BulkUploadDialog({ open, onOpenChange, entityName, schem
           <Alert>
             <FileSpreadsheet className="h-4 w-4" />
             <AlertDescription>
-              Upload a CSV or Excel file with your data. Download the template to see the required format.
+              Upload a CSV or Excel file (.csv, .xlsx, .xls) with your data. Download the template to see the required format.
             </AlertDescription>
           </Alert>
 
@@ -201,7 +201,7 @@ export default function BulkUploadDialog({ open, onOpenChange, entityName, schem
           </Button>
 
           <div className="space-y-2">
-            <Label htmlFor="file">Select File</Label>
+            <Label htmlFor="file">Select File (CSV or Excel)</Label>
             <Input
               id="file"
               type="file"
@@ -209,6 +209,11 @@ export default function BulkUploadDialog({ open, onOpenChange, entityName, schem
               onChange={handleFileChange}
               disabled={uploading}
             />
+            {file && (
+              <p className="text-xs text-slate-500 mt-1">
+                Selected: {file.name}
+              </p>
+            )}
           </div>
 
           {uploading && (
