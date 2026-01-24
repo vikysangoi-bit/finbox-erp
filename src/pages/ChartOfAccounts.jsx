@@ -9,15 +9,18 @@ import EmptyState from "@/components/shared/EmptyState";
 import AccountForm from "@/components/accounts/AccountForm";
 import BulkUploadDialog from "@/components/shared/BulkUploadDialog";
 import BulkDeleteDialog from "@/components/shared/BulkDeleteDialog";
+import GoogleSheetsDialog from "@/components/accounts/GoogleSheetsDialog";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, Pencil, Trash2, BookOpen, Upload } from "lucide-react";
+import { MoreHorizontal, Pencil, Trash2, BookOpen, Upload, Sheet } from "lucide-react";
 import ConfirmDialog from "@/components/shared/ConfirmDialog";
 
 export default function ChartOfAccounts() {
   const [showForm, setShowForm] = useState(false);
   const [showBulkUpload, setShowBulkUpload] = useState(false);
   const [showBulkDelete, setShowBulkDelete] = useState(false);
+  const [showGoogleSheetsImport, setShowGoogleSheetsImport] = useState(false);
+  const [showGoogleSheetsExport, setShowGoogleSheetsExport] = useState(false);
   const [editingAccount, setEditingAccount] = useState(null);
   const [deleteAccount, setDeleteAccount] = useState(null);
   const [search, setSearch] = useState('');
@@ -200,6 +203,14 @@ export default function ChartOfAccounts() {
             <Trash2 className="w-4 h-4 mr-2" />
             Bulk Delete
           </Button>
+          <Button variant="outline" onClick={() => setShowGoogleSheetsImport(true)} className="border-green-200 text-green-700 hover:bg-green-50">
+            <Sheet className="w-4 h-4 mr-2" />
+            Import from Sheets
+          </Button>
+          <Button variant="outline" onClick={() => setShowGoogleSheetsExport(true)} className="border-blue-200 text-blue-700 hover:bg-blue-50">
+            <Sheet className="w-4 h-4 mr-2" />
+            Export to Sheets
+          </Button>
           {selectedRows.length > 0 && (
             <Button variant="destructive" onClick={() => setShowBulkDeleteConfirm(true)}>
               <Trash2 className="w-4 h-4 mr-2" />
@@ -285,6 +296,20 @@ export default function ChartOfAccounts() {
           entityName="Account"
           identifierField="code"
           onSuccess={() => queryClient.invalidateQueries({ queryKey: ['accounts'] })}
+        />
+
+        <GoogleSheetsDialog
+          open={showGoogleSheetsImport}
+          onOpenChange={setShowGoogleSheetsImport}
+          mode="import"
+          onSuccess={() => queryClient.invalidateQueries({ queryKey: ['accounts'] })}
+        />
+
+        <GoogleSheetsDialog
+          open={showGoogleSheetsExport}
+          onOpenChange={setShowGoogleSheetsExport}
+          mode="export"
+          onSuccess={() => {}}
         />
 
         <BulkUploadDialog
