@@ -269,8 +269,8 @@ export default function PurchaseOrderForm({ open, onOpenChange, po, onSave, isLo
             <div className="space-y-3">
               <h3 className="font-bold text-sm underline">Billing details</h3>
               <div className="text-sm">
-                <p className="font-semibold">Bill to: Shorepoint Retail Technologies Limited</p>
-                <p className="text-slate-600">Billing address: 1st Floor, Wilawan, Vijay Diamond, Opp. SBI Branch, Cross Road B,</p>
+                <p className="font-semibold">Bill to: Shopsense Retail Technologies Limited</p>
+                <p className="text-slate-600">Billing address: 1st Floor, Wework Vijay Diamond, Opp. SBI Branch, Cross Road B,</p>
                 <p className="text-slate-600">Ajit Nagar, Kondivita, Andheri East, Mumbai - 400093, Maharashtra, India</p>
               </div>
             </div>
