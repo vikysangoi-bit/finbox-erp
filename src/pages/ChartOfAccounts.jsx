@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import PageHeader from "@/components/shared/PageHeader";
-import SearchFilter from "@/components/shared/SearchFilter";
+import FilterBar from "@/components/shared/FilterBar";
 import DataTable from "@/components/shared/DataTable";
 import StatusBadge from "@/components/shared/StatusBadge";
 import EmptyState from "@/components/shared/EmptyState";
@@ -29,6 +29,9 @@ export default function ChartOfAccounts() {
   const [deleteAccount, setDeleteAccount] = useState(null);
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState('all');
+  const [parentAccountFilter, setParentAccountFilter] = useState('all');
+  const [regionFilter, setRegionFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState('all');
   const [selectedRows, setSelectedRows] = useState([]);
   const [showBulkDeleteConfirm, setShowBulkDeleteConfirm] = useState(false);
 
@@ -163,8 +166,20 @@ export default function ChartOfAccounts() {
       account.code?.toLowerCase().includes(search.toLowerCase()) ||
       account.name?.toLowerCase().includes(search.toLowerCase());
     const matchesType = typeFilter === 'all' || account.type === typeFilter;
-    return matchesSearch && matchesType;
+    const matchesParent = parentAccountFilter === 'all' || 
+      (parentAccountFilter === 'main' && !account.parentAccount) ||
+      (parentAccountFilter === 'sub' && account.parentAccount) ||
+      account.parentAccount === parentAccountFilter;
+    const matchesRegion = regionFilter === 'all' || account.region === regionFilter;
+    const matchesStatus = statusFilter === 'all' || 
+      (statusFilter === 'active' && account.active) ||
+      (statusFilter === 'inactive' && !account.active);
+    return matchesSearch && matchesType && matchesParent && matchesRegion && matchesStatus;
   });
+
+  // Get unique regions and parent accounts for filter options
+  const uniqueRegions = [...new Set(accounts.map(a => a.region).filter(Boolean))];
+  const mainAccounts = accounts.filter(a => !a.parentAccount);
 
   const handleSave = (data) => {
     if (editingAccount) {
@@ -257,26 +272,76 @@ export default function ChartOfAccounts() {
           )}
         </PageHeader>
 
-        <SearchFilter
-          searchValue={search}
-          onSearchChange={setSearch}
-          searchPlaceholder="Search by code or name..."
-          filters={[
-            {
-              key: 'type',
-              value: typeFilter,
-              onChange: setTypeFilter,
-              placeholder: 'Type',
-              options: [
-                { value: 'asset', label: 'Asset' },
-                { value: 'liability', label: 'Liability' },
-                { value: 'equity', label: 'Equity' },
-                { value: 'revenue', label: 'Revenue' },
-                { value: 'expense', label: 'Expense' },
-              ]
-            }
-          ]}
-        />
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4 text-sm text-slate-600">
+              <div>
+                <span className="font-semibold text-slate-900">{accounts.length}</span> Total
+              </div>
+              <div className="h-4 w-px bg-slate-200" />
+              <div>
+                <span className="font-semibold text-slate-900">{filteredAccounts.length}</span> Filtered
+              </div>
+              {selectedRows.length > 0 && (
+                <>
+                  <div className="h-4 w-px bg-slate-200" />
+                  <div>
+                    <span className="font-semibold text-blue-600">{selectedRows.length}</span> Selected
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+
+          <FilterBar
+            searchValue={search}
+            onSearchChange={setSearch}
+            searchPlaceholder="Search by code or name..."
+            filters={[
+              {
+                key: 'type',
+                value: typeFilter,
+                onChange: setTypeFilter,
+                placeholder: 'Type',
+                options: [
+                  { value: 'asset', label: 'Asset' },
+                  { value: 'liability', label: 'Liability' },
+                  { value: 'equity', label: 'Equity' },
+                  { value: 'revenue', label: 'Revenue' },
+                  { value: 'expense', label: 'Expense' },
+                ]
+              },
+              {
+                key: 'parent',
+                value: parentAccountFilter,
+                onChange: setParentAccountFilter,
+                placeholder: 'Parent Account',
+                options: [
+                  { value: 'main', label: 'Main Accounts' },
+                  { value: 'sub', label: 'Sub Accounts' },
+                  ...mainAccounts.map(a => ({ value: a.id, label: `${a.code} - ${a.name}` }))
+                ]
+              },
+              {
+                key: 'region',
+                value: regionFilter,
+                onChange: setRegionFilter,
+                placeholder: 'Region',
+                options: uniqueRegions.map(r => ({ value: r, label: r }))
+              },
+              {
+                key: 'status',
+                value: statusFilter,
+                onChange: setStatusFilter,
+                placeholder: 'Status',
+                options: [
+                  { value: 'active', label: 'Active' },
+                  { value: 'inactive', label: 'Inactive' },
+                ]
+              }
+            ]}
+          />
+        </div>
 
         {!isLoading && accounts.length === 0 ? (
           <EmptyState
