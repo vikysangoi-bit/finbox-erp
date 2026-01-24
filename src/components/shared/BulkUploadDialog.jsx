@@ -113,11 +113,16 @@ export default function BulkUploadDialog({ open, onOpenChange, entityName, schem
       let successCount = 0;
       let skippedCount = 0;
       
-      // For Account entity, fetch existing codes to check for duplicates
+      // For Account entity, fetch existing accounts to check for duplicates and map parent codes
       let existingCodes = [];
+      let accountsMap = {};
       if (entityName === 'Account') {
         const existingAccounts = await base44.entities.Account.list();
         existingCodes = existingAccounts.map(acc => acc.code);
+        accountsMap = existingAccounts.reduce((map, acc) => {
+          map[acc.code] = acc.id;
+          return map;
+        }, {});
       }
 
       for (let i = 0; i < data.length; i++) {
@@ -131,6 +136,23 @@ export default function BulkUploadDialog({ open, onOpenChange, entityName, schem
               error: 'Skipped - Account code already exists'
             });
             continue;
+          }
+          
+          // Map parentAccount code to ID for Account entity
+          if (entityName === 'Account' && data[i].parentAccount) {
+            const parentCode = data[i].parentAccount;
+            const parentId = accountsMap[parentCode];
+            
+            if (!parentId) {
+              errorList.push({
+                row: i + 2,
+                data: data[i],
+                error: `Parent account code "${parentCode}" not found`
+              });
+              continue;
+            }
+            
+            data[i].parentAccount = parentId;
           }
           
           await base44.entities[entityName].create(data[i]);
