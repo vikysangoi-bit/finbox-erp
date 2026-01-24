@@ -56,11 +56,19 @@ export default function AccountForm({ open, onOpenChange, account, accounts = []
     phone: '',
     email: '',
     address: '',
+    city: '',
+    state: '',
     country: '',
     region: '',
+    pincode: '',
+    placeOfSupply: '',
     paymentTerms: '',
     creditLimit: 0,
     taxId: '',
+    gstId: '',
+    panId: '',
+    tanId: '',
+    vatId: '',
     supplierCategory: ''
   });
   
@@ -89,11 +97,19 @@ export default function AccountForm({ open, onOpenChange, account, accounts = []
         phone: '',
         email: '',
         address: '',
+        city: '',
+        state: '',
         country: '',
         region: '',
+        pincode: '',
+        placeOfSupply: '',
         paymentTerms: '',
         creditLimit: 0,
         taxId: '',
+        gstId: '',
+        panId: '',
+        tanId: '',
+        vatId: '',
         supplierCategory: ''
       });
     }
@@ -327,12 +343,33 @@ export default function AccountForm({ open, onOpenChange, account, accounts = []
 
             <div className="grid grid-cols-2 gap-4 mt-4">
               <div className="space-y-2">
+                <Label htmlFor="city">City</Label>
+                <Input
+                  id="city"
+                  value={form.city || ''}
+                  onChange={(e) => setForm({ ...form, city: e.target.value })}
+                  placeholder="e.g., Mumbai"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="state">State</Label>
+                <Input
+                  id="state"
+                  value={form.state || ''}
+                  onChange={(e) => setForm({ ...form, state: e.target.value })}
+                  placeholder="e.g., Maharashtra"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4 mt-4">
+              <div className="space-y-2">
                 <Label htmlFor="country">Country</Label>
                 <Input
                   id="country"
                   value={form.country || ''}
                   onChange={(e) => setForm({ ...form, country: e.target.value })}
-                  placeholder="e.g., United States"
+                  placeholder="e.g., India"
                 />
               </div>
               <div className="space-y-2">
@@ -341,7 +378,28 @@ export default function AccountForm({ open, onOpenChange, account, accounts = []
                   id="region"
                   value={form.region || ''}
                   onChange={(e) => setForm({ ...form, region: e.target.value })}
-                  placeholder="e.g., California"
+                  placeholder="e.g., Western India"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4 mt-4">
+              <div className="space-y-2">
+                <Label htmlFor="pincode">PIN Code</Label>
+                <Input
+                  id="pincode"
+                  value={form.pincode || ''}
+                  onChange={(e) => setForm({ ...form, pincode: e.target.value })}
+                  placeholder="e.g., 400001"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="placeOfSupply">Place of Supply</Label>
+                <Input
+                  id="placeOfSupply"
+                  value={form.placeOfSupply || ''}
+                  onChange={(e) => setForm({ ...form, placeOfSupply: e.target.value })}
+                  placeholder="e.g., Maharashtra"
                 />
               </div>
             </div>
@@ -387,13 +445,55 @@ export default function AccountForm({ open, onOpenChange, account, accounts = []
             </div>
 
             <div className="space-y-2 mt-4">
-              <Label htmlFor="taxId">Tax ID / VAT Number</Label>
+              <Label htmlFor="taxId">Tax ID</Label>
               <Input
                 id="taxId"
                 value={form.taxId || ''}
                 onChange={(e) => setForm({ ...form, taxId: e.target.value })}
                 placeholder="e.g., 12-3456789"
               />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4 mt-4">
+              <div className="space-y-2">
+                <Label htmlFor="gstId">GST Number</Label>
+                <Input
+                  id="gstId"
+                  value={form.gstId || ''}
+                  onChange={(e) => setForm({ ...form, gstId: e.target.value })}
+                  placeholder="e.g., 22AAAAA0000A1Z5"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="panId">PAN Number</Label>
+                <Input
+                  id="panId"
+                  value={form.panId || ''}
+                  onChange={(e) => setForm({ ...form, panId: e.target.value })}
+                  placeholder="e.g., ABCDE1234F"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4 mt-4">
+              <div className="space-y-2">
+                <Label htmlFor="tanId">TAN Number</Label>
+                <Input
+                  id="tanId"
+                  value={form.tanId || ''}
+                  onChange={(e) => setForm({ ...form, tanId: e.target.value })}
+                  placeholder="e.g., ABCD12345E"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="vatId">VAT Number</Label>
+                <Input
+                  id="vatId"
+                  value={form.vatId || ''}
+                  onChange={(e) => setForm({ ...form, vatId: e.target.value })}
+                  placeholder="e.g., GB123456789"
+                />
+              </div>
             </div>
 
             {form.type === 'expense' && (

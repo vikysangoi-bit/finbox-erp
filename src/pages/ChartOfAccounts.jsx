@@ -227,19 +227,46 @@ export default function ChartOfAccounts() {
               properties: {
                 code: { type: "string" },
                 name: { type: "string" },
+                brand: { type: "string" },
+                alias: { type: "string" },
                 type: { type: "string", enum: ["asset", "liability", "equity", "revenue", "expense"] },
-                category: { type: "string", enum: ["current_asset", "fixed_asset", "current_liability", "long_term_liability", "equity", "operating_revenue", "other_revenue", "cost_of_goods", "operating_expense", "other_expense"] }
+                category: { type: "string", enum: ["current_asset", "fixed_asset", "current_liability", "long_term_liability", "equity", "operating_revenue", "other_revenue", "cost_of_goods", "operating_expense", "other_expense"] },
+                parentAccount: { type: "string" },
+                supplierCategory: { type: "string", enum: ["fabric", "trims", "accessories", "packaging", "services", "other"] },
+                currency: { type: "string" },
+                openingBalance: { type: "number" },
+                currentBalance: { type: "number" },
+                description: { type: "string" },
+                contactType: { type: "string", enum: ["business", "finance", "operations"] },
+                contactPerson: { type: "string" },
+                phone: { type: "string" },
+                email: { type: "string", format: "email" },
+                address: { type: "string" },
+                city: { type: "string" },
+                state: { type: "string" },
+                country: { type: "string" },
+                region: { type: "string" },
+                pincode: { type: "string" },
+                placeOfSupply: { type: "string" },
+                taxId: { type: "string" },
+                gstId: { type: "string" },
+                panId: { type: "string" },
+                tanId: { type: "string" },
+                vatId: { type: "string" },
+                paymentTerms: { type: "string", enum: ["net_7", "net_15", "net_30", "net_45", "net_60", "net_90", "cod", "advance"] },
+                creditLimit: { type: "number" },
+                active: { type: "boolean" }
               },
               required: ["code", "name", "type", "category"]
             }
           }}
           templateData={[
-            'code,name,type,category',
-            '1000,Cash,asset,current_asset',
-            '2000,Accounts Payable,liability,current_liability',
-            '3000,Sales Revenue,revenue,operating_revenue',
-            '4000,Cost of Goods Sold,expense,cost_of_goods',
-            '5000,Operating Expenses,expense,operating_expense'
+            'code,name,type,category,brand,alias,currency,openingBalance,city,state,country,pincode,placeOfSupply,gstId,panId,tanId,vatId,active',
+            '1000,Cash,asset,current_asset,ABC Corp,Cash Account,USD,10000,Mumbai,Maharashtra,India,400001,Maharashtra,22AAAAA0000A1Z5,ABCDE1234F,ABCD12345E,GB123456789,true',
+            '2000,Accounts Payable,liability,current_liability,XYZ Ltd,AP Account,USD,0,Delhi,Delhi,India,110001,Delhi,,,,,true',
+            '3000,Sales Revenue,revenue,operating_revenue,,,USD,0,,,India,,,,,,true',
+            '4000,Cost of Goods Sold,expense,cost_of_goods,,,USD,0,,,India,,,,,,true',
+            '5000,Operating Expenses,expense,operating_expense,,,USD,0,,,India,,,,,,true'
           ]}
           onSuccess={() => queryClient.invalidateQueries({ queryKey: ['accounts'] })}
         />
