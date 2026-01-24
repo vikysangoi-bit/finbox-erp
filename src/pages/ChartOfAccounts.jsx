@@ -269,6 +269,16 @@ export default function ChartOfAccounts() {
           variant="destructive"
         />
 
+        <ConfirmDialog
+          open={showBulkDeleteConfirm}
+          onOpenChange={setShowBulkDeleteConfirm}
+          title="Delete Selected Accounts"
+          description={`Are you sure you want to delete ${selectedRows.length} selected account(s)? This action cannot be undone.`}
+          confirmLabel="Delete All"
+          onConfirm={handleBulkDelete}
+          variant="destructive"
+        />
+
         <BulkDeleteDialog
           open={showBulkDelete}
           onOpenChange={setShowBulkDelete}
