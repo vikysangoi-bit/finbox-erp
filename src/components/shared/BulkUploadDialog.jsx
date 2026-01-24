@@ -107,13 +107,32 @@ export default function BulkUploadDialog({ open, onOpenChange, entityName, schem
         return;
       }
 
-      // Bulk create records with error tracking
+      // Bulk create records with error tracking and duplicate detection for Account entity
       const data = Array.isArray(extractResult.output) ? extractResult.output : [extractResult.output];
       const errorList = [];
       let successCount = 0;
+      let skippedCount = 0;
+      
+      // For Account entity, fetch existing codes to check for duplicates
+      let existingCodes = [];
+      if (entityName === 'Account') {
+        const existingAccounts = await base44.entities.Account.list();
+        existingCodes = existingAccounts.map(acc => acc.code);
+      }
 
       for (let i = 0; i < data.length; i++) {
         try {
+          // Check for duplicate code in Account entity
+          if (entityName === 'Account' && data[i].code && existingCodes.includes(data[i].code)) {
+            skippedCount++;
+            errorList.push({
+              row: i + 2,
+              data: data[i],
+              error: 'Skipped - Account code already exists'
+            });
+            continue;
+          }
+          
           await base44.entities[entityName].create(data[i]);
           successCount++;
         } catch (error) {
@@ -132,7 +151,8 @@ export default function BulkUploadDialog({ open, onOpenChange, entityName, schem
         success: errorList.length === 0, 
         count: successCount,
         totalRows: data.length,
-        errorCount: errorList.length
+        errorCount: errorList.length - skippedCount,
+        skippedCount: skippedCount
       });
       
       if (errorList.length === 0) {
@@ -215,11 +235,12 @@ export default function BulkUploadDialog({ open, onOpenChange, entityName, schem
                   {result.error ? (
                     `Error: ${result.error}`
                   ) : result.success ? (
-                    `Successfully uploaded ${result.count} of ${result.totalRows} records!`
+                    `Successfully uploaded ${result.count} of ${result.totalRows} records!${result.skippedCount > 0 ? ` (${result.skippedCount} skipped - duplicate codes)` : ''}`
                   ) : (
                     <div className="space-y-1">
                       <div>Uploaded {result.count} of {result.totalRows} records.</div>
-                      <div className="font-semibold text-rose-700">{result.errorCount} rows failed - download error file below for details.</div>
+                      {result.skippedCount > 0 && <div className="text-amber-700">{result.skippedCount} rows skipped (duplicate codes).</div>}
+                      {result.errorCount > 0 && <div className="font-semibold text-rose-700">{result.errorCount} rows failed - download error file below for details.</div>}
                     </div>
                   )}
                 </AlertDescription>
