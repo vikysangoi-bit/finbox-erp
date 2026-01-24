@@ -58,6 +58,15 @@ export default function Approvals() {
           approved_by: user?.email,
           approved_at: new Date().toISOString()
         });
+      } else if (request.entity_type === 'account_delete') {
+        await base44.entities.Account.update(request.entity_id, {
+          is_deleted: true,
+          deleted_by: user?.email,
+          deleted_on: new Date().toISOString()
+        });
+      } else if (request.entity_type === 'account_update') {
+        // Update logic would require storing pending changes in the approval request
+        alert('Account update approval - implement change application logic');
       }
 
       // Log audit

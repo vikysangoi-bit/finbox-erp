@@ -162,6 +162,9 @@ export default function ChartOfAccounts() {
   });
 
   const filteredAccounts = accounts.filter(account => {
+    // Filter out soft-deleted accounts
+    if (account.is_deleted) return false;
+    
     const matchesSearch = 
       account.code?.toLowerCase().includes(search.toLowerCase()) ||
       account.name?.toLowerCase().includes(search.toLowerCase());
@@ -227,46 +230,23 @@ export default function ChartOfAccounts() {
             visibleColumns={visibleColumns}
             onVisibilityChange={setVisibleColumns}
           />
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="border-slate-200">
-                <RefreshCw className="w-4 h-4 mr-2" />
-                Sync
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
-              <DropdownMenuItem onClick={() => setShowBulkUpload(true)}>
-                <Upload className="w-4 h-4 mr-2" />
-                Bulk Upload (CSV/Excel)
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setShowBulkDelete(true)} className="text-rose-600">
-                <Trash2 className="w-4 h-4 mr-2" />
-                Bulk Delete
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setShowGoogleSheetsImport(true)}>
-                <Download className="w-4 h-4 mr-2" />
-                Import from Google Sheets
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setShowGoogleSheetsExport(true)}>
-                <Sheet className="w-4 h-4 mr-2" />
-                Export to Google Sheets
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => {
-                const headers = ['code', 'name', 'type', 'category'];
-                const rows = filteredAccounts.map(a => [a.code, a.name, a.type, a.category]);
-                const csv = [headers, ...rows].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
-                const blob = new Blob([csv], { type: 'text/csv' });
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `chart_of_accounts_${new Date().toISOString().split('T')[0]}.csv`;
-                a.click();
-              }}>
-                <Download className="w-4 h-4 mr-2" />
-                Export to Excel
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <SyncDropdown
+            onBulkUpload={() => setShowBulkUpload(true)}
+            onBulkDelete={() => setShowBulkDelete(true)}
+            onGoogleSheetsImport={() => setShowGoogleSheetsImport(true)}
+            onGoogleSheetsExport={() => setShowGoogleSheetsExport(true)}
+            onExportToExcel={() => {
+              const headers = ['code', 'name', 'type', 'category'];
+              const rows = filteredAccounts.map(a => [a.code, a.name, a.type, a.category]);
+              const csv = [headers, ...rows].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
+              const blob = new Blob([csv], { type: 'text/csv' });
+              const url = window.URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = url;
+              a.download = `chart_of_accounts_${new Date().toISOString().split('T')[0]}.csv`;
+              a.click();
+            }}
+          />
           {selectedRows.length > 0 && (
             <Button variant="destructive" onClick={() => setShowBulkDeleteConfirm(true)}>
               <Trash2 className="w-4 h-4 mr-2" />
