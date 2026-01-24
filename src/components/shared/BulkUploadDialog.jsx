@@ -81,11 +81,21 @@ export default function BulkUploadDialog({ open, onOpenChange, entityName, schem
       const { file_url } = await base44.integrations.Core.UploadFile({ file });
       setProgress(30);
 
-      // Extract data from file
-      const extractResult = await base44.integrations.Core.ExtractDataFromUploadedFile({
-        file_url,
-        json_schema: schema
-      });
+      // Extract data from file - use custom function for Excel files
+      const isExcel = file.name.endsWith('.xlsx') || file.name.endsWith('.xls');
+      let extractResult;
+      
+      if (isExcel) {
+        extractResult = await base44.functions.parseExcelFile({
+          file_url,
+          json_schema: schema
+        });
+      } else {
+        extractResult = await base44.integrations.Core.ExtractDataFromUploadedFile({
+          file_url,
+          json_schema: schema
+        });
+      }
 
       setProgress(60);
 
