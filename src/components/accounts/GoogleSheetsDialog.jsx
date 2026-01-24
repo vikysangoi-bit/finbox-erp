@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -141,31 +142,43 @@ export default function GoogleSheetsDialog({ open, onOpenChange, mode = 'import'
           </Alert>
 
           <div className="space-y-2">
-              <Label htmlFor="spreadsheet">Select Spreadsheet *</Label>
-              <Select 
-                value={spreadsheetId} 
-                onValueChange={setSpreadsheetId}
-                disabled={processing || loadingSpreadsheets}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder={loadingSpreadsheets ? "Loading..." : "Select a spreadsheet"} />
-                </SelectTrigger>
-                <SelectContent>
-                  {loadingSpreadsheets ? (
-                    <div className="flex items-center justify-center p-2">
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                    </div>
-                  ) : spreadsheets.length === 0 ? (
-                    <div className="p-2 text-sm text-slate-500">No spreadsheets found</div>
-                  ) : (
-                    spreadsheets.map((sheet) => (
+              <Label htmlFor="spreadsheet">Spreadsheet *</Label>
+              {spreadsheets.length > 0 ? (
+                <Select 
+                  value={spreadsheetId} 
+                  onValueChange={setSpreadsheetId}
+                  disabled={processing || loadingSpreadsheets}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a spreadsheet" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {spreadsheets.map((sheet) => (
                       <SelectItem key={sheet.id} value={sheet.id}>
                         {sheet.name}
                       </SelectItem>
-                    ))
-                  )}
-                </SelectContent>
-              </Select>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : (
+                <>
+                  <Input
+                    id="spreadsheetId"
+                    placeholder="Paste spreadsheet ID or URL"
+                    value={spreadsheetId}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      // Extract ID from URL if full URL is pasted
+                      const match = value.match(/\/d\/([a-zA-Z0-9-_]+)/);
+                      setSpreadsheetId(match ? match[1] : value);
+                    }}
+                    disabled={processing}
+                  />
+                  <p className="text-xs text-slate-500">
+                    Find this in your Google Sheet URL after /d/
+                  </p>
+                </>
+              )}
             </div>
 
             <div className="space-y-2">
