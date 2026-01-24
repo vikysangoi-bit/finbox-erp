@@ -2,15 +2,16 @@ import React from 'react';
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { format } from "date-fns";
-import { CheckCircle, XCircle, FileText, Package, Clock } from "lucide-react";
+import { CheckCircle, XCircle, FileText, Package, Clock, MoreHorizontal, Eye, Pencil, Trash2 } from "lucide-react";
 
 const entityIcons = {
   journal_entry: FileText,
   inventory_transaction: Package,
 };
 
-export default function ApprovalCard({ request, onApprove, onReject, isLoading }) {
+export default function ApprovalCard({ request, onApprove, onReject, isLoading, onView, onEdit, onDelete }) {
   const Icon = entityIcons[request.entity_type] || FileText;
   
   return (
@@ -21,14 +22,43 @@ export default function ApprovalCard({ request, onApprove, onReject, isLoading }
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-4">
-            <div>
+            <div className="flex-1">
               <h4 className="font-semibold text-slate-900 truncate">{request.title}</h4>
               <p className="text-sm text-slate-500 mt-1">{request.description}</p>
             </div>
-            <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200 flex items-center gap-1">
-              <Clock className="w-3 h-3" />
-              Pending
-            </Badge>
+            <div className="flex items-center gap-2">
+              <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200 flex items-center gap-1">
+                <Clock className="w-3 h-3" />
+                Pending
+              </Badge>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-8 w-8">
+                    <MoreHorizontal className="w-4 h-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  {onView && (
+                    <DropdownMenuItem onClick={() => onView(request)}>
+                      <Eye className="w-4 h-4 mr-2" />
+                      View
+                    </DropdownMenuItem>
+                  )}
+                  {onEdit && (
+                    <DropdownMenuItem onClick={() => onEdit(request)}>
+                      <Pencil className="w-4 h-4 mr-2" />
+                      Edit
+                    </DropdownMenuItem>
+                  )}
+                  {onDelete && (
+                    <DropdownMenuItem onClick={() => onDelete(request)} className="text-rose-600">
+                      <Trash2 className="w-4 h-4 mr-2" />
+                      Delete
+                    </DropdownMenuItem>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           </div>
           
           <div className="flex flex-wrap gap-4 mt-4 text-sm text-slate-600">
