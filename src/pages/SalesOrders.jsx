@@ -22,6 +22,11 @@ export default function SalesOrders() {
   const [deleteOrder, setDeleteOrder] = useState(null);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [serviceFilter, setServiceFilter] = useState('all');
+  const [clientFilter, setClientFilter] = useState('all');
+  const [salesPersonFilter, setSalesPersonFilter] = useState('all');
+  const [deliveryMonthFilter, setDeliveryMonthFilter] = useState('all');
+  const [orderMonthFilter, setOrderMonthFilter] = useState('all');
 
   const queryClient = useQueryClient();
 
@@ -150,12 +155,34 @@ export default function SalesOrders() {
   const filteredOrders = orders.filter(order => {
     if (order.is_deleted) return false;
     
+    // Auto-mark as expired if past end date
+    const now = new Date();
+    const endDate = order.endDate ? new Date(order.endDate) : null;
+    const isExpired = endDate && endDate < now && order.status === 'active';
+    const displayStatus = isExpired ? 'expired' : order.status;
+    
     const matchesSearch = 
       order.orderFormNo?.toLowerCase().includes(search.toLowerCase()) ||
       order.customerCode?.toLowerCase().includes(search.toLowerCase()) ||
       order.customerName?.toLowerCase().includes(search.toLowerCase());
-    const matchesStatus = statusFilter === 'all' || order.status === statusFilter;
-    return matchesSearch && matchesStatus;
+    const matchesStatus = statusFilter === 'all' || displayStatus === statusFilter;
+    const matchesService = serviceFilter === 'all' || order.serviceName === serviceFilter;
+    const matchesClient = clientFilter === 'all' || order.customerName === clientFilter;
+    const matchesSalesPerson = salesPersonFilter === 'all' || order.salesPersonName === salesPersonFilter;
+    
+    const matchesDeliveryMonth = deliveryMonthFilter === 'all' || (() => {
+      if (!order.expectedDelivery) return false;
+      const deliveryDate = new Date(order.expectedDelivery);
+      return `${deliveryDate.getFullYear()}-${String(deliveryDate.getMonth() + 1).padStart(2, '0')}` === deliveryMonthFilter;
+    })();
+    
+    const matchesOrderMonth = orderMonthFilter === 'all' || (() => {
+      if (!order.startDate) return false;
+      const startDate = new Date(order.startDate);
+      return `${startDate.getFullYear()}-${String(startDate.getMonth() + 1).padStart(2, '0')}` === orderMonthFilter;
+    })();
+    
+    return matchesSearch && matchesStatus && matchesService && matchesClient && matchesSalesPerson && matchesDeliveryMonth && matchesOrderMonth;
   });
 
   const columns = [
@@ -164,7 +191,12 @@ export default function SalesOrders() {
     { id: 'customerName', header: "Customer Name", accessor: "customerName" },
     { id: 'orderFormValue', header: "Value", render: (row) => <span className="font-medium">{(row.orderFormValue || 0).toLocaleString('en-US', { style: 'currency', currency: row.currency || 'USD' })}</span> },
     { id: 'expectedDelivery', header: "Expected Delivery", accessor: "expectedDelivery" },
-    { id: 'status', header: "Status", render: (row) => <StatusBadge status={row.status} /> },
+    { id: 'status', header: "Status", render: (row) => {
+      const now = new Date();
+      const endDate = row.endDate ? new Date(row.endDate) : null;
+      const isExpired = endDate && endDate < now && row.status === 'active';
+      return <StatusBadge status={isExpired ? 'expired' : row.status} />;
+    }},
     {
       id: 'actions',
       header: "",
@@ -245,6 +277,66 @@ export default function SalesOrders() {
             searchPlaceholder="Search by order no, customer..."
             filters={[
               {
+                key: 'service',
+                value: serviceFilter,
+                onChange: setServiceFilter,
+                placeholder: 'Service',
+                options: [
+                  { value: 'DaaS', label: 'DaaS' },
+                  { value: 'GaaS', label: 'GaaS' }
+                ]
+              },
+              {
+                key: 'client',
+                value: clientFilter,
+                onChange: setClientFilter,
+                placeholder: 'Client',
+                options: [...new Set(orders.map(o => o.customerName).filter(Boolean))].map(name => ({
+                  value: name,
+                  label: name
+                }))
+              },
+              {
+                key: 'salesPerson',
+                value: salesPersonFilter,
+                onChange: setSalesPersonFilter,
+                placeholder: 'Sales Person',
+                options: [...new Set(orders.map(o => o.salesPersonName).filter(Boolean))].map(name => ({
+                  value: name,
+                  label: name
+                }))
+              },
+              {
+                key: 'deliveryMonth',
+                value: deliveryMonthFilter,
+                onChange: setDeliveryMonthFilter,
+                placeholder: 'Delivery Month',
+                options: [...new Set(orders.map(o => {
+                  if (!o.expectedDelivery) return null;
+                  const date = new Date(o.expectedDelivery);
+                  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+                }).filter(Boolean))].sort().reverse().map(month => {
+                  const [year, m] = month.split('-');
+                  const monthName = new Date(year, parseInt(m) - 1).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+                  return { value: month, label: monthName };
+                })
+              },
+              {
+                key: 'orderMonth',
+                value: orderMonthFilter,
+                onChange: setOrderMonthFilter,
+                placeholder: 'Order Month',
+                options: [...new Set(orders.map(o => {
+                  if (!o.startDate) return null;
+                  const date = new Date(o.startDate);
+                  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+                }).filter(Boolean))].sort().reverse().map(month => {
+                  const [year, m] = month.split('-');
+                  const monthName = new Date(year, parseInt(m) - 1).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+                  return { value: month, label: monthName };
+                })
+              },
+              {
                 key: 'status',
                 value: statusFilter,
                 onChange: setStatusFilter,
@@ -254,7 +346,8 @@ export default function SalesOrders() {
                   { value: 'pending_approval', label: 'Pending Approval' },
                   { value: 'approved', label: 'Approved' },
                   { value: 'active', label: 'Active' },
-                  { value: 'completed', label: 'Completed' },
+                  { value: 'signed', label: 'Signed' },
+                  { value: 'expired', label: 'Expired' },
                   { value: 'cancelled', label: 'Cancelled' }
                 ]
               }

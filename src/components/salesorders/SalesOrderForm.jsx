@@ -355,8 +355,6 @@ export default function SalesOrderForm({ open, onOpenChange, order, accounts = [
                   <SelectContent>
                     <SelectItem value="DaaS">DaaS</SelectItem>
                     <SelectItem value="GaaS">GaaS</SelectItem>
-                    <SelectItem value="Snap">Snap</SelectItem>
-                    <SelectItem value="AI Photoshoot">AI Photoshoot</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -532,7 +530,8 @@ export default function SalesOrderForm({ open, onOpenChange, order, accounts = [
                   <SelectItem value="pending_approval">Pending Approval</SelectItem>
                   <SelectItem value="approved">Approved</SelectItem>
                   <SelectItem value="active">Active</SelectItem>
-                  <SelectItem value="completed">Completed</SelectItem>
+                  <SelectItem value="signed">Signed</SelectItem>
+                  <SelectItem value="expired">Expired</SelectItem>
                   <SelectItem value="cancelled">Cancelled</SelectItem>
                 </SelectContent>
               </Select>
