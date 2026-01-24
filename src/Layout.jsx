@@ -34,6 +34,27 @@ import {
 const navigation = [
   { name: 'Dashboard', icon: LayoutDashboard, page: 'Dashboard' },
   { 
+    name: 'Order to Cash', 
+    icon: ArrowRightLeft, 
+    children: [
+      { name: 'Sales Orders', page: 'SalesOrders' },
+      { name: 'Invoices', page: 'Invoices' },
+      { name: 'Credit Notes', page: 'CreditNotes' },
+      { name: 'Receipts', page: 'Receipts' },
+    ]
+  },
+  { 
+    name: 'Procure to Pay', 
+    icon: FileText, 
+    children: [
+      { name: 'Purchase Orders', page: 'PurchaseOrders' },
+      { name: 'Goods Receipts', page: 'GoodsReceipts' },
+      { name: 'Vendor Bills', page: 'VendorBills' },
+      { name: 'Debit Notes', page: 'DebitNotes' },
+      { name: 'Payments', page: 'Payments' },
+    ]
+  },
+  { 
     name: 'Accounting', 
     icon: BookOpen, 
     children: [
@@ -47,15 +68,6 @@ const navigation = [
     children: [
       { name: 'Items', page: 'Inventory' },
       { name: 'Transactions', page: 'InventoryTransactions' },
-    ]
-  },
-  { 
-    name: 'Procurement', 
-    icon: FileText, 
-    children: [
-      { name: 'Suppliers', page: 'Suppliers' },
-      { name: 'Purchase Orders', page: 'PurchaseOrders' },
-      { name: 'Goods Receipts', page: 'GoodsReceipts' },
     ]
   },
   { 

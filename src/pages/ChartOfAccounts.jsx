@@ -221,17 +221,6 @@ export default function ChartOfAccounts() {
           subtitle="Manage your accounting structure"
           onAdd={() => { setEditingAccount(null); setViewingAccount(null); setShowForm(true); }}
           addLabel="New Account"
-          onExport={() => {
-            const headers = ['code', 'name', 'type', 'category'];
-            const rows = filteredAccounts.map(a => [a.code, a.name, a.type, a.category]);
-            const csv = [headers, ...rows].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
-            const blob = new Blob([csv], { type: 'text/csv' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `chart_of_accounts_${new Date().toISOString().split('T')[0]}.csv`;
-            a.click();
-          }}
         >
           <ColumnSelector
             columns={allColumns.filter(c => c.id !== 'actions')}
@@ -261,6 +250,20 @@ export default function ChartOfAccounts() {
               <DropdownMenuItem onClick={() => setShowGoogleSheetsExport(true)}>
                 <Sheet className="w-4 h-4 mr-2" />
                 Export to Google Sheets
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => {
+                const headers = ['code', 'name', 'type', 'category'];
+                const rows = filteredAccounts.map(a => [a.code, a.name, a.type, a.category]);
+                const csv = [headers, ...rows].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
+                const blob = new Blob([csv], { type: 'text/csv' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `chart_of_accounts_${new Date().toISOString().split('T')[0]}.csv`;
+                a.click();
+              }}>
+                <Download className="w-4 h-4 mr-2" />
+                Export to Excel
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
