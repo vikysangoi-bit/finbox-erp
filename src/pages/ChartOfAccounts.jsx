@@ -261,12 +261,12 @@ export default function ChartOfAccounts() {
             }
           }}
           templateData={[
-            'code,name,type,category,brand,alias,currency,openingBalance,city,state,country,pincode,placeOfSupply,gstId,panId,tanId,vatId,active',
-            '1000,Cash,asset,current_asset,ABC Corp,Cash Account,USD,10000,Mumbai,Maharashtra,India,400001,Maharashtra,22AAAAA0000A1Z5,ABCDE1234F,ABCD12345E,GB123456789,true',
-            '2000,Accounts Payable,liability,current_liability,XYZ Ltd,AP Account,USD,0,Delhi,Delhi,India,110001,Delhi,,,,,true',
-            '3000,Sales Revenue,revenue,operating_revenue,,,USD,0,,,India,,,,,,true',
-            '4000,Cost of Goods Sold,expense,cost_of_goods,,,USD,0,,,India,,,,,,true',
-            '5000,Operating Expenses,expense,operating_expense,,,USD,0,,,India,,,,,,true'
+            'code,name,type,category,brand,alias,parentAccount,supplierCategory,currency,openingBalance,description,contactType,contactPerson,phone,email,address,city,state,country,region,pincode,placeOfSupply,gstId,panId,tanId,vatId,paymentTerms,creditLimit,active',
+            '1000,Cash,asset,current_asset,ABC Corp,Cash Account,,,USD,10000,Main cash account,business,John Doe,+919876543210,john@example.com,123 Business St,Mumbai,Maharashtra,India,Western India,400001,Maharashtra,22AAAAA0000A1Z5,ABCDE1234F,ABCD12345E,GB123456789,net_30,50000,true',
+            '2000,Accounts Payable,liability,current_liability,XYZ Ltd,AP Account,,,USD,0,Supplier payables,finance,Jane Smith,+919876543211,jane@example.com,456 Finance Ave,Delhi,Delhi,India,Northern India,110001,Delhi,,,,,net_30,0,true',
+            '3000,Sales Revenue,revenue,operating_revenue,,,,,USD,0,Sales income,,,,,,,,India,,,,,,,,true',
+            '4000,Cost of Goods Sold,expense,cost_of_goods,,,fabric,,USD,0,Material costs,,,,,,,,India,,,,,,,,true',
+            '5000,Operating Expenses,expense,operating_expense,,,,,USD,0,Daily operations,,,,,,,,India,,,,,,,,true'
           ]}
           onSuccess={() => queryClient.invalidateQueries({ queryKey: ['accounts'] })}
         />
