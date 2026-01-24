@@ -8,7 +8,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { base44 } from "@/api/base44Client";
 import GaasLineItemsUpload from "./GaasLineItemsUpload";
-import { Upload, Trash2 } from "lucide-react";
+import SalesOrderPrintView from "./SalesOrderPrintView";
+import { Upload, Trash2, Eye } from "lucide-react";
 
 export default function SalesOrderForm({ open, onOpenChange, order, accounts = [], onSave, isLoading, viewMode = false }) {
   const [form, setForm] = useState({
@@ -48,6 +49,7 @@ export default function SalesOrderForm({ open, onOpenChange, order, accounts = [
   });
   
   const [showGaasUpload, setShowGaasUpload] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
 
   useEffect(() => {
     if (order) {
@@ -541,9 +543,15 @@ export default function SalesOrderForm({ open, onOpenChange, order, accounts = [
                 {viewMode ? 'Close' : 'Cancel'}
               </Button>
               {!viewMode && (
-                <Button type="submit" disabled={isLoading} className="bg-slate-900 hover:bg-slate-800">
-                  {isLoading ? 'Saving...' : (order ? 'Update Order Form' : 'Create Order Form')}
-                </Button>
+                <>
+                  <Button type="button" variant="outline" onClick={() => setShowPreview(true)} className="gap-2">
+                    <Eye className="w-4 h-4" />
+                    Preview
+                  </Button>
+                  <Button type="submit" disabled={isLoading} className="bg-slate-900 hover:bg-slate-800">
+                    {isLoading ? 'Saving...' : (order ? 'Update Order Form' : 'Create Order Form')}
+                  </Button>
+                </>
               )}
             </div>
           </DialogFooter>
@@ -555,6 +563,12 @@ export default function SalesOrderForm({ open, onOpenChange, order, accounts = [
           onSuccess={(items) => {
             setForm({ ...form, gaasLineItems: [...(form.gaasLineItems || []), ...items] });
           }}
+        />
+
+        <SalesOrderPrintView
+          open={showPreview}
+          onOpenChange={setShowPreview}
+          order={form}
         />
       </DialogContent>
     </Dialog>
