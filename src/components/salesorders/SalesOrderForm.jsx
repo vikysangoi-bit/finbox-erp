@@ -146,8 +146,8 @@ export default function SalesOrderForm({ open, onOpenChange, order, accounts = [
         
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Section A: Client & Order Form Details */}
-          <div className="border-2 border-slate-900 rounded-lg p-6 space-y-4">
-            <h3 className="text-lg font-bold text-slate-900 pb-2 border-b-2 border-slate-900">
+          <div className="border-2 border-[#0f172a] rounded-lg p-6 space-y-4">
+            <h3 className="text-lg font-bold text-slate-900 pb-2 border-b-2 border-[#0f172a]">
               A. Client & Order Form Details
             </h3>
 
@@ -342,8 +342,8 @@ export default function SalesOrderForm({ open, onOpenChange, order, accounts = [
           </div>
 
           {/* Section B: Service Details */}
-          <div className="border-2 border-slate-900 rounded-lg p-6 space-y-4">
-            <div className="pb-2 border-b-2 border-slate-900">
+          <div className="border-2 border-[#0f172a] rounded-lg p-6 space-y-4">
+            <div className="pb-2 border-b-2 border-[#0f172a]">
               <h3 className="text-lg font-bold text-slate-900">B. Service Details</h3>
             </div>
 
