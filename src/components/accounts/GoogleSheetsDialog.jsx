@@ -1,21 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Progress } from "@/components/ui/progress";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Sheet, Upload, Download, CheckCircle, AlertCircle, FileSpreadsheet, Loader2 } from "lucide-react";
+import { Sheet, Upload, Download, CheckCircle, AlertCircle, FileSpreadsheet } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 
 export default function GoogleSheetsDialog({ open, onOpenChange, mode = 'import', onSuccess }) {
-  const [spreadsheets, setSpreadsheets] = useState([]);
-  const [sheets, setSheets] = useState([]);
-  const [loadingSpreadsheets, setLoadingSpreadsheets] = useState(false);
-  const [loadingSheets, setLoadingSheets] = useState(false);
   const [spreadsheetId, setSpreadsheetId] = useState('');
-  const [sheetName, setSheetName] = useState('');
+  const [sheetName, setSheetName] = useState('Sheet1');
   const [clearExisting, setClearExisting] = useState(false);
   const [processing, setProcessing] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -94,78 +89,40 @@ export default function GoogleSheetsDialog({ open, onOpenChange, mode = 'import'
             <FileSpreadsheet className="h-4 w-4" />
             <AlertDescription>
               {mode === 'import' 
-                ? 'Import accounts from a Google Sheet. Make sure the sheet has the required columns (code, name, type, category).'
-                : 'Export all accounts to a Google Sheet. This will create a formatted spreadsheet with all account data.'}
+                ? 'Import accounts from a Google Sheet. Make sure the sheet is shared with your account and has the required columns (code, name, type, category).'
+                : 'Export all accounts to a Google Sheet. Make sure the sheet is shared with your account with edit permissions.'}
             </AlertDescription>
           </Alert>
 
           <div className="space-y-2">
-              <Label htmlFor="spreadsheet">Spreadsheet *</Label>
-              {spreadsheets.length > 0 ? (
-                <Select 
-                  value={spreadsheetId} 
-                  onValueChange={setSpreadsheetId}
-                  disabled={processing || loadingSpreadsheets}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a spreadsheet" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {spreadsheets.map((sheet) => (
-                      <SelectItem key={sheet.id} value={sheet.id}>
-                        {sheet.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              ) : (
-                <>
-                  <Input
-                    id="spreadsheetId"
-                    placeholder="Paste spreadsheet ID or URL"
-                    value={spreadsheetId}
-                    onChange={(e) => {
-                      const value = e.target.value;
-                      // Extract ID from URL if full URL is pasted
-                      const match = value.match(/\/d\/([a-zA-Z0-9-_]+)/);
-                      setSpreadsheetId(match ? match[1] : value);
-                    }}
-                    disabled={processing}
-                  />
-                  <p className="text-xs text-slate-500">
-                    Find this in your Google Sheet URL after /d/
-                  </p>
-                </>
-              )}
-            </div>
+            <Label htmlFor="spreadsheetId">Spreadsheet ID *</Label>
+            <Input
+              id="spreadsheetId"
+              placeholder="Paste spreadsheet ID or URL"
+              value={spreadsheetId}
+              onChange={(e) => {
+                const value = e.target.value;
+                // Extract ID from URL if full URL is pasted
+                const match = value.match(/\/d\/([a-zA-Z0-9-_]+)/);
+                setSpreadsheetId(match ? match[1] : value);
+              }}
+              disabled={processing}
+            />
+            <p className="text-xs text-slate-500">
+              You can paste either the spreadsheet ID or the full URL
+            </p>
+          </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="sheetName">Select Sheet *</Label>
-              <Select 
-                value={sheetName} 
-                onValueChange={setSheetName}
-                disabled={processing || loadingSheets || !spreadsheetId}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder={loadingSheets ? "Loading..." : spreadsheetId ? "Select a sheet" : "First select a spreadsheet"} />
-                </SelectTrigger>
-                <SelectContent>
-                  {loadingSheets ? (
-                    <div className="flex items-center justify-center p-2">
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                    </div>
-                  ) : sheets.length === 0 ? (
-                    <div className="p-2 text-sm text-slate-500">No sheets found</div>
-                  ) : (
-                    sheets.map((sheet) => (
-                      <SelectItem key={sheet} value={sheet}>
-                        {sheet}
-                      </SelectItem>
-                    ))
-                  )}
-                </SelectContent>
-              </Select>
-            </div>
+          <div className="space-y-2">
+            <Label htmlFor="sheetName">Sheet Name</Label>
+            <Input
+              id="sheetName"
+              placeholder="Sheet1"
+              value={sheetName}
+              onChange={(e) => setSheetName(e.target.value)}
+              disabled={processing}
+            />
+          </div>
 
           {mode === 'export' && (
             <div className="flex items-center space-x-2">
