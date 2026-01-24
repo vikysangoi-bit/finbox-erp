@@ -566,7 +566,7 @@ export default function AccountForm({ open, onOpenChange, account, accounts = []
               {viewMode ? 'Close' : 'Cancel'}
             </Button>
             {!viewMode && (
-              <Button type="submit" disabled={isLoading} className="bg-slate-900 hover:bg-slate-800">
+              <Button type="submit" disabled={isLoading}>
                 {isLoading ? 'Saving...' : (account ? 'Update' : 'Create')}
               </Button>
             )}
