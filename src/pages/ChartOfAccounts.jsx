@@ -12,7 +12,7 @@ import BulkDeleteDialog from "@/components/shared/BulkDeleteDialog";
 import GoogleSheetsDialog from "@/components/accounts/GoogleSheetsDialog";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, Pencil, Trash2, BookOpen, Upload, Sheet, RefreshCw, Download } from "lucide-react";
+import { MoreHorizontal, Pencil, Trash2, BookOpen, Upload, Sheet, RefreshCw, Download, Eye } from "lucide-react";
 import ConfirmDialog from "@/components/shared/ConfirmDialog";
 
 export default function ChartOfAccounts() {
@@ -22,6 +22,7 @@ export default function ChartOfAccounts() {
   const [showGoogleSheetsImport, setShowGoogleSheetsImport] = useState(false);
   const [showGoogleSheetsExport, setShowGoogleSheetsExport] = useState(false);
   const [editingAccount, setEditingAccount] = useState(null);
+  const [viewingAccount, setViewingAccount] = useState(null);
   const [deleteAccount, setDeleteAccount] = useState(null);
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState('all');
@@ -126,7 +127,11 @@ export default function ChartOfAccounts() {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => { setEditingAccount(row); setShowForm(true); }}>
+            <DropdownMenuItem onClick={() => { setViewingAccount(row); setShowForm(true); }}>
+              <Eye className="w-4 h-4 mr-2" />
+              View
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => { setEditingAccount(row); setViewingAccount(null); setShowForm(true); }}>
               <Pencil className="w-4 h-4 mr-2" />
               Edit
             </DropdownMenuItem>
@@ -181,7 +186,7 @@ export default function ChartOfAccounts() {
         <PageHeader 
           title="Chart of Accounts" 
           subtitle="Manage your accounting structure"
-          onAdd={() => { setEditingAccount(null); setShowForm(true); }}
+          onAdd={() => { setEditingAccount(null); setViewingAccount(null); setShowForm(true); }}
           addLabel="New Account"
           onExport={() => {
             const headers = ['code', 'name', 'type', 'category'];
@@ -273,11 +278,18 @@ export default function ChartOfAccounts() {
 
         <AccountForm
           open={showForm}
-          onOpenChange={setShowForm}
-          account={editingAccount}
+          onOpenChange={(open) => {
+            setShowForm(open);
+            if (!open) {
+              setViewingAccount(null);
+              setEditingAccount(null);
+            }
+          }}
+          account={viewingAccount || editingAccount}
           accounts={accounts}
           onSave={handleSave}
           isLoading={createMutation.isPending || updateMutation.isPending}
+          viewMode={!!viewingAccount}
         />
 
         <ConfirmDialog

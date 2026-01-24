@@ -38,7 +38,7 @@ const categoryOptions = {
   ],
 };
 
-export default function AccountForm({ open, onOpenChange, account, accounts = [], onSave, isLoading }) {
+export default function AccountForm({ open, onOpenChange, account, accounts = [], onSave, isLoading, viewMode = false }) {
   const [form, setForm] = useState({
     code: '',
     name: '',
@@ -117,7 +117,9 @@ export default function AccountForm({ open, onOpenChange, account, accounts = []
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSave(form);
+    if (!viewMode) {
+      onSave(form);
+    }
   };
 
   const parentAccounts = accounts.filter(a => a.type === form.type && a.id !== account?.id);
@@ -126,7 +128,7 @@ export default function AccountForm({ open, onOpenChange, account, accounts = []
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{account ? 'Edit Account' : 'New Account'}</DialogTitle>
+          <DialogTitle>{viewMode ? 'View Account' : (account ? 'Edit Account' : 'New Account')}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
@@ -138,6 +140,7 @@ export default function AccountForm({ open, onOpenChange, account, accounts = []
                 onChange={(e) => setForm({ ...form, code: e.target.value })}
                 placeholder="e.g., 1001"
                 required
+                disabled={viewMode}
               />
             </div>
             <div className="space-y-2">
@@ -148,6 +151,7 @@ export default function AccountForm({ open, onOpenChange, account, accounts = []
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
                 placeholder="e.g., Cash in Bank"
                 required
+                disabled={viewMode}
               />
             </div>
           </div>
@@ -160,6 +164,7 @@ export default function AccountForm({ open, onOpenChange, account, accounts = []
                 value={form.brand || ''}
                 onChange={(e) => setForm({ ...form, brand: e.target.value })}
                 placeholder="e.g., ABC Corporation"
+                disabled={viewMode}
               />
             </div>
             <div className="space-y-2">
@@ -169,6 +174,7 @@ export default function AccountForm({ open, onOpenChange, account, accounts = []
                 value={form.alias || ''}
                 onChange={(e) => setForm({ ...form, alias: e.target.value })}
                 placeholder="e.g., Short name"
+                disabled={viewMode}
               />
             </div>
           </div>
@@ -179,6 +185,7 @@ export default function AccountForm({ open, onOpenChange, account, accounts = []
               <Select 
                 value={form.type} 
                 onValueChange={(v) => setForm({ ...form, type: v, category: categoryOptions[v][0].value })}
+                disabled={viewMode}
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -192,7 +199,7 @@ export default function AccountForm({ open, onOpenChange, account, accounts = []
             </div>
             <div className="space-y-2">
               <Label>Category *</Label>
-              <Select value={form.category} onValueChange={(v) => setForm({ ...form, category: v })}>
+              <Select value={form.category} onValueChange={(v) => setForm({ ...form, category: v })} disabled={viewMode}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -214,13 +221,14 @@ export default function AccountForm({ open, onOpenChange, account, accounts = []
                   setAccountLevel(v);
                   if (v === 'main') setForm({ ...form, parentAccount: '' });
                 }}
+                disabled={viewMode}
               >
                 <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="main" id="main" />
+                  <RadioGroupItem value="main" id="main" disabled={viewMode} />
                   <Label htmlFor="main" className="font-normal cursor-pointer">Main Account</Label>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="sub" id="sub" />
+                  <RadioGroupItem value="sub" id="sub" disabled={viewMode} />
                   <Label htmlFor="sub" className="font-normal cursor-pointer">Sub-Category</Label>
                 </div>
               </RadioGroup>
@@ -232,6 +240,7 @@ export default function AccountForm({ open, onOpenChange, account, accounts = []
                 <Select 
                   value={form.parentAccount || ''} 
                   onValueChange={(v) => setForm({ ...form, parentAccount: v })}
+                  disabled={viewMode}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select parent account" />
@@ -251,6 +260,7 @@ export default function AccountForm({ open, onOpenChange, account, accounts = []
                 value={form.currency} 
                 onChange={(v) => setForm({ ...form, currency: v })}
                 className="w-full"
+                disabled={viewMode}
               />
             </div>
           </div>
@@ -263,6 +273,7 @@ export default function AccountForm({ open, onOpenChange, account, accounts = []
               step="0.01"
               value={form.openingBalance}
               onChange={(e) => setForm({ ...form, openingBalance: parseFloat(e.target.value) || 0 })}
+              disabled={viewMode}
             />
           </div>
 
@@ -273,6 +284,7 @@ export default function AccountForm({ open, onOpenChange, account, accounts = []
               value={form.description || ''}
               onChange={(e) => setForm({ ...form, description: e.target.value })}
               rows={2}
+              disabled={viewMode}
             />
           </div>
 
@@ -285,6 +297,7 @@ export default function AccountForm({ open, onOpenChange, account, accounts = []
                 <Select 
                   value={form.contactType || 'none'} 
                   onValueChange={(v) => setForm({ ...form, contactType: v === 'none' ? '' : v })}
+                  disabled={viewMode}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select type" />
@@ -304,6 +317,7 @@ export default function AccountForm({ open, onOpenChange, account, accounts = []
                   value={form.contactPerson || ''}
                   onChange={(e) => setForm({ ...form, contactPerson: e.target.value })}
                   placeholder="e.g., John Doe"
+                  disabled={viewMode}
                 />
               </div>
             </div>
@@ -316,6 +330,7 @@ export default function AccountForm({ open, onOpenChange, account, accounts = []
                   value={form.phone || ''}
                   onChange={(e) => setForm({ ...form, phone: e.target.value })}
                   placeholder="e.g., +1234567890"
+                  disabled={viewMode}
                 />
               </div>
               <div className="space-y-2">
@@ -326,6 +341,7 @@ export default function AccountForm({ open, onOpenChange, account, accounts = []
                   value={form.email || ''}
                   onChange={(e) => setForm({ ...form, email: e.target.value })}
                   placeholder="e.g., contact@example.com"
+                  disabled={viewMode}
                 />
               </div>
             </div>
@@ -338,6 +354,7 @@ export default function AccountForm({ open, onOpenChange, account, accounts = []
                 onChange={(e) => setForm({ ...form, address: e.target.value })}
                 rows={2}
                 placeholder="Enter address"
+                disabled={viewMode}
               />
             </div>
 
@@ -349,6 +366,7 @@ export default function AccountForm({ open, onOpenChange, account, accounts = []
                   value={form.city || ''}
                   onChange={(e) => setForm({ ...form, city: e.target.value })}
                   placeholder="e.g., Mumbai"
+                  disabled={viewMode}
                 />
               </div>
               <div className="space-y-2">
@@ -358,6 +376,7 @@ export default function AccountForm({ open, onOpenChange, account, accounts = []
                   value={form.state || ''}
                   onChange={(e) => setForm({ ...form, state: e.target.value })}
                   placeholder="e.g., Maharashtra"
+                  disabled={viewMode}
                 />
               </div>
             </div>
@@ -370,6 +389,7 @@ export default function AccountForm({ open, onOpenChange, account, accounts = []
                   value={form.country || ''}
                   onChange={(e) => setForm({ ...form, country: e.target.value })}
                   placeholder="e.g., India"
+                  disabled={viewMode}
                 />
               </div>
               <div className="space-y-2">
@@ -379,6 +399,7 @@ export default function AccountForm({ open, onOpenChange, account, accounts = []
                   value={form.region || ''}
                   onChange={(e) => setForm({ ...form, region: e.target.value })}
                   placeholder="e.g., Western India"
+                  disabled={viewMode}
                 />
               </div>
             </div>
@@ -391,6 +412,7 @@ export default function AccountForm({ open, onOpenChange, account, accounts = []
                   value={form.pincode || ''}
                   onChange={(e) => setForm({ ...form, pincode: e.target.value })}
                   placeholder="e.g., 400001"
+                  disabled={viewMode}
                 />
               </div>
               <div className="space-y-2">
@@ -400,6 +422,7 @@ export default function AccountForm({ open, onOpenChange, account, accounts = []
                   value={form.placeOfSupply || ''}
                   onChange={(e) => setForm({ ...form, placeOfSupply: e.target.value })}
                   placeholder="e.g., Maharashtra"
+                  disabled={viewMode}
                 />
               </div>
             </div>
@@ -414,6 +437,7 @@ export default function AccountForm({ open, onOpenChange, account, accounts = []
                 <Select 
                   value={form.paymentTerms || 'none'} 
                   onValueChange={(v) => setForm({ ...form, paymentTerms: v === 'none' ? '' : v })}
+                  disabled={viewMode}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select payment terms" />
@@ -440,6 +464,7 @@ export default function AccountForm({ open, onOpenChange, account, accounts = []
                   value={form.creditLimit || 0}
                   onChange={(e) => setForm({ ...form, creditLimit: parseFloat(e.target.value) || 0 })}
                   placeholder="0.00"
+                  disabled={viewMode}
                 />
               </div>
             </div>
@@ -451,6 +476,7 @@ export default function AccountForm({ open, onOpenChange, account, accounts = []
                 value={form.taxId || ''}
                 onChange={(e) => setForm({ ...form, taxId: e.target.value })}
                 placeholder="e.g., 12-3456789"
+                disabled={viewMode}
               />
             </div>
 
@@ -462,6 +488,7 @@ export default function AccountForm({ open, onOpenChange, account, accounts = []
                   value={form.gstId || ''}
                   onChange={(e) => setForm({ ...form, gstId: e.target.value })}
                   placeholder="e.g., 22AAAAA0000A1Z5"
+                  disabled={viewMode}
                 />
               </div>
               <div className="space-y-2">
@@ -471,6 +498,7 @@ export default function AccountForm({ open, onOpenChange, account, accounts = []
                   value={form.panId || ''}
                   onChange={(e) => setForm({ ...form, panId: e.target.value })}
                   placeholder="e.g., ABCDE1234F"
+                  disabled={viewMode}
                 />
               </div>
             </div>
@@ -483,6 +511,7 @@ export default function AccountForm({ open, onOpenChange, account, accounts = []
                   value={form.tanId || ''}
                   onChange={(e) => setForm({ ...form, tanId: e.target.value })}
                   placeholder="e.g., ABCD12345E"
+                  disabled={viewMode}
                 />
               </div>
               <div className="space-y-2">
@@ -492,6 +521,7 @@ export default function AccountForm({ open, onOpenChange, account, accounts = []
                   value={form.vatId || ''}
                   onChange={(e) => setForm({ ...form, vatId: e.target.value })}
                   placeholder="e.g., GB123456789"
+                  disabled={viewMode}
                 />
               </div>
             </div>
@@ -502,6 +532,7 @@ export default function AccountForm({ open, onOpenChange, account, accounts = []
                 <Select 
                   value={form.supplierCategory || 'none'} 
                   onValueChange={(v) => setForm({ ...form, supplierCategory: v === 'none' ? '' : v })}
+                  disabled={viewMode}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select category" />
@@ -526,16 +557,19 @@ export default function AccountForm({ open, onOpenChange, account, accounts = []
               id="active"
               checked={form.active}
               onCheckedChange={(v) => setForm({ ...form, active: v })}
+              disabled={viewMode}
             />
           </div>
 
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-              Cancel
+              {viewMode ? 'Close' : 'Cancel'}
             </Button>
-            <Button type="submit" disabled={isLoading} className="bg-slate-900 hover:bg-slate-800">
-              {isLoading ? 'Saving...' : (account ? 'Update' : 'Create')}
-            </Button>
+            {!viewMode && (
+              <Button type="submit" disabled={isLoading} className="bg-slate-900 hover:bg-slate-800">
+                {isLoading ? 'Saving...' : (account ? 'Update' : 'Create')}
+              </Button>
+            )}
           </DialogFooter>
         </form>
       </DialogContent>
