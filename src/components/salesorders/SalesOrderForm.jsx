@@ -357,6 +357,7 @@ export default function SalesOrderForm({ open, onOpenChange, order, accounts = [
                   <SelectContent>
                     <SelectItem value="DaaS">DaaS</SelectItem>
                     <SelectItem value="GaaS">GaaS</SelectItem>
+                    <SelectItem value="AI Photoshoot">AI Photoshoot</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -388,6 +389,8 @@ export default function SalesOrderForm({ open, onOpenChange, order, accounts = [
                             <th className="p-2 text-left font-bold border-r border-slate-300">HSN</th>
                             <th className="p-2 text-left font-bold border-r border-slate-300">Qty</th>
                             <th className="p-2 text-left font-bold border-r border-slate-300">Rate</th>
+                            <th className="p-2 text-left font-bold border-r border-slate-300">Expected Delivery Date</th>
+                            <th className="p-2 text-left font-bold border-r border-slate-300">EAN / Article No</th>
                             {!viewMode && <th className="p-2 text-left font-bold w-12"></th>}
                           </tr>
                         </thead>
@@ -404,6 +407,8 @@ export default function SalesOrderForm({ open, onOpenChange, order, accounts = [
                                 <td className="p-2 border-r border-slate-200">{item.hsn}</td>
                                 <td className="p-2 border-r border-slate-200">{item.quantity}</td>
                                 <td className="p-2 border-r border-slate-200">{item.rate}</td>
+                                <td className="p-2 border-r border-slate-200">{item.expectedDeliveryDate || '-'}</td>
+                                <td className="p-2 border-r border-slate-200">{item.eanArticleNo || '-'}</td>
                                 {!viewMode && (
                                   <td className="p-2">
                                     <Button 
@@ -424,7 +429,7 @@ export default function SalesOrderForm({ open, onOpenChange, order, accounts = [
                             ))
                           ) : (
                             <tr>
-                              <td colSpan={viewMode ? 9 : 10} className="p-6 text-center text-slate-400">
+                              <td colSpan={viewMode ? 11 : 12} className="p-6 text-center text-slate-400">
                                 No line items added. Use bulk upload to add items.
                               </td>
                             </tr>
@@ -465,7 +470,6 @@ export default function SalesOrderForm({ open, onOpenChange, order, accounts = [
                           <SelectItem value="One-Time Fee">One-Time Fee</SelectItem>
                           <SelectItem value="SKU">Per SKU</SelectItem>
                           <SelectItem value="Tech_pack">Per Tech Pack</SelectItem>
-                          <SelectItem value="Qty">Per Quantity</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -498,62 +502,24 @@ export default function SalesOrderForm({ open, onOpenChange, order, accounts = [
                 <Label className="text-sm font-semibold">Additional Notes</Label>
                 <Textarea value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} disabled={viewMode} rows={3} placeholder="Any additional terms or notes..." />
               </div>
-
-              {form.attachments?.length > 0 && (
-                <div className="space-y-2 pt-2">
-                  <Label className="text-sm font-semibold">Attachments</Label>
-                  <div className="flex flex-wrap gap-2">
-                    {form.attachments.map((att, idx) => (
-                      <a key={idx} href={att.url} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-600 hover:underline bg-blue-50 px-3 py-1 rounded-full">
-                        {att.name}
-                      </a>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {!viewMode && (
-                <div className="pt-2">
-                  <Input type="file" onChange={handleFileUpload} />
-                </div>
-              )}
             </div>
           </div>
 
-          <DialogFooter className="flex items-center justify-between pt-4">
-            <div className="space-y-1">
-              <Label className="text-xs text-slate-500">Status</Label>
-              <Select value={form.status} onValueChange={(v) => setForm({ ...form, status: v })} disabled={viewMode}>
-                <SelectTrigger className="w-48">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="draft">Draft</SelectItem>
-                  <SelectItem value="pending_approval">Pending Approval</SelectItem>
-                  <SelectItem value="approved">Approved</SelectItem>
-                  <SelectItem value="active">Active</SelectItem>
-                  <SelectItem value="signed">Signed</SelectItem>
-                  <SelectItem value="expired">Expired</SelectItem>
-                  <SelectItem value="cancelled">Cancelled</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="flex gap-3">
-              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-                {viewMode ? 'Close' : 'Cancel'}
-              </Button>
-              {!viewMode && (
-                <>
-                  <Button type="button" variant="outline" onClick={() => setShowPreview(true)} className="gap-2">
-                    <Eye className="w-4 h-4" />
-                    Preview
-                  </Button>
-                  <Button type="submit" disabled={isLoading} className="bg-[#0f172a] hover:bg-[#1e3a5f]">
-                    {isLoading ? 'Saving...' : (order ? 'Update Order Form' : 'Create Order Form')}
-                  </Button>
-                </>
-              )}
-            </div>
+          <DialogFooter className="flex items-center justify-end pt-4 gap-3">
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+              {viewMode ? 'Close' : 'Cancel'}
+            </Button>
+            {!viewMode && (
+              <>
+                <Button type="button" variant="outline" onClick={() => setShowPreview(true)} className="gap-2">
+                  <Eye className="w-4 h-4" />
+                  Preview
+                </Button>
+                <Button type="submit" disabled={isLoading} className="bg-[#0f172a] hover:bg-[#1e3a5f]">
+                  {isLoading ? 'Saving...' : (order ? 'Update Order Form' : 'Create Order Form')}
+                </Button>
+              </>
+            )}
           </DialogFooter>
         </form>
 
