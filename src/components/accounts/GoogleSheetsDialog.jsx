@@ -21,49 +21,8 @@ export default function GoogleSheetsDialog({ open, onOpenChange, mode = 'import'
   const [progress, setProgress] = useState(0);
   const [result, setResult] = useState(null);
 
-  useEffect(() => {
-    if (open) {
-      loadSpreadsheets();
-    }
-  }, [open]);
-
-  useEffect(() => {
-    if (spreadsheetId) {
-      loadSheets();
-    }
-  }, [spreadsheetId]);
-
-  const loadSpreadsheets = async () => {
-    setLoadingSpreadsheets(true);
-    try {
-      const response = await base44.functions.invoke('listGoogleSpreadsheets');
-      setSpreadsheets(response.data.spreadsheets || []);
-    } catch (error) {
-      console.error('Failed to load spreadsheets:', error);
-    } finally {
-      setLoadingSpreadsheets(false);
-    }
-  };
-
-  const loadSheets = async () => {
-    setLoadingSheets(true);
-    setSheets([]);
-    setSheetName('');
-    try {
-      const response = await base44.functions.invoke('listGoogleSheets', { spreadsheetId });
-      setSheets(response.data.sheets || []);
-      if (response.data.sheets?.length > 0) {
-        setSheetName(response.data.sheets[0]);
-      }
-    } catch (error) {
-      console.error('Failed to load sheets:', error);
-    } finally {
-      setLoadingSheets(false);
-    }
-  };
-
   const handleSubmit = async () => {
-    if (!spreadsheetId || !sheetName) return;
+    if (!spreadsheetId) return;
 
     setProcessing(true);
     setProgress(20);
@@ -114,8 +73,7 @@ export default function GoogleSheetsDialog({ open, onOpenChange, mode = 'import'
 
   const resetForm = () => {
     setSpreadsheetId('');
-    setSheetName('');
-    setSheets([]);
+    setSheetName('Sheet1');
     setClearExisting(false);
     setProgress(0);
     setResult(null);
@@ -254,7 +212,7 @@ export default function GoogleSheetsDialog({ open, onOpenChange, mode = 'import'
           </Button>
           <Button 
             onClick={handleSubmit} 
-            disabled={!spreadsheetId || !sheetName || processing} 
+            disabled={!spreadsheetId || processing} 
             className="bg-slate-900 hover:bg-slate-800"
           >
             {processing ? 'Processing...' : mode === 'import' ? 'Import' : 'Export'}
