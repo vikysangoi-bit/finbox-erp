@@ -10,11 +10,13 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { CheckCircle, Clock, XCircle } from "lucide-react";
+import ConfirmDialog from "@/components/shared/ConfirmDialog";
 
 export default function Approvals() {
   const [activeTab, setActiveTab] = useState('pending');
   const [rejectDialog, setRejectDialog] = useState(null);
   const [rejectReason, setRejectReason] = useState('');
+  const [deleteRequest, setDeleteRequest] = useState(null);
 
   const queryClient = useQueryClient();
 
@@ -130,6 +132,14 @@ export default function Approvals() {
     }
   });
 
+  const deleteMutation = useMutation({
+    mutationFn: (id) => base44.entities.ApprovalRequest.delete(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['approval-requests'] });
+      setDeleteRequest(null);
+    }
+  });
+
   const pendingRequests = requests.filter(r => r.status === 'pending');
   const approvedRequests = requests.filter(r => r.status === 'approved');
   const rejectedRequests = requests.filter(r => r.status === 'rejected');
@@ -142,6 +152,16 @@ export default function Approvals() {
     if (rejectDialog) {
       rejectMutation.mutate({ request: rejectDialog, reason: rejectReason });
     }
+  };
+
+  const handleView = (request) => {
+    // Navigate to the entity's detail page based on entity_type
+    alert(`View functionality for ${request.entity_type} with ID: ${request.entity_id}`);
+  };
+
+  const handleEdit = (request) => {
+    // Navigate to the entity's edit page based on entity_type
+    alert(`Edit functionality for ${request.entity_type} with ID: ${request.entity_id}`);
   };
 
   return (
@@ -182,6 +202,9 @@ export default function Approvals() {
                   request={request}
                   onApprove={() => approveMutation.mutate(request)}
                   onReject={() => handleReject(request)}
+                  onView={handleView}
+                  onEdit={handleEdit}
+                  onDelete={setDeleteRequest}
                   isLoading={approveMutation.isPending}
                 />
               ))
@@ -200,6 +223,9 @@ export default function Approvals() {
                 <ApprovalCard
                   key={request.id}
                   request={{ ...request, status: 'approved' }}
+                  onView={handleView}
+                  onEdit={handleEdit}
+                  onDelete={setDeleteRequest}
                 />
               ))
             )}
@@ -217,6 +243,9 @@ export default function Approvals() {
                 <ApprovalCard
                   key={request.id}
                   request={{ ...request, status: 'rejected' }}
+                  onView={handleView}
+                  onEdit={handleEdit}
+                  onDelete={setDeleteRequest}
                 />
               ))
             )}
@@ -254,6 +283,17 @@ export default function Approvals() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+
+        {/* Delete Confirmation */}
+        <ConfirmDialog
+          open={!!deleteRequest}
+          onOpenChange={() => setDeleteRequest(null)}
+          title="Delete Approval Request"
+          description={`Are you sure you want to delete "${deleteRequest?.title}"? This action cannot be undone.`}
+          confirmLabel="Delete"
+          onConfirm={() => deleteMutation.mutate(deleteRequest.id)}
+          variant="destructive"
+        />
       </div>
     </div>
   );
