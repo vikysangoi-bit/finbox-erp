@@ -21,6 +21,7 @@ export default function InvoiceForm({ open, onOpenChange, invoice, accounts = []
     paymentTerms: 'net_30',
     paymentDueDate: '',
     invoiceStatus: 'Open',
+    invoiceType: 'Tax',
     salesOrderId: '',
     customerBrand: '',
     customerRegion: '',
@@ -46,6 +47,7 @@ export default function InvoiceForm({ open, onOpenChange, invoice, accounts = []
         paymentTerms: 'net_30',
         paymentDueDate: '',
         invoiceStatus: 'Open',
+        invoiceType: 'Tax',
         salesOrderId: '',
         customerBrand: '',
         customerRegion: '',
@@ -290,18 +292,32 @@ export default function InvoiceForm({ open, onOpenChange, invoice, accounts = []
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label>Invoice Status</Label>
-            <Select value={form.invoiceStatus} onValueChange={(v) => setForm({ ...form, invoiceStatus: v })} disabled={viewMode}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Open">Open</SelectItem>
-                <SelectItem value="Paid">Paid</SelectItem>
-                <SelectItem value="Partially paid">Partially Paid</SelectItem>
-              </SelectContent>
-            </Select>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>Invoice Type</Label>
+              <Select value={form.invoiceType} onValueChange={(v) => setForm({ ...form, invoiceType: v })} disabled={viewMode}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Tax">Tax</SelectItem>
+                  <SelectItem value="Proforma">Proforma</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Invoice Status</Label>
+              <Select value={form.invoiceStatus} onValueChange={(v) => setForm({ ...form, invoiceStatus: v })} disabled={viewMode}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Open">Open</SelectItem>
+                  <SelectItem value="Paid">Paid</SelectItem>
+                  <SelectItem value="Partially paid">Partially Paid</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           <DialogFooter>

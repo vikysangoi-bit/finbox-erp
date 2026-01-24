@@ -138,6 +138,7 @@ export default function Invoices() {
     { id: 'customerName', header: "Customer Name", accessor: "customerName" },
     { id: 'orderFormNo', header: "Order No", accessor: "orderFormNo" },
     { id: 'serviceName', header: "Service", accessor: "serviceName" },
+    { id: 'invoiceType', header: "Type", accessor: "invoiceType" },
     { id: 'invoiceValue', header: "Value", render: (row) => <span className="font-medium">{(row.invoiceValue || 0).toLocaleString('en-US', { style: 'currency', currency: row.invoiceCurrency || 'USD' })}</span> },
     { id: 'paymentDueDate', header: "Due Date", accessor: "paymentDueDate" },
     { id: 'status', header: "Status", render: (row) => <StatusBadge status={row.invoiceStatus?.toLowerCase().replace(/ /g, '_')} /> },
