@@ -25,14 +25,15 @@ export default function PurchaseOrderForm({ open, onOpenChange, po, onSave, isLo
     payment_terms: 'net_30',
     currency: 'INR',
     items: [{
-      article_no: '',
-      style_id: '',
-      item_category: '',
+      itemCode: '',
+      articleNo: '',
+      styleID: '',
+      itemCategory: '',
       description: '',
       composition: '',
       size: '',
       color: '',
-      hsn_code: '',
+      hsnCode: '',
       item_expected_delivery: '',
       quantity: 0,
       rate_per_unit: 0,
@@ -55,14 +56,15 @@ export default function PurchaseOrderForm({ open, onOpenChange, po, onSave, isLo
         ...po,
         po_date: po.po_date || new Date().toISOString().split('T')[0],
         items: po.items || [{
-          article_no: '',
-          style_id: '',
-          item_category: '',
+          itemCode: '',
+          articleNo: '',
+          styleID: '',
+          itemCategory: '',
           description: '',
           composition: '',
           size: '',
           color: '',
-          hsn_code: '',
+          hsnCode: '',
           item_expected_delivery: '',
           quantity: 0,
           rate_per_unit: 0,
@@ -148,14 +150,15 @@ export default function PurchaseOrderForm({ open, onOpenChange, po, onSave, isLo
     setForm({
       ...form,
       items: [...form.items, {
-        article_no: '',
-        style_id: '',
-        item_category: '',
+        itemCode: '',
+        articleNo: '',
+        styleID: '',
+        itemCategory: '',
         description: '',
         composition: '',
         size: '',
         color: '',
-        hsn_code: '',
+        hsnCode: '',
         item_expected_delivery: '',
         quantity: 0,
         rate_per_unit: 0,
@@ -324,7 +327,8 @@ export default function PurchaseOrderForm({ open, onOpenChange, po, onSave, isLo
               <table className="w-full text-xs border border-slate-300">
                 <thead className="bg-slate-50">
                   <tr>
-                    <th className="p-2 border border-slate-300 font-bold">EAN/Article No.</th>
+                    <th className="p-2 border border-slate-300 font-bold">Item Code</th>
+                    <th className="p-2 border border-slate-300 font-bold">Article No.</th>
                     <th className="p-2 border border-slate-300 font-bold">Style ID</th>
                     <th className="p-2 border border-slate-300 font-bold">Item Category</th>
                     <th className="p-2 border border-slate-300 font-bold">Description</th>
@@ -347,22 +351,29 @@ export default function PurchaseOrderForm({ open, onOpenChange, po, onSave, isLo
                       <td className="p-1 border border-slate-300">
                         <Input
                           className="h-7 text-xs border-0"
-                          value={item.article_no || ''}
-                          onChange={(e) => handleItemChange(index, 'article_no', e.target.value)}
+                          value={item.itemCode || ''}
+                          onChange={(e) => handleItemChange(index, 'itemCode', e.target.value)}
                         />
                       </td>
                       <td className="p-1 border border-slate-300">
                         <Input
                           className="h-7 text-xs border-0"
-                          value={item.style_id || ''}
-                          onChange={(e) => handleItemChange(index, 'style_id', e.target.value)}
+                          value={item.articleNo || ''}
+                          onChange={(e) => handleItemChange(index, 'articleNo', e.target.value)}
                         />
                       </td>
                       <td className="p-1 border border-slate-300">
                         <Input
                           className="h-7 text-xs border-0"
-                          value={item.item_category || ''}
-                          onChange={(e) => handleItemChange(index, 'item_category', e.target.value)}
+                          value={item.styleID || ''}
+                          onChange={(e) => handleItemChange(index, 'styleID', e.target.value)}
+                        />
+                      </td>
+                      <td className="p-1 border border-slate-300">
+                        <Input
+                          className="h-7 text-xs border-0"
+                          value={item.itemCategory || ''}
+                          onChange={(e) => handleItemChange(index, 'itemCategory', e.target.value)}
                         />
                       </td>
                       <td className="p-1 border border-slate-300">
@@ -404,8 +415,8 @@ export default function PurchaseOrderForm({ open, onOpenChange, po, onSave, isLo
                       <td className="p-1 border border-slate-300">
                         <Input
                           className="h-7 text-xs border-0"
-                          value={item.hsn_code || ''}
-                          onChange={(e) => handleItemChange(index, 'hsn_code', e.target.value)}
+                          value={item.hsnCode || ''}
+                          onChange={(e) => handleItemChange(index, 'hsnCode', e.target.value)}
                         />
                       </td>
                       <td className="p-1 border border-slate-300">

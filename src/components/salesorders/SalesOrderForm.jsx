@@ -380,7 +380,10 @@ export default function SalesOrderForm({ open, onOpenChange, order, accounts = [
                       <table className="w-full text-sm">
                         <thead className="bg-slate-100 border-b border-slate-300">
                           <tr>
+                            <th className="p-2 text-left font-bold border-r border-slate-300">Item Code</th>
+                            <th className="p-2 text-left font-bold border-r border-slate-300">Article No</th>
                             <th className="p-2 text-left font-bold border-r border-slate-300">Style ID</th>
+                            <th className="p-2 text-left font-bold border-r border-slate-300">Item Category</th>
                             <th className="p-2 text-left font-bold border-r border-slate-300">Item Name</th>
                             <th className="p-2 text-left font-bold border-r border-slate-300">Description</th>
                             <th className="p-2 text-left font-bold border-r border-slate-300">Composition</th>
@@ -390,7 +393,6 @@ export default function SalesOrderForm({ open, onOpenChange, order, accounts = [
                             <th className="p-2 text-left font-bold border-r border-slate-300">Qty</th>
                             <th className="p-2 text-left font-bold border-r border-slate-300">Rate</th>
                             <th className="p-2 text-left font-bold border-r border-slate-300">Expected Delivery Date</th>
-                            <th className="p-2 text-left font-bold border-r border-slate-300">EAN / Article No</th>
                             {!viewMode && <th className="p-2 text-left font-bold w-12"></th>}
                           </tr>
                         </thead>
@@ -398,17 +400,19 @@ export default function SalesOrderForm({ open, onOpenChange, order, accounts = [
                           {form.gaasLineItems?.length > 0 ? (
                             form.gaasLineItems.map((item, idx) => (
                               <tr key={idx} className="border-b border-slate-200">
-                                <td className="p-2 border-r border-slate-200">{item.styleId}</td>
+                                <td className="p-2 border-r border-slate-200">{item.itemCode || '-'}</td>
+                                <td className="p-2 border-r border-slate-200">{item.articleNo || '-'}</td>
+                                <td className="p-2 border-r border-slate-200">{item.styleID || '-'}</td>
+                                <td className="p-2 border-r border-slate-200">{item.itemCategory || '-'}</td>
                                 <td className="p-2 border-r border-slate-200">{item.itemName}</td>
                                 <td className="p-2 border-r border-slate-200">{item.description}</td>
                                 <td className="p-2 border-r border-slate-200">{item.composition}</td>
                                 <td className="p-2 border-r border-slate-200">{item.size}</td>
                                 <td className="p-2 border-r border-slate-200">{item.color}</td>
-                                <td className="p-2 border-r border-slate-200">{item.hsn}</td>
+                                <td className="p-2 border-r border-slate-200">{item.hsnCode}</td>
                                 <td className="p-2 border-r border-slate-200">{item.quantity}</td>
                                 <td className="p-2 border-r border-slate-200">{item.rate}</td>
                                 <td className="p-2 border-r border-slate-200">{item.expectedDeliveryDate || '-'}</td>
-                                <td className="p-2 border-r border-slate-200">{item.eanArticleNo || '-'}</td>
                                 {!viewMode && (
                                   <td className="p-2">
                                     <Button 
@@ -429,7 +433,7 @@ export default function SalesOrderForm({ open, onOpenChange, order, accounts = [
                             ))
                           ) : (
                             <tr>
-                              <td colSpan={viewMode ? 11 : 12} className="p-6 text-center text-slate-400">
+                              <td colSpan={viewMode ? 13 : 14} className="p-6 text-center text-slate-400">
                                 No line items added. Use bulk upload to add items.
                               </td>
                             </tr>
