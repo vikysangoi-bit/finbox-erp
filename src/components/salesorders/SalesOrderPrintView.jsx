@@ -31,7 +31,7 @@ export default function SalesOrderPrintView({ open, onOpenChange, order }) {
           <div className="flex items-start justify-between mb-6 pb-4 border-b-2 border-[#0f172a]">
             <div className="w-48">
               <img 
-                src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/696d1c12e7412aa1b6e6ab01/1cb57e374_fyndheader.png" 
+                src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/696d1c12e7412aa1b6e6ab01/c0ecc7ee4_image.png" 
                 alt="Fynd Logo" 
                 className="h-16 object-contain"
               />
