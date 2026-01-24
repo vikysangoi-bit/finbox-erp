@@ -6,19 +6,22 @@ import FilterBar from "@/components/shared/FilterBar";
 import DataTable from "@/components/shared/DataTable";
 import EmptyState from "@/components/shared/EmptyState";
 import SalesOrderForm from "@/components/salesorders/SalesOrderForm";
+import SalesOrderPrintView from "@/components/salesorders/SalesOrderPrintView";
 import BulkUploadDialog from "@/components/shared/BulkUploadDialog";
 import SyncDropdown from "@/components/shared/SyncDropdown";
 import StatusBadge from "@/components/shared/StatusBadge";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, FileText, Eye, Edit, Trash2 } from "lucide-react";
+import { MoreHorizontal, FileText, Eye, Edit, Trash2, Printer } from "lucide-react";
 import ConfirmDialog from "@/components/shared/ConfirmDialog";
 
 export default function SalesOrders() {
   const [showForm, setShowForm] = useState(false);
+  const [showPrintView, setShowPrintView] = useState(false);
   const [showBulkUpload, setShowBulkUpload] = useState(false);
   const [editingOrder, setEditingOrder] = useState(null);
   const [viewingOrder, setViewingOrder] = useState(null);
+  const [printingOrder, setPrintingOrder] = useState(null);
   const [deleteOrder, setDeleteOrder] = useState(null);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -212,6 +215,10 @@ export default function SalesOrders() {
               <Eye className="w-4 h-4 mr-2" />
               View
             </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => { setPrintingOrder(row); setShowPrintView(true); }}>
+              <Printer className="w-4 h-4 mr-2" />
+              Print
+            </DropdownMenuItem>
             <DropdownMenuItem onClick={() => { setEditingOrder(row); setViewingOrder(null); setShowForm(true); }}>
               <Edit className="w-4 h-4 mr-2" />
               Edit
@@ -386,6 +393,15 @@ export default function SalesOrders() {
           onSave={handleSave}
           isLoading={createMutation.isPending || updateMutation.isPending}
           viewMode={!!viewingOrder}
+        />
+
+        <SalesOrderPrintView
+          open={showPrintView}
+          onOpenChange={(open) => {
+            setShowPrintView(open);
+            if (!open) setPrintingOrder(null);
+          }}
+          order={printingOrder}
         />
 
         <ConfirmDialog
