@@ -1,0 +1,352 @@
+import React, { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from "@tantml:parameter>@/api/base44Client";
+import PageHeader from "@/components/shared/PageHeader";
+import FilterBar from "@/components/shared/FilterBar";
+import DataTable from "@/components/shared/DataTable";
+import EmptyState from "@/components/shared/EmptyState";
+import SalesOrderForm from "@/components/salesorders/SalesOrderForm";
+import BulkUploadDialog from "@/components/shared/BulkUploadDialog";
+import SyncDropdown from "@/components/shared/SyncDropdown";
+import StatusBadge from "@/components/shared/StatusBadge";
+import { Button } from "@/components/ui/button";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { MoreHorizontal, FileText, Eye, Edit, Trash2 } from "lucide-react";
+import ConfirmDialog from "@/components/shared/ConfirmDialog";
+
+export default function SalesOrders() {
+  const [showForm, setShowForm] = useState(false);
+  const [showBulkUpload, setShowBulkUpload] = useState(false);
+  const [editingOrder, setEditingOrder] = useState(null);
+  const [viewingOrder, setViewingOrder] = useState(null);
+  const [deleteOrder, setDeleteOrder] = useState(null);
+  const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+
+  const queryClient = useQueryClient();
+
+  const { data: orders = [], isLoading } = useQuery({
+    queryKey: ['sales-orders'],
+    queryFn: () => base44.entities.SalesOrder.list('-created_date')
+  });
+
+  const { data: accounts = [] } = useQuery({
+    queryKey: ['accounts'],
+    queryFn: () => base44.entities.Account.list()
+  });
+
+  const createMutation = useMutation({
+    mutationFn: async (data) => {
+      // Fetch customer details from Account
+      const customer = accounts.find(a => a.code === data.customerCode);
+      if (customer) {
+        data.customerName = customer.name;
+        data.customerBrand = customer.brand;
+        data.customerAddress = customer.address;
+        data.customerCountry = customer.country;
+        data.customerGstId = customer.gstId;
+      }
+      
+      const user = await base44.auth.me();
+      await base44.entities.SalesOrder.create(data);
+      
+      await base44.functions.invoke('logAuditEntry', {
+        action: 'create',
+        entity_type: 'SalesOrder',
+        entity_name: data.orderFormNo,
+        details: 'Created sales order'
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['sales-orders'] });
+      setShowForm(false);
+    }
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: async ({ id, data }) => {
+      const user = await base44.auth.me();
+      
+      // Fetch customer details if customer code changed
+      const customer = accounts.find(a => a.code === data.customerCode);
+      if (customer) {
+        data.customerName = customer.name;
+        data.customerBrand = customer.brand;
+        data.customerAddress = customer.address;
+        data.customerCountry = customer.country;
+        data.customerGstId = customer.gstId;
+      }
+      
+      if (user.role === 'admin') {
+        await base44.entities.SalesOrder.update(id, { ...data, updated_by: user.email });
+        
+        await base44.functions.invoke('logAuditEntry', {
+          action: 'update',
+          entity_type: 'SalesOrder',
+          entity_id: id,
+          entity_name: data.orderFormNo,
+          details: 'Updated sales order'
+        });
+      } else {
+        await base44.entities.ApprovalRequest.create({
+          entity_type: 'sales_order_update',
+          entity_id: id,
+          title: `Update Sales Order: ${data.orderFormNo}`,
+          description: `Request to update sales order ${data.orderFormNo}`,
+          submitted_by: user.email,
+          submitted_by_name: user.full_name,
+          submitted_at: new Date().toISOString()
+        });
+        
+        alert('Update request submitted for admin approval');
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['sales-orders'] });
+      setShowForm(false);
+      setEditingOrder(null);
+    }
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id) => {
+      const user = await base44.auth.me();
+      const order = orders.find(o => o.id === id);
+      
+      if (user.role === 'admin') {
+        await base44.entities.SalesOrder.update(id, {
+          is_deleted: true,
+          deleted_by: user.email,
+          deleted_on: new Date().toISOString()
+        });
+        
+        await base44.functions.invoke('logAuditEntry', {
+          action: 'delete',
+          entity_type: 'SalesOrder',
+          entity_id: id,
+          entity_name: order?.orderFormNo,
+          details: 'Deleted sales order'
+        });
+      } else {
+        await base44.entities.ApprovalRequest.create({
+          entity_type: 'sales_order_delete',
+          entity_id: id,
+          title: `Delete Sales Order: ${order?.orderFormNo}`,
+          description: `Request to delete sales order ${order?.orderFormNo}`,
+          submitted_by: user.email,
+          submitted_by_name: user.full_name,
+          submitted_at: new Date().toISOString()
+        });
+        
+        alert('Delete request submitted for admin approval');
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['sales-orders'] });
+      setDeleteOrder(null);
+    }
+  });
+
+  const filteredOrders = orders.filter(order => {
+    if (order.is_deleted) return false;
+    
+    const matchesSearch = 
+      order.orderFormNo?.toLowerCase().includes(search.toLowerCase()) ||
+      order.customerCode?.toLowerCase().includes(search.toLowerCase()) ||
+      order.customerName?.toLowerCase().includes(search.toLowerCase());
+    const matchesStatus = statusFilter === 'all' || order.status === statusFilter;
+    return matchesSearch && matchesStatus;
+  });
+
+  const columns = [
+    { id: 'orderFormNo', header: "Order No", accessor: "orderFormNo", render: (row) => <span className="font-mono font-medium">{row.orderFormNo}</span> },
+    { id: 'customerCode', header: "Customer Code", accessor: "customerCode" },
+    { id: 'customerName', header: "Customer Name", accessor: "customerName" },
+    { id: 'orderFormValue', header: "Value", render: (row) => <span className="font-medium">{(row.orderFormValue || 0).toLocaleString('en-US', { style: 'currency', currency: row.currency || 'USD' })}</span> },
+    { id: 'expectedDelivery', header: "Expected Delivery", accessor: "expectedDelivery" },
+    { id: 'status', header: "Status", render: (row) => <StatusBadge status={row.status} /> },
+    {
+      id: 'actions',
+      header: "",
+      render: (row) => (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon" className="h-8 w-8">
+              <MoreHorizontal className="w-4 h-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={() => { setViewingOrder(row); setShowForm(true); }}>
+              <Eye className="w-4 h-4 mr-2" />
+              View
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => { setEditingOrder(row); setViewingOrder(null); setShowForm(true); }}>
+              <Edit className="w-4 h-4 mr-2" />
+              Edit
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setDeleteOrder(row)} className="text-rose-600">
+              <Trash2 className="w-4 h-4 mr-2" />
+              Delete
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      )
+    }
+  ];
+
+  const handleSave = (data) => {
+    if (editingOrder) {
+      updateMutation.mutate({ id: editingOrder.id, data });
+    } else {
+      createMutation.mutate(data);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 p-4 md:p-8">
+      <div className="max-w-7xl mx-auto space-y-6">
+        <PageHeader 
+          title="Sales Orders" 
+          subtitle="Manage customer sales orders"
+          onAdd={() => { setEditingOrder(null); setViewingOrder(null); setShowForm(true); }}
+          addLabel="New Sales Order"
+        >
+          <SyncDropdown
+            onBulkUpload={() => setShowBulkUpload(true)}
+            onBulkDelete={() => {}}
+            onGoogleSheetsImport={() => {}}
+            onGoogleSheetsExport={() => {}}
+            onExportToExcel={() => {
+              const headers = ['orderFormNo', 'customerCode', 'customerName', 'orderFormValue', 'status'];
+              const rows = filteredOrders.map(o => [o.orderFormNo, o.customerCode, o.customerName, o.orderFormValue, o.status]);
+              const csv = [headers, ...rows].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
+              const blob = new Blob([csv], { type: 'text/csv' });
+              const url = window.URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = url;
+              a.download = `sales_orders_${new Date().toISOString().split('T')[0]}.csv`;
+              a.click();
+            }}
+          />
+        </PageHeader>
+
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4 text-sm text-slate-600">
+              <div><span className="font-semibold text-slate-900">{orders.length}</span> Total</div>
+              <div className="h-4 w-px bg-slate-200" />
+              <div><span className="font-semibold text-slate-900">{filteredOrders.length}</span> Filtered</div>
+            </div>
+          </div>
+
+          <FilterBar
+            searchValue={search}
+            onSearchChange={setSearch}
+            searchPlaceholder="Search by order no, customer..."
+            filters={[
+              {
+                key: 'status',
+                value: statusFilter,
+                onChange: setStatusFilter,
+                placeholder: 'Status',
+                options: [
+                  { value: 'draft', label: 'Draft' },
+                  { value: 'pending_approval', label: 'Pending Approval' },
+                  { value: 'approved', label: 'Approved' },
+                  { value: 'active', label: 'Active' },
+                  { value: 'completed', label: 'Completed' },
+                  { value: 'cancelled', label: 'Cancelled' }
+                ]
+              }
+            ]}
+          />
+        </div>
+
+        {!isLoading && orders.length === 0 ? (
+          <EmptyState
+            icon={FileText}
+            title="No sales orders yet"
+            description="Create your first sales order to get started."
+            actionLabel="Create Sales Order"
+            onAction={() => setShowForm(true)}
+          />
+        ) : (
+          <DataTable 
+            columns={columns} 
+            data={filteredOrders} 
+            isLoading={isLoading}
+            emptyMessage="No sales orders match your search"
+          />
+        )}
+
+        <SalesOrderForm
+          open={showForm}
+          onOpenChange={(open) => {
+            setShowForm(open);
+            if (!open) {
+              setViewingOrder(null);
+              setEditingOrder(null);
+            }
+          }}
+          order={viewingOrder || editingOrder}
+          accounts={accounts}
+          onSave={handleSave}
+          isLoading={createMutation.isPending || updateMutation.isPending}
+          viewMode={!!viewingOrder}
+        />
+
+        <ConfirmDialog
+          open={!!deleteOrder}
+          onOpenChange={() => setDeleteOrder(null)}
+          title="Delete Sales Order"
+          description={`Are you sure you want to delete order "${deleteOrder?.orderFormNo}"?`}
+          confirmLabel="Delete"
+          onConfirm={() => deleteMutation.mutate(deleteOrder.id)}
+          variant="destructive"
+        />
+
+        <BulkUploadDialog
+          open={showBulkUpload}
+          onOpenChange={setShowBulkUpload}
+          entityName="SalesOrder"
+          schema={{
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                RFQID: { type: "string" },
+                orderFormNo: { type: "string" },
+                customerCode: { type: "string" },
+                orderFormValue: { type: "number" },
+                paymentTerm: { type: "string", enum: ["full_advance", "net_7", "net_30", "net_45", "net_60", "net_90"] },
+                paymentTermFrom: { type: "string" },
+                expectedDelivery: { type: "string" },
+                orderTerm: { type: "string", enum: ["1_year", "2_years", "3_years", "5_years"] },
+                startDate: { type: "string" },
+                endDate: { type: "string" },
+                autoRenewal: { type: "string", enum: ["Yes", "No"] },
+                leadSource: { type: "string", enum: ["Direct", "Indirect"] },
+                partnerName: { type: "string" },
+                salesPersonName: { type: "string" },
+                contactPersonName: { type: "string" },
+                contactPersonEmail: { type: "string" },
+                contactPersonPhone: { type: "string" },
+                serviceName: { type: "string", enum: ["DaaS", "GaaS", "Snap"] },
+                uom: { type: "string", enum: ["SKU", "Tech_pack", "Qty"] },
+                inclusions: { type: "string" },
+                unitPrice: { type: "number" },
+                billingFrequency: { type: "string", enum: ["One_Time", "ARR", "MRR"] },
+                specialTerms: { type: "string" }
+              },
+              required: ["orderFormNo", "customerCode"]
+            }
+          }}
+          templateData={[
+            'RFQID,orderFormNo,customerCode,orderFormValue,paymentTerm,expectedDelivery,orderTerm,startDate,endDate,autoRenewal,leadSource,salesPersonName,contactPersonName,contactPersonEmail,contactPersonPhone,serviceName,uom,unitPrice,billingFrequency',
+            'RFQ001,SO-2024-001,1000,50000,net_30,2024-03-01,1_year,2024-01-01,2024-12-31,No,Direct,John Sales,Jane Contact,jane@example.com,+1234567890,DaaS,SKU,100,ARR'
+          ]}
+          onSuccess={() => queryClient.invalidateQueries({ queryKey: ['sales-orders'] })}
+        />
+      </div>
+    </div>
+  );
+}
