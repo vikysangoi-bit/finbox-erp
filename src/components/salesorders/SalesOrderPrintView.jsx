@@ -232,7 +232,7 @@ export default function SalesOrderPrintView({ open, onOpenChange, order }) {
           {/* Footer - Signatures */}
           <div className="grid grid-cols-2 gap-8 mt-12 pt-8 border-t border-slate-300">
             <div className="text-center">
-              <div className="border-t-2 border-slate-900 pt-2 mt-16">
+              <div className="border-t-2 border-[#0f172a] pt-2 mt-16">
                 <p className="font-semibold text-sm">Client Signature</p>
                 <p className="text-xs text-slate-500">({order.customerName})</p>
               </div>
