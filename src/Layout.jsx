@@ -147,7 +147,7 @@ function Sidebar({ currentPageName, mobile = false }) {
       <div className="p-6 border-b border-slate-100">
         <Link to={createPageUrl('Dashboard')} className="flex items-center gap-3">
           <img 
-            src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/696d1c12e7412aa1b6e6ab01/1cb57e374_fyndheader.png" 
+            src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/696d1c12e7412aa1b6e6ab01/10ee209f4_Fyndcreatelogo.png" 
             alt="Fynd Logo" 
             className="h-12 object-contain"
           />
@@ -220,7 +220,7 @@ export default function Layout({ children, currentPageName }) {
 
           <Link to={createPageUrl('Dashboard')} className="flex items-center gap-2">
             <img 
-              src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/696d1c12e7412aa1b6e6ab01/1cb57e374_fyndheader.png" 
+              src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/696d1c12e7412aa1b6e6ab01/10ee209f4_Fyndcreatelogo.png" 
               alt="Fynd Logo" 
               className="h-8 object-contain"
             />
