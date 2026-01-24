@@ -7,6 +7,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { base44 } from "@/api/base44Client";
+import GaasLineItemsUpload from "./GaasLineItemsUpload";
+import { Upload, Trash2 } from "lucide-react";
 
 export default function SalesOrderForm({ open, onOpenChange, order, accounts = [], onSave, isLoading, viewMode = false }) {
   const [form, setForm] = useState({
@@ -38,15 +40,18 @@ export default function SalesOrderForm({ open, onOpenChange, order, accounts = [
     unitPrice: 0,
     billingFrequency: 'One_Time',
     specialTerms: '',
+    gaasLineItems: [],
     status: 'draft',
     currency: 'USD',
     notes: '',
     attachments: []
   });
+  
+  const [showGaasUpload, setShowGaasUpload] = useState(false);
 
   useEffect(() => {
     if (order) {
-      setForm(order);
+      setForm({ ...order, gaasLineItems: order.gaasLineItems || [] });
     } else {
       setForm({
         RFQID: '',
@@ -77,6 +82,7 @@ export default function SalesOrderForm({ open, onOpenChange, order, accounts = [
         unitPrice: 0,
         billingFrequency: 'One_Time',
         specialTerms: '',
+        gaasLineItems: [],
         status: 'draft',
         currency: 'USD',
         notes: '',
@@ -355,52 +361,138 @@ export default function SalesOrderForm({ open, onOpenChange, order, accounts = [
                 </Select>
               </div>
 
-              {/* Service Details Table */}
-              <div className="border border-slate-300 rounded-lg overflow-hidden">
-                <div className="grid grid-cols-5 bg-slate-100 border-b border-slate-300">
-                  <div className="p-3 border-r border-slate-300 font-bold text-sm">Fee Type</div>
-                  <div className="p-3 border-r border-slate-300 font-bold text-sm">Billing Cycle</div>
-                  <div className="p-3 border-r border-slate-300 font-bold text-sm">Commercial Value</div>
-                  <div className="p-3 border-r border-slate-300 font-bold text-sm">Inclusions</div>
-                  <div className="p-3 font-bold text-sm">Terms</div>
+              {/* Service Details Table - GaaS */}
+              {form.serviceName === 'GaaS' ? (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <Label className="text-sm font-semibold">Line Items</Label>
+                    {!viewMode && (
+                      <Button type="button" onClick={() => setShowGaasUpload(true)} size="sm" variant="outline">
+                        <Upload className="w-4 h-4 mr-2" />
+                        Bulk Upload Items
+                      </Button>
+                    )}
+                  </div>
+
+                  <div className="border border-slate-300 rounded-lg overflow-hidden">
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-sm">
+                        <thead className="bg-slate-100 border-b border-slate-300">
+                          <tr>
+                            <th className="p-2 text-left font-bold border-r border-slate-300">Style ID</th>
+                            <th className="p-2 text-left font-bold border-r border-slate-300">Item Name</th>
+                            <th className="p-2 text-left font-bold border-r border-slate-300">Description</th>
+                            <th className="p-2 text-left font-bold border-r border-slate-300">Composition</th>
+                            <th className="p-2 text-left font-bold border-r border-slate-300">Size</th>
+                            <th className="p-2 text-left font-bold border-r border-slate-300">Color</th>
+                            <th className="p-2 text-left font-bold border-r border-slate-300">HSN</th>
+                            <th className="p-2 text-left font-bold border-r border-slate-300">Qty</th>
+                            <th className="p-2 text-left font-bold border-r border-slate-300">Rate</th>
+                            {!viewMode && <th className="p-2 text-left font-bold w-12"></th>}
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {form.gaasLineItems?.length > 0 ? (
+                            form.gaasLineItems.map((item, idx) => (
+                              <tr key={idx} className="border-b border-slate-200">
+                                <td className="p-2 border-r border-slate-200">{item.styleId}</td>
+                                <td className="p-2 border-r border-slate-200">{item.itemName}</td>
+                                <td className="p-2 border-r border-slate-200">{item.description}</td>
+                                <td className="p-2 border-r border-slate-200">{item.composition}</td>
+                                <td className="p-2 border-r border-slate-200">{item.size}</td>
+                                <td className="p-2 border-r border-slate-200">{item.color}</td>
+                                <td className="p-2 border-r border-slate-200">{item.hsn}</td>
+                                <td className="p-2 border-r border-slate-200">{item.quantity}</td>
+                                <td className="p-2 border-r border-slate-200">{item.rate}</td>
+                                {!viewMode && (
+                                  <td className="p-2">
+                                    <Button 
+                                      type="button"
+                                      variant="ghost" 
+                                      size="icon"
+                                      className="h-6 w-6"
+                                      onClick={() => {
+                                        const newItems = form.gaasLineItems.filter((_, i) => i !== idx);
+                                        setForm({ ...form, gaasLineItems: newItems });
+                                      }}
+                                    >
+                                      <Trash2 className="w-3 h-3 text-rose-500" />
+                                    </Button>
+                                  </td>
+                                )}
+                              </tr>
+                            ))
+                          ) : (
+                            <tr>
+                              <td colSpan={viewMode ? 9 : 10} className="p-6 text-center text-slate-400">
+                                No line items added. Use bulk upload to add items.
+                              </td>
+                            </tr>
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                  
+                  {form.gaasLineItems?.length > 0 && (
+                    <div className="text-right text-sm">
+                      <span className="font-semibold">Total Items: </span>
+                      <span>{form.gaasLineItems.length}</span>
+                      <span className="ml-4 font-semibold">Total Qty: </span>
+                      <span>{form.gaasLineItems.reduce((sum, item) => sum + (item.quantity || 0), 0)}</span>
+                      <span className="ml-4 font-semibold">Total Value: </span>
+                      <span>{form.gaasLineItems.reduce((sum, item) => sum + ((item.quantity || 0) * (item.rate || 0)), 0).toFixed(2)}</span>
+                    </div>
+                  )}
                 </div>
-                <div className="grid grid-cols-5">
-                  <div className="p-3 border-r border-slate-300">
-                    <Select value={form.uom} onValueChange={(v) => setForm({ ...form, uom: v })} disabled={viewMode}>
-                      <SelectTrigger className="border-0 h-8 p-0">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="One-Time Fee">One-Time Fee</SelectItem>
-                        <SelectItem value="SKU">Per SKU</SelectItem>
-                        <SelectItem value="Tech_pack">Per Tech Pack</SelectItem>
-                        <SelectItem value="Qty">Per Quantity</SelectItem>
-                      </SelectContent>
-                    </Select>
+              ) : (
+                /* Service Details Table - Other Services */
+                <div className="border border-slate-300 rounded-lg overflow-hidden">
+                  <div className="grid grid-cols-5 bg-slate-100 border-b border-slate-300">
+                    <div className="p-3 border-r border-slate-300 font-bold text-sm">Fee Type</div>
+                    <div className="p-3 border-r border-slate-300 font-bold text-sm">Billing Cycle</div>
+                    <div className="p-3 border-r border-slate-300 font-bold text-sm">Commercial Value</div>
+                    <div className="p-3 border-r border-slate-300 font-bold text-sm">Inclusions</div>
+                    <div className="p-3 font-bold text-sm">Terms</div>
                   </div>
-                  <div className="p-3 border-r border-slate-300">
-                    <Select value={form.billingFrequency} onValueChange={(v) => setForm({ ...form, billingFrequency: v })} disabled={viewMode}>
-                      <SelectTrigger className="border-0 h-8 p-0">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="One_Time">One Time</SelectItem>
-                        <SelectItem value="ARR">Annual</SelectItem>
-                        <SelectItem value="MRR">Monthly</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="p-3 border-r border-slate-300">
-                    <Input type="number" step="0.01" value={form.unitPrice} onChange={(e) => setForm({ ...form, unitPrice: parseFloat(e.target.value) || 0 })} disabled={viewMode} className="border-0 h-8 p-0" />
-                  </div>
-                  <div className="p-3 border-r border-slate-300">
-                    <Textarea value={form.inclusions} onChange={(e) => setForm({ ...form, inclusions: e.target.value })} disabled={viewMode} rows={2} className="border-0 p-0 text-sm" placeholder="e.g., 1 Lifestyle Shoot + 6 Studio Shoot" />
-                  </div>
-                  <div className="p-3">
-                    <Textarea value={form.specialTerms} onChange={(e) => setForm({ ...form, specialTerms: e.target.value })} disabled={viewMode} rows={2} className="border-0 p-0 text-sm" placeholder="e.g., 50% On Execution" />
+                  <div className="grid grid-cols-5">
+                    <div className="p-3 border-r border-slate-300">
+                      <Select value={form.uom} onValueChange={(v) => setForm({ ...form, uom: v })} disabled={viewMode}>
+                        <SelectTrigger className="border-0 h-8 p-0">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="One-Time Fee">One-Time Fee</SelectItem>
+                          <SelectItem value="SKU">Per SKU</SelectItem>
+                          <SelectItem value="Tech_pack">Per Tech Pack</SelectItem>
+                          <SelectItem value="Qty">Per Quantity</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="p-3 border-r border-slate-300">
+                      <Select value={form.billingFrequency} onValueChange={(v) => setForm({ ...form, billingFrequency: v })} disabled={viewMode}>
+                        <SelectTrigger className="border-0 h-8 p-0">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="One_Time">One Time</SelectItem>
+                          <SelectItem value="ARR">Annual</SelectItem>
+                          <SelectItem value="MRR">Monthly</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="p-3 border-r border-slate-300">
+                      <Input type="number" step="0.01" value={form.unitPrice} onChange={(e) => setForm({ ...form, unitPrice: parseFloat(e.target.value) || 0 })} disabled={viewMode} className="border-0 h-8 p-0" />
+                    </div>
+                    <div className="p-3 border-r border-slate-300">
+                      <Textarea value={form.inclusions} onChange={(e) => setForm({ ...form, inclusions: e.target.value })} disabled={viewMode} rows={2} className="border-0 p-0 text-sm" placeholder="e.g., 1 Lifestyle Shoot + 6 Studio Shoot" />
+                    </div>
+                    <div className="p-3">
+                      <Textarea value={form.specialTerms} onChange={(e) => setForm({ ...form, specialTerms: e.target.value })} disabled={viewMode} rows={2} className="border-0 p-0 text-sm" placeholder="e.g., 50% On Execution" />
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
 
               <div className="space-y-2 pt-4">
                 <Label className="text-sm font-semibold">Additional Notes</Label>
@@ -457,6 +549,14 @@ export default function SalesOrderForm({ open, onOpenChange, order, accounts = [
             </div>
           </DialogFooter>
         </form>
+
+        <GaasLineItemsUpload
+          open={showGaasUpload}
+          onOpenChange={setShowGaasUpload}
+          onSuccess={(items) => {
+            setForm({ ...form, gaasLineItems: [...(form.gaasLineItems || []), ...items] });
+          }}
+        />
       </DialogContent>
     </Dialog>
   );
