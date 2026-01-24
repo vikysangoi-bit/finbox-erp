@@ -1,23 +1,68 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Progress } from "@/components/ui/progress";
-import { Sheet, Upload, Download, CheckCircle, AlertCircle, FileSpreadsheet } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Sheet, Upload, Download, CheckCircle, AlertCircle, FileSpreadsheet, Loader2 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 
 export default function GoogleSheetsDialog({ open, onOpenChange, mode = 'import', onSuccess }) {
+  const [spreadsheets, setSpreadsheets] = useState([]);
+  const [sheets, setSheets] = useState([]);
+  const [loadingSpreadsheets, setLoadingSpreadsheets] = useState(false);
+  const [loadingSheets, setLoadingSheets] = useState(false);
   const [spreadsheetId, setSpreadsheetId] = useState('');
-  const [sheetName, setSheetName] = useState('Sheet1');
+  const [sheetName, setSheetName] = useState('');
   const [clearExisting, setClearExisting] = useState(false);
   const [processing, setProcessing] = useState(false);
   const [progress, setProgress] = useState(0);
   const [result, setResult] = useState(null);
 
+  useEffect(() => {
+    if (open) {
+      loadSpreadsheets();
+    }
+  }, [open]);
+
+  useEffect(() => {
+    if (spreadsheetId) {
+      loadSheets();
+    }
+  }, [spreadsheetId]);
+
+  const loadSpreadsheets = async () => {
+    setLoadingSpreadsheets(true);
+    try {
+      const response = await base44.functions.invoke('listGoogleSpreadsheets');
+      setSpreadsheets(response.data.spreadsheets || []);
+    } catch (error) {
+      console.error('Failed to load spreadsheets:', error);
+    } finally {
+      setLoadingSpreadsheets(false);
+    }
+  };
+
+  const loadSheets = async () => {
+    setLoadingSheets(true);
+    setSheets([]);
+    setSheetName('');
+    try {
+      const response = await base44.functions.invoke('listGoogleSheets', { spreadsheetId });
+      setSheets(response.data.sheets || []);
+      if (response.data.sheets?.length > 0) {
+        setSheetName(response.data.sheets[0]);
+      }
+    } catch (error) {
+      console.error('Failed to load sheets:', error);
+    } finally {
+      setLoadingSheets(false);
+    }
+  };
+
   const handleSubmit = async () => {
-    if (!spreadsheetId) return;
+    if (!spreadsheetId || !sheetName) return;
 
     setProcessing(true);
     setProgress(20);
@@ -68,7 +113,8 @@ export default function GoogleSheetsDialog({ open, onOpenChange, mode = 'import'
 
   const resetForm = () => {
     setSpreadsheetId('');
-    setSheetName('Sheet1');
+    setSheetName('');
+    setSheets([]);
     setClearExisting(false);
     setProgress(0);
     setResult(null);
@@ -95,29 +141,60 @@ export default function GoogleSheetsDialog({ open, onOpenChange, mode = 'import'
           </Alert>
 
           <div className="space-y-2">
-            <Label htmlFor="spreadsheetId">Spreadsheet ID *</Label>
-            <Input
-              id="spreadsheetId"
-              placeholder="e.g., 1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms"
-              value={spreadsheetId}
-              onChange={(e) => setSpreadsheetId(e.target.value)}
-              disabled={processing}
-            />
-            <p className="text-xs text-slate-500">
-              Find this in your Google Sheet URL after /d/
-            </p>
-          </div>
+              <Label htmlFor="spreadsheet">Select Spreadsheet *</Label>
+              <Select 
+                value={spreadsheetId} 
+                onValueChange={setSpreadsheetId}
+                disabled={processing || loadingSpreadsheets}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={loadingSpreadsheets ? "Loading..." : "Select a spreadsheet"} />
+                </SelectTrigger>
+                <SelectContent>
+                  {loadingSpreadsheets ? (
+                    <div className="flex items-center justify-center p-2">
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    </div>
+                  ) : spreadsheets.length === 0 ? (
+                    <div className="p-2 text-sm text-slate-500">No spreadsheets found</div>
+                  ) : (
+                    spreadsheets.map((sheet) => (
+                      <SelectItem key={sheet.id} value={sheet.id}>
+                        {sheet.name}
+                      </SelectItem>
+                    ))
+                  )}
+                </SelectContent>
+              </Select>
+            </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="sheetName">Sheet Name</Label>
-            <Input
-              id="sheetName"
-              placeholder="Sheet1"
-              value={sheetName}
-              onChange={(e) => setSheetName(e.target.value)}
-              disabled={processing}
-            />
-          </div>
+            <div className="space-y-2">
+              <Label htmlFor="sheetName">Select Sheet *</Label>
+              <Select 
+                value={sheetName} 
+                onValueChange={setSheetName}
+                disabled={processing || loadingSheets || !spreadsheetId}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={loadingSheets ? "Loading..." : spreadsheetId ? "Select a sheet" : "First select a spreadsheet"} />
+                </SelectTrigger>
+                <SelectContent>
+                  {loadingSheets ? (
+                    <div className="flex items-center justify-center p-2">
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    </div>
+                  ) : sheets.length === 0 ? (
+                    <div className="p-2 text-sm text-slate-500">No sheets found</div>
+                  ) : (
+                    sheets.map((sheet) => (
+                      <SelectItem key={sheet} value={sheet}>
+                        {sheet}
+                      </SelectItem>
+                    ))
+                  )}
+                </SelectContent>
+              </Select>
+            </div>
 
           {mode === 'export' && (
             <div className="flex items-center space-x-2">
@@ -164,7 +241,7 @@ export default function GoogleSheetsDialog({ open, onOpenChange, mode = 'import'
           </Button>
           <Button 
             onClick={handleSubmit} 
-            disabled={!spreadsheetId || processing} 
+            disabled={!spreadsheetId || !sheetName || processing} 
             className="bg-slate-900 hover:bg-slate-800"
           >
             {processing ? 'Processing...' : mode === 'import' ? 'Import' : 'Export'}
