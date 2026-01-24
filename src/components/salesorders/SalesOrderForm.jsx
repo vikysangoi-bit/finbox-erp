@@ -548,7 +548,7 @@ export default function SalesOrderForm({ open, onOpenChange, order, accounts = [
                     <Eye className="w-4 h-4" />
                     Preview
                   </Button>
-                  <Button type="submit" disabled={isLoading} className="bg-slate-900 hover:bg-slate-800">
+                  <Button type="submit" disabled={isLoading} className="bg-[#0f172a] hover:bg-[#1e3a5f]">
                     {isLoading ? 'Saving...' : (order ? 'Update Order Form' : 'Create Order Form')}
                   </Button>
                 </>

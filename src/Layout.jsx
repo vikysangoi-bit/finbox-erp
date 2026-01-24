@@ -98,7 +98,7 @@ function NavItem({ item, currentPageName, expanded, setExpanded, mobile = false 
         <button
           onClick={() => setExpanded(isExpanded ? null : item.name)}
           className={`w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all
-            ${isActive ? 'bg-slate-900 text-white' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'}`}
+            ${isActive ? 'bg-[#0f172a] text-white' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'}`}
         >
           <div className="flex items-center gap-3">
             <item.icon className="w-5 h-5" />
@@ -114,7 +114,7 @@ function NavItem({ item, currentPageName, expanded, setExpanded, mobile = false 
                 to={createPageUrl(child.page)}
                 className={`block px-3 py-2 rounded-lg text-sm transition-all
                   ${child.page === currentPageName 
-                    ? 'bg-slate-800 text-white' 
+                    ? 'bg-[#1e3a5f] text-white' 
                     : 'text-slate-500 hover:bg-slate-100 hover:text-slate-900'}`}
               >
                 {child.name}
@@ -130,7 +130,7 @@ function NavItem({ item, currentPageName, expanded, setExpanded, mobile = false 
     <Link
       to={createPageUrl(item.page)}
       className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all
-        ${isActive ? 'bg-slate-900 text-white' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'}`}
+        ${isActive ? 'bg-[#0f172a] text-white' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'}`}
     >
       <item.icon className="w-5 h-5" />
       <span>{item.name}</span>
@@ -146,7 +146,7 @@ function Sidebar({ currentPageName, mobile = false }) {
       {/* Logo */}
       <div className="p-6 border-b border-slate-100">
         <Link to={createPageUrl('Dashboard')} className="flex items-center gap-3">
-          <div className="p-2 rounded-xl bg-gradient-to-br from-slate-800 to-slate-900">
+          <div className="p-2 rounded-xl bg-gradient-to-br from-[#1e3a5f] to-[#0f172a]">
             <Building2 className="w-6 h-6 text-white" />
           </div>
           <div>
@@ -217,7 +217,7 @@ export default function Layout({ children, currentPageName }) {
           </Sheet>
 
           <Link to={createPageUrl('Dashboard')} className="flex items-center gap-2">
-            <div className="p-1.5 rounded-lg bg-gradient-to-br from-slate-800 to-slate-900">
+            <div className="p-1.5 rounded-lg bg-gradient-to-br from-[#1e3a5f] to-[#0f172a]">
               <Building2 className="w-5 h-5 text-white" />
             </div>
             <span className="font-bold text-slate-900">GarmentERP</span>
@@ -256,7 +256,7 @@ export default function Layout({ children, currentPageName }) {
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="flex items-center gap-3 px-3">
                 <Avatar className="h-9 w-9">
-                  <AvatarFallback className="bg-gradient-to-br from-slate-600 to-slate-800 text-white">
+                  <AvatarFallback className="bg-gradient-to-br from-[#2d4a6f] to-[#1e3a5f] text-white">
                     {getInitials(user?.full_name)}
                   </AvatarFallback>
                 </Avatar>

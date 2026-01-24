@@ -28,7 +28,7 @@ export default function SalesOrderPrintView({ open, onOpenChange, order }) {
 
         <div className="p-8 bg-white print:p-0" id="print-content">
           {/* Header with Logo and Company Info */}
-          <div className="flex items-start justify-between mb-6 pb-4 border-b-2 border-slate-900">
+          <div className="flex items-start justify-between mb-6 pb-4 border-b-2 border-[#0f172a]">
             <div className="w-48">
               <img 
                 src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/696d1c12e7412aa1b6e6ab01/1cb57e374_fyndheader.png" 
@@ -53,8 +53,8 @@ export default function SalesOrderPrintView({ open, onOpenChange, order }) {
           </div>
 
           {/* Section A: Client & Order Form Details */}
-          <div className="border-2 border-slate-900 rounded-lg p-6 mb-6">
-            <h3 className="text-lg font-bold text-slate-900 pb-3 border-b-2 border-slate-900 mb-4">
+          <div className="border-2 border-[#0f172a] rounded-lg p-6 mb-6">
+            <h3 className="text-lg font-bold text-slate-900 pb-3 border-b-2 border-[#0f172a] mb-4">
               A. Client & Order Form Details
             </h3>
 
@@ -149,8 +149,8 @@ export default function SalesOrderPrintView({ open, onOpenChange, order }) {
           </div>
 
           {/* Section B: Service Details */}
-          <div className="border-2 border-slate-900 rounded-lg p-6">
-            <h3 className="text-lg font-bold text-slate-900 pb-3 border-b-2 border-slate-900 mb-4">
+          <div className="border-2 border-[#0f172a] rounded-lg p-6">
+            <h3 className="text-lg font-bold text-slate-900 pb-3 border-b-2 border-[#0f172a] mb-4">
               B. Service Details
             </h3>
 
@@ -238,7 +238,7 @@ export default function SalesOrderPrintView({ open, onOpenChange, order }) {
               </div>
             </div>
             <div className="text-center">
-              <div className="border-t-2 border-slate-900 pt-2 mt-16">
+              <div className="border-t-2 border-[#0f172a] pt-2 mt-16">
                 <p className="font-semibold text-sm">Authorized Signatory</p>
                 <p className="text-xs text-slate-500">(Shopsense Retail Technologies Ltd.)</p>
               </div>
