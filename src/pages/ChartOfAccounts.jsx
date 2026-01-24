@@ -12,7 +12,7 @@ import BulkDeleteDialog from "@/components/shared/BulkDeleteDialog";
 import GoogleSheetsDialog from "@/components/accounts/GoogleSheetsDialog";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, Pencil, Trash2, BookOpen, Upload, Sheet } from "lucide-react";
+import { MoreHorizontal, Pencil, Trash2, BookOpen, Upload, Sheet, RefreshCw, Download } from "lucide-react";
 import ConfirmDialog from "@/components/shared/ConfirmDialog";
 
 export default function ChartOfAccounts() {
@@ -195,22 +195,32 @@ export default function ChartOfAccounts() {
             a.click();
           }}
         >
-          <Button variant="outline" onClick={() => setShowBulkUpload(true)} className="border-slate-200">
-            <Upload className="w-4 h-4 mr-2" />
-            Bulk Upload
-          </Button>
-          <Button variant="outline" onClick={() => setShowBulkDelete(true)} className="border-rose-200 text-rose-600 hover:bg-rose-50">
-            <Trash2 className="w-4 h-4 mr-2" />
-            Bulk Delete
-          </Button>
-          <Button variant="outline" onClick={() => setShowGoogleSheetsImport(true)} className="border-green-200 text-green-700 hover:bg-green-50">
-            <Sheet className="w-4 h-4 mr-2" />
-            Import from Sheets
-          </Button>
-          <Button variant="outline" onClick={() => setShowGoogleSheetsExport(true)} className="border-blue-200 text-blue-700 hover:bg-blue-50">
-            <Sheet className="w-4 h-4 mr-2" />
-            Export to Sheets
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="border-slate-200">
+                <RefreshCw className="w-4 h-4 mr-2" />
+                Sync
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuItem onClick={() => setShowBulkUpload(true)}>
+                <Upload className="w-4 h-4 mr-2" />
+                Bulk Upload (CSV/Excel)
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setShowBulkDelete(true)} className="text-rose-600">
+                <Trash2 className="w-4 h-4 mr-2" />
+                Bulk Delete
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setShowGoogleSheetsImport(true)}>
+                <Download className="w-4 h-4 mr-2" />
+                Import from Google Sheets
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setShowGoogleSheetsExport(true)}>
+                <Sheet className="w-4 h-4 mr-2" />
+                Export to Google Sheets
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
           {selectedRows.length > 0 && (
             <Button variant="destructive" onClick={() => setShowBulkDeleteConfirm(true)}>
               <Trash2 className="w-4 h-4 mr-2" />
