@@ -13,7 +13,8 @@ import GoogleSheetsDialog from "@/components/accounts/GoogleSheetsDialog";
 import ColumnSelector from "@/components/shared/ColumnSelector";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, Pencil, Trash2, BookOpen, Upload, Sheet, RefreshCw, Download, Eye } from "lucide-react";
+import { MoreHorizontal, Pencil, Trash2, BookOpen, Eye } from "lucide-react";
+import SyncDropdown from "@/components/shared/SyncDropdown";
 import ConfirmDialog from "@/components/shared/ConfirmDialog";
 
 const STORAGE_KEY = 'chartOfAccounts_visibleColumns';
@@ -134,7 +135,38 @@ export default function ChartOfAccounts() {
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }) => base44.entities.Account.update(id, data),
+    mutationFn: async ({ id, data }) => {
+      const user = await base44.auth.me();
+      
+      // Check if user is admin
+      if (user.role === 'admin') {
+        // Admin can update directly
+        await base44.entities.Account.update(id, { ...data, updated_by: user.email });
+        
+        // Log audit
+        await base44.functions.invoke('logAuditEntry', {
+          action: 'update',
+          entity_type: 'Account',
+          entity_id: id,
+          entity_name: data.name || data.code,
+          details: 'Updated account',
+          new_values: data
+        });
+      } else {
+        // Non-admin creates approval request
+        await base44.entities.ApprovalRequest.create({
+          entity_type: 'account_update',
+          entity_id: id,
+          title: `Update Account: ${data.name || data.code}`,
+          description: `Request to update account ${data.code}`,
+          submitted_by: user.email,
+          submitted_by_name: user.full_name,
+          submitted_at: new Date().toISOString()
+        });
+        
+        alert('Update request submitted for admin approval');
+      }
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['accounts'] });
       setShowForm(false);
@@ -143,7 +175,42 @@ export default function ChartOfAccounts() {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id) => base44.entities.Account.delete(id),
+    mutationFn: async (id) => {
+      const user = await base44.auth.me();
+      const account = accounts.find(a => a.id === id);
+      
+      // Check if user is admin
+      if (user.role === 'admin') {
+        // Admin can delete (soft delete)
+        await base44.entities.Account.update(id, {
+          is_deleted: true,
+          deleted_by: user.email,
+          deleted_on: new Date().toISOString()
+        });
+        
+        // Log audit
+        await base44.functions.invoke('logAuditEntry', {
+          action: 'delete',
+          entity_type: 'Account',
+          entity_id: id,
+          entity_name: account?.name || account?.code,
+          details: 'Deleted account'
+        });
+      } else {
+        // Non-admin creates approval request
+        await base44.entities.ApprovalRequest.create({
+          entity_type: 'account_delete',
+          entity_id: id,
+          title: `Delete Account: ${account?.name || account?.code}`,
+          description: `Request to delete account ${account?.code}`,
+          submitted_by: user.email,
+          submitted_by_name: user.full_name,
+          submitted_at: new Date().toISOString()
+        });
+        
+        alert('Delete request submitted for admin approval');
+      }
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['accounts'] });
       setDeleteAccount(null);

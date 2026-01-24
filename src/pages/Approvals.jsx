@@ -84,6 +84,7 @@ export default function Approvals() {
       queryClient.invalidateQueries({ queryKey: ['approval-requests'] });
       queryClient.invalidateQueries({ queryKey: ['journal-entries'] });
       queryClient.invalidateQueries({ queryKey: ['inventory-transactions'] });
+      queryClient.invalidateQueries({ queryKey: ['accounts'] });
     }
   });
 
@@ -136,6 +137,7 @@ export default function Approvals() {
       queryClient.invalidateQueries({ queryKey: ['approval-requests'] });
       queryClient.invalidateQueries({ queryKey: ['journal-entries'] });
       queryClient.invalidateQueries({ queryKey: ['inventory-transactions'] });
+      queryClient.invalidateQueries({ queryKey: ['accounts'] });
       setRejectDialog(null);
       setRejectReason('');
     }
