@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import PageHeader from "@/components/shared/PageHeader";
@@ -10,10 +10,13 @@ import AccountForm from "@/components/accounts/AccountForm";
 import BulkUploadDialog from "@/components/shared/BulkUploadDialog";
 import BulkDeleteDialog from "@/components/shared/BulkDeleteDialog";
 import GoogleSheetsDialog from "@/components/accounts/GoogleSheetsDialog";
+import ColumnSelector from "@/components/shared/ColumnSelector";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal, Pencil, Trash2, BookOpen, Upload, Sheet, RefreshCw, Download, Eye } from "lucide-react";
 import ConfirmDialog from "@/components/shared/ConfirmDialog";
+
+const STORAGE_KEY = 'chartOfAccounts_visibleColumns';
 
 export default function ChartOfAccounts() {
   const [showForm, setShowForm] = useState(false);
@@ -30,6 +33,56 @@ export default function ChartOfAccounts() {
   const [showBulkDeleteConfirm, setShowBulkDeleteConfirm] = useState(false);
 
   const queryClient = useQueryClient();
+
+  const allColumns = [
+    { id: 'code', header: "Code", accessor: "code", render: (row) => <span className="font-mono font-medium text-slate-900">{row.code}</span> },
+    { id: 'name', header: "Name", accessor: "name", render: (row) => <span className="font-medium">{row.name}</span> },
+    { id: 'type', header: "Type", render: (row) => <span className="capitalize text-slate-600">{row.type}</span> },
+    { id: 'category', header: "Category", render: (row) => <span className="text-sm text-slate-500 capitalize">{row.category?.replace(/_/g, ' ')}</span> },
+    { id: 'currency', header: "Currency", accessor: "currency", render: (row) => <span className="text-slate-600">{row.currency || 'USD'}</span> },
+    { id: 'balance', header: "Balance", render: (row) => <span className="font-medium text-slate-900">{(row.currentBalance || 0).toLocaleString('en-US', { style: 'currency', currency: row.currency || 'USD' })}</span> },
+    { id: 'status', header: "Status", render: (row) => <StatusBadge status={row.active ? 'active' : 'inactive'} /> },
+    {
+      id: 'actions',
+      header: "",
+      cellClassName: "text-right",
+      render: (row) => (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon" className="h-8 w-8">
+              <MoreHorizontal className="w-4 h-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={() => { setViewingAccount(row); setShowForm(true); }}>
+              <Eye className="w-4 h-4 mr-2" />
+              View
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => { setEditingAccount(row); setViewingAccount(null); setShowForm(true); }}>
+              <Pencil className="w-4 h-4 mr-2" />
+              Edit
+            </DropdownMenuItem>
+            <DropdownMenuItem 
+              onClick={() => setDeleteAccount(row)}
+              className="text-rose-600"
+            >
+              <Trash2 className="w-4 h-4 mr-2" />
+              Delete
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      )
+    }
+  ];
+
+  const [visibleColumns, setVisibleColumns] = useState(() => {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    return saved ? JSON.parse(saved) : allColumns.map(c => c.id);
+  });
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(visibleColumns));
+  }, [visibleColumns]);
 
   const { data: accounts = [], isLoading } = useQuery({
     queryKey: ['accounts'],
@@ -79,74 +132,6 @@ export default function ChartOfAccounts() {
     const matchesType = typeFilter === 'all' || account.type === typeFilter;
     return matchesSearch && matchesType;
   });
-
-  const columns = [
-    { 
-      header: "Code", 
-      accessor: "code",
-      render: (row) => <span className="font-mono font-medium text-slate-900">{row.code}</span>
-    },
-    { header: "Name", accessor: "name", render: (row) => <span className="font-medium">{row.name}</span> },
-    { 
-      header: "Type", 
-      render: (row) => (
-        <span className="capitalize text-slate-600">{row.type}</span>
-      )
-    },
-    { 
-      header: "Category", 
-      render: (row) => (
-        <span className="text-sm text-slate-500 capitalize">{row.category?.replace(/_/g, ' ')}</span>
-      )
-    },
-    { 
-      header: "Currency", 
-      accessor: "currency",
-      render: (row) => <span className="text-slate-600">{row.currency || 'USD'}</span>
-    },
-    { 
-      header: "Balance", 
-      render: (row) => (
-        <span className="font-medium text-slate-900">
-          {(row.currentBalance || 0).toLocaleString('en-US', { style: 'currency', currency: row.currency || 'USD' })}
-        </span>
-      )
-    },
-    { 
-      header: "Status", 
-      render: (row) => <StatusBadge status={row.active ? 'active' : 'inactive'} />
-    },
-    {
-      header: "",
-      cellClassName: "text-right",
-      render: (row) => (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-8 w-8">
-              <MoreHorizontal className="w-4 h-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => { setViewingAccount(row); setShowForm(true); }}>
-              <Eye className="w-4 h-4 mr-2" />
-              View
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => { setEditingAccount(row); setViewingAccount(null); setShowForm(true); }}>
-              <Pencil className="w-4 h-4 mr-2" />
-              Edit
-            </DropdownMenuItem>
-            <DropdownMenuItem 
-              onClick={() => setDeleteAccount(row)}
-              className="text-rose-600"
-            >
-              <Trash2 className="w-4 h-4 mr-2" />
-              Delete
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      )
-    }
-  ];
 
   const handleSave = (data) => {
     if (editingAccount) {
@@ -200,6 +185,11 @@ export default function ChartOfAccounts() {
             a.click();
           }}
         >
+          <ColumnSelector
+            columns={allColumns.filter(c => c.id !== 'actions')}
+            visibleColumns={visibleColumns}
+            onVisibilityChange={setVisibleColumns}
+          />
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" className="border-slate-200">
@@ -265,7 +255,7 @@ export default function ChartOfAccounts() {
           />
         ) : (
           <DataTable 
-            columns={columns} 
+            columns={allColumns} 
             data={filteredAccounts} 
             isLoading={isLoading}
             emptyMessage="No accounts match your search"
@@ -273,6 +263,7 @@ export default function ChartOfAccounts() {
             selectedRows={selectedRows}
             onSelectRow={handleSelectRow}
             onSelectAll={handleSelectAll}
+            visibleColumns={visibleColumns}
           />
         )}
 
