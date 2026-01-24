@@ -13,9 +13,9 @@ import JournalEntries from './pages/JournalEntries';
 import PurchaseOrders from './pages/PurchaseOrders';
 import PurchaseReports from './pages/PurchaseReports';
 import Reports from './pages/Reports';
+import SalesOrders from './pages/SalesOrders';
 import Suppliers from './pages/Suppliers';
 import Users from './pages/Users';
-import SalesOrders from './pages/SalesOrders';
 import __Layout from './Layout.jsx';
 
 
@@ -35,9 +35,9 @@ export const PAGES = {
     "PurchaseOrders": PurchaseOrders,
     "PurchaseReports": PurchaseReports,
     "Reports": Reports,
+    "SalesOrders": SalesOrders,
     "Suppliers": Suppliers,
     "Users": Users,
-    "SalesOrders": SalesOrders,
 }
 
 export const pagesConfig = {

@@ -146,11 +146,13 @@ function Sidebar({ currentPageName, mobile = false }) {
       {/* Logo */}
       <div className="p-6 border-b border-slate-100">
         <Link to={createPageUrl('Dashboard')} className="flex items-center gap-3">
-          <div className="p-2 rounded-xl bg-gradient-to-br from-[#1e3a5f] to-[#0f172a]">
-            <Building2 className="w-6 h-6 text-white" />
-          </div>
+          <img 
+            src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/696d1c12e7412aa1b6e6ab01/1cb57e374_fyndheader.png" 
+            alt="Fynd Logo" 
+            className="h-12 object-contain"
+          />
           <div>
-            <h1 className="text-lg font-bold text-slate-900">GarmentERP</h1>
+            <h1 className="text-lg font-bold text-slate-900">FyndERP</h1>
             <p className="text-xs text-slate-500">Accounting & Inventory</p>
           </div>
         </Link>
@@ -172,7 +174,7 @@ function Sidebar({ currentPageName, mobile = false }) {
 
       {/* Footer */}
       <div className="p-4 border-t border-slate-100">
-        <p className="text-xs text-slate-400 text-center">© 2024 GarmentERP</p>
+        <p className="text-xs text-slate-400 text-center">© 2024 FyndERP</p>
       </div>
     </div>
   );
@@ -217,10 +219,12 @@ export default function Layout({ children, currentPageName }) {
           </Sheet>
 
           <Link to={createPageUrl('Dashboard')} className="flex items-center gap-2">
-            <div className="p-1.5 rounded-lg bg-gradient-to-br from-[#1e3a5f] to-[#0f172a]">
-              <Building2 className="w-5 h-5 text-white" />
-            </div>
-            <span className="font-bold text-slate-900">GarmentERP</span>
+            <img 
+              src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/696d1c12e7412aa1b6e6ab01/1cb57e374_fyndheader.png" 
+              alt="Fynd Logo" 
+              className="h-8 object-contain"
+            />
+            <span className="font-bold text-slate-900">FyndERP</span>
           </Link>
 
           <DropdownMenu>
