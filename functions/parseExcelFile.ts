@@ -1,14 +1,30 @@
-import * as XLSX from 'xlsx';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
+import * as XLSX from 'npm:xlsx@0.18.5';
 
-export default async function parseExcelFile({ file_url, json_schema }) {
+Deno.serve(async (req) => {
   try {
+    const base44 = createClientFromRequest(req);
+    const user = await base44.auth.me();
+
+    if (!user) {
+      return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const { file_url, json_schema } = await req.json();
+
+    if (!file_url) {
+      return Response.json({ 
+        status: 'error', 
+        details: 'file_url is required' 
+      });
+    }
     // Fetch the Excel file
     const response = await fetch(file_url);
     if (!response.ok) {
-      return {
+      return Response.json({
         status: 'error',
         details: 'Failed to download the file'
-      };
+      });
     }
 
     const arrayBuffer = await response.arrayBuffer();
@@ -19,10 +35,10 @@ export default async function parseExcelFile({ file_url, json_schema }) {
     // Get the first sheet
     const sheetName = workbook.SheetNames[0];
     if (!sheetName) {
-      return {
+      return Response.json({
         status: 'error',
         details: 'No sheets found in the Excel file'
-      };
+      });
     }
     
     const worksheet = workbook.Sheets[sheetName];
@@ -31,10 +47,10 @@ export default async function parseExcelFile({ file_url, json_schema }) {
     const jsonData = XLSX.utils.sheet_to_json(worksheet, { defval: '' });
     
     if (!jsonData || jsonData.length === 0) {
-      return {
+      return Response.json({
         status: 'error',
         details: 'No data found in the Excel file'
-      };
+      });
     }
 
     // Process the data based on schema
@@ -61,15 +77,15 @@ export default async function parseExcelFile({ file_url, json_schema }) {
       return processed;
     });
 
-    return {
+    return Response.json({
       status: 'success',
       output: processedData
-    };
+    });
 
   } catch (error) {
-    return {
+    return Response.json({
       status: 'error',
       details: error.message || 'Failed to parse Excel file'
-    };
+    });
   }
-}
+});
