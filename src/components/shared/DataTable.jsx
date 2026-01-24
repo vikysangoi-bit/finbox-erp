@@ -13,48 +13,58 @@ export default function DataTable({
   selectable = false,
   selectedRows = [],
   onSelectRow,
-  onSelectAll
+  onSelectAll,
+  visibleColumns = null
 }) {
   const allSelected = selectable && data.length > 0 && selectedRows.length === data.length;
   const someSelected = selectable && selectedRows.length > 0 && selectedRows.length < data.length;
 
+  // Filter and sort columns based on visibility
+  const displayColumns = visibleColumns 
+    ? visibleColumns
+        .map(id => columns.find(col => col.id === id))
+        .filter(Boolean)
+    : columns;
+
   if (isLoading) {
     return (
       <Card className="border-0 bg-white/80 backdrop-blur-sm overflow-hidden">
-        <Table>
-          <TableHeader>
-            <TableRow className="bg-slate-50/50 border-b border-slate-100">
-              {selectable && <TableHead className="w-12"><Skeleton className="h-4 w-4" /></TableHead>}
-              {columns.map((col, i) => (
-                <TableHead key={i} className="text-slate-600 font-semibold">
-                  {col.header}
-                </TableHead>
-              ))}
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {[...Array(5)].map((_, i) => (
-              <TableRow key={i}>
-                {selectable && <TableCell><Skeleton className="h-4 w-4" /></TableCell>}
-                {columns.map((_, j) => (
-                  <TableCell key={j}>
-                    <Skeleton className="h-4 w-24" />
-                  </TableCell>
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader className="sticky top-0 z-10 bg-slate-50/95 backdrop-blur-sm">
+              <TableRow className="border-b border-slate-100">
+                {selectable && <TableHead className="w-12"><Skeleton className="h-4 w-4" /></TableHead>}
+                {displayColumns.map((col, i) => (
+                  <TableHead key={i} className="text-slate-600 font-semibold">
+                    {col.header}
+                  </TableHead>
                 ))}
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {[...Array(5)].map((_, i) => (
+                <TableRow key={i}>
+                  {selectable && <TableCell><Skeleton className="h-4 w-4" /></TableCell>}
+                  {displayColumns.map((_, j) => (
+                    <TableCell key={j}>
+                      <Skeleton className="h-4 w-24" />
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
       </Card>
     );
   }
 
   return (
     <Card className="border-0 bg-white/80 backdrop-blur-sm overflow-hidden">
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto max-h-[calc(100vh-300px)] relative">
         <Table>
-          <TableHeader>
-            <TableRow className="bg-slate-50/50 border-b border-slate-100">
+          <TableHeader className="sticky top-0 z-10 bg-slate-50/95 backdrop-blur-sm shadow-sm">
+            <TableRow className="border-b border-slate-100">
               {selectable && (
                 <TableHead className="w-12">
                   <Checkbox
@@ -65,8 +75,8 @@ export default function DataTable({
                   />
                 </TableHead>
               )}
-              {columns.map((col, i) => (
-                <TableHead key={i} className={`text-slate-600 font-semibold ${col.className || ''}`}>
+              {displayColumns.map((col, i) => (
+                <TableHead key={col.id || i} className={`text-slate-600 font-semibold ${col.className || ''}`}>
                   {col.header}
                 </TableHead>
               ))}
@@ -75,7 +85,7 @@ export default function DataTable({
           <TableBody>
             {data.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={columns.length + (selectable ? 1 : 0)} className="text-center py-12 text-slate-500">
+                <TableCell colSpan={displayColumns.length + (selectable ? 1 : 0)} className="text-center py-12 text-slate-500">
                   {emptyMessage}
                 </TableCell>
               </TableRow>
@@ -94,8 +104,8 @@ export default function DataTable({
                       />
                     </TableCell>
                   )}
-                  {columns.map((col, j) => (
-                    <TableCell key={j} className={col.cellClassName || ''} onClick={() => onRowClick?.(row)}>
+                  {displayColumns.map((col, j) => (
+                    <TableCell key={col.id || j} className={col.cellClassName || ''} onClick={() => onRowClick?.(row)}>
                       {col.render ? col.render(row) : row[col.accessor]}
                     </TableCell>
                   ))}
