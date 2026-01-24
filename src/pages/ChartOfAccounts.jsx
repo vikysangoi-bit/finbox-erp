@@ -8,6 +8,7 @@ import StatusBadge from "@/components/shared/StatusBadge";
 import EmptyState from "@/components/shared/EmptyState";
 import AccountForm from "@/components/accounts/AccountForm";
 import BulkUploadDialog from "@/components/shared/BulkUploadDialog";
+import BulkDeleteDialog from "@/components/shared/BulkDeleteDialog";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal, Pencil, Trash2, BookOpen, Upload } from "lucide-react";
@@ -16,10 +17,13 @@ import ConfirmDialog from "@/components/shared/ConfirmDialog";
 export default function ChartOfAccounts() {
   const [showForm, setShowForm] = useState(false);
   const [showBulkUpload, setShowBulkUpload] = useState(false);
+  const [showBulkDelete, setShowBulkDelete] = useState(false);
   const [editingAccount, setEditingAccount] = useState(null);
   const [deleteAccount, setDeleteAccount] = useState(null);
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState('all');
+  const [selectedRows, setSelectedRows] = useState([]);
+  const [showBulkDeleteConfirm, setShowBulkDeleteConfirm] = useState(false);
 
   const queryClient = useQueryClient();
 
@@ -50,6 +54,17 @@ export default function ChartOfAccounts() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['accounts'] });
       setDeleteAccount(null);
+    }
+  });
+
+  const bulkDeleteMutation = useMutation({
+    mutationFn: async (ids) => {
+      await Promise.all(ids.map(id => base44.entities.Account.delete(id)));
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['accounts'] });
+      setSelectedRows([]);
+      setShowBulkDeleteConfirm(false);
     }
   });
 
@@ -133,6 +148,30 @@ export default function ChartOfAccounts() {
     }
   };
 
+  const handleSelectRow = (row) => {
+    setSelectedRows(prev => {
+      const exists = prev.some(r => r.id === row.id);
+      if (exists) {
+        return prev.filter(r => r.id !== row.id);
+      } else {
+        return [...prev, row];
+      }
+    });
+  };
+
+  const handleSelectAll = () => {
+    if (selectedRows.length === filteredAccounts.length) {
+      setSelectedRows([]);
+    } else {
+      setSelectedRows([...filteredAccounts]);
+    }
+  };
+
+  const handleBulkDelete = () => {
+    const ids = selectedRows.map(row => row.id);
+    bulkDeleteMutation.mutate(ids);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 p-4 md:p-8">
       <div className="max-w-7xl mx-auto space-y-6">
@@ -157,6 +196,16 @@ export default function ChartOfAccounts() {
             <Upload className="w-4 h-4 mr-2" />
             Bulk Upload
           </Button>
+          <Button variant="outline" onClick={() => setShowBulkDelete(true)} className="border-rose-200 text-rose-600 hover:bg-rose-50">
+            <Trash2 className="w-4 h-4 mr-2" />
+            Bulk Delete
+          </Button>
+          {selectedRows.length > 0 && (
+            <Button variant="destructive" onClick={() => setShowBulkDeleteConfirm(true)}>
+              <Trash2 className="w-4 h-4 mr-2" />
+              Delete Selected ({selectedRows.length})
+            </Button>
+          )}
         </PageHeader>
 
         <SearchFilter
@@ -194,6 +243,10 @@ export default function ChartOfAccounts() {
             data={filteredAccounts} 
             isLoading={isLoading}
             emptyMessage="No accounts match your search"
+            selectable={true}
+            selectedRows={selectedRows}
+            onSelectRow={handleSelectRow}
+            onSelectAll={handleSelectAll}
           />
         )}
 
@@ -214,6 +267,14 @@ export default function ChartOfAccounts() {
           confirmLabel="Delete"
           onConfirm={() => deleteMutation.mutate(deleteAccount.id)}
           variant="destructive"
+        />
+
+        <BulkDeleteDialog
+          open={showBulkDelete}
+          onOpenChange={setShowBulkDelete}
+          entityName="Account"
+          identifierField="code"
+          onSuccess={() => queryClient.invalidateQueries({ queryKey: ['accounts'] })}
         />
 
         <BulkUploadDialog
