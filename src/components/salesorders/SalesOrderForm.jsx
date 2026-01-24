@@ -98,7 +98,11 @@ export default function SalesOrderForm({ open, onOpenChange, order, accounts = [
         customerBrand: customer.brand || '',
         customerAddress: customer.address || '',
         customerCountry: customer.country || '',
-        customerGstId: customer.gstId || ''
+        customerGstId: customer.gstId || '',
+        paymentTerm: customer.paymentTerms || 'net_30',
+        contactPersonName: customer.contactPerson || '',
+        contactPersonPhone: customer.phone || '',
+        contactPersonEmail: customer.email || ''
       }));
     }
   };
@@ -150,7 +154,10 @@ export default function SalesOrderForm({ open, onOpenChange, order, accounts = [
                       <SelectValue placeholder="Select customer" />
                     </SelectTrigger>
                     <SelectContent>
-                      {accounts.filter(a => a.type === 'revenue').map((acc) => (
+                      {accounts.filter(a => {
+                        const parent = accounts.find(p => p.id === a.parentAccount);
+                        return parent?.name === 'Trade Receivables';
+                      }).map((acc) => (
                         <SelectItem key={acc.id} value={acc.code}>{acc.name}</SelectItem>
                       ))}
                     </SelectContent>
@@ -160,19 +167,19 @@ export default function SalesOrderForm({ open, onOpenChange, order, accounts = [
                 <div className="flex items-start gap-3">
                   <Label className="w-32 text-sm font-semibold pt-2 shrink-0">Brand/Trade Name</Label>
                   <span className="pt-2">:</span>
-                  <Input value={form.customerBrand} disabled className="flex-1 bg-slate-50" />
+                  <Input value={form.customerBrand} onChange={(e) => setForm({ ...form, customerBrand: e.target.value })} disabled={viewMode} className="flex-1" />
                 </div>
 
                 <div className="flex items-start gap-3">
                   <Label className="w-32 text-sm font-semibold pt-2 shrink-0">Billing Address</Label>
                   <span className="pt-2">:</span>
-                  <Textarea value={form.customerAddress} disabled className="flex-1 bg-slate-50" rows={2} />
+                  <Textarea value={form.customerAddress} onChange={(e) => setForm({ ...form, customerAddress: e.target.value })} disabled={viewMode} className="flex-1" rows={2} />
                 </div>
 
                 <div className="flex items-start gap-3">
                   <Label className="w-32 text-sm font-semibold pt-2 shrink-0">Tax Details</Label>
                   <span className="pt-2">:</span>
-                  <Input value={form.customerGstId ? `GST: ${form.customerGstId}` : ''} disabled className="flex-1 bg-slate-50" />
+                  <Input value={form.customerGstId} onChange={(e) => setForm({ ...form, customerGstId: e.target.value })} disabled={viewMode} className="flex-1" placeholder="GST ID" />
                 </div>
 
                 <div className="flex items-start gap-3">
@@ -189,7 +196,7 @@ export default function SalesOrderForm({ open, onOpenChange, order, accounts = [
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="1_year">6 Months</SelectItem>
+                      <SelectItem value="6_months">6 Months</SelectItem>
                       <SelectItem value="1_year">1 Year</SelectItem>
                       <SelectItem value="2_years">2 Years</SelectItem>
                       <SelectItem value="3_years">3 Years</SelectItem>
@@ -328,12 +335,8 @@ export default function SalesOrderForm({ open, onOpenChange, order, accounts = [
 
           {/* Section B: Service Details */}
           <div className="border-2 border-slate-900 rounded-lg p-6 space-y-4">
-            <div className="flex items-center justify-between pb-2 border-b-2 border-slate-900">
+            <div className="pb-2 border-b-2 border-slate-900">
               <h3 className="text-lg font-bold text-slate-900">B. Service Details</h3>
-              <div className="text-sm">
-                <span className="font-semibold">Bundle Service: </span>
-                <Input value={form.RFQID} onChange={(e) => setForm({ ...form, RFQID: e.target.value })} disabled={viewMode} className="inline-block w-32 h-8" placeholder="No" />
-              </div>
             </div>
 
             <div className="space-y-3">
