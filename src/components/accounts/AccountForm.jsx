@@ -122,7 +122,7 @@ export default function AccountForm({ open, onOpenChange, account, accounts = []
     }
   };
 
-  const parentAccounts = accounts.filter(a => a.type === form.type && a.id !== account?.id);
+  const parentAccounts = accounts.filter(a => a.type === form.type && a.id !== account?.id && !a.parentAccount);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
