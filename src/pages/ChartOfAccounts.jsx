@@ -105,7 +105,12 @@ export default function ChartOfAccounts() {
 
   const [visibleColumns, setVisibleColumns] = useState(() => {
     const saved = localStorage.getItem(STORAGE_KEY);
-    return saved ? JSON.parse(saved) : allColumns.map(c => c.id);
+    const savedColumns = saved ? JSON.parse(saved) : allColumns.map(c => c.id);
+    // Always ensure actions column is included
+    if (!savedColumns.includes('actions')) {
+      savedColumns.push('actions');
+    }
+    return savedColumns;
   });
 
   useEffect(() => {

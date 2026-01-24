@@ -26,6 +26,12 @@ export default function DataTable({
         .filter(Boolean)
     : columns;
 
+  // Always ensure actions column is at the end if it exists
+  const actionsColumn = columns.find(col => col.id === 'actions');
+  if (actionsColumn && !displayColumns.find(col => col.id === 'actions')) {
+    displayColumns.push(actionsColumn);
+  }
+
   if (isLoading) {
     return (
       <Card className="border-0 bg-white/80 backdrop-blur-sm overflow-hidden">
