@@ -152,7 +152,7 @@ function Sidebar({ currentPageName, mobile = false }) {
             className="h-12 object-contain"
           />
           <div>
-            <h1 className="text-lg font-bold text-slate-900">FyndERP</h1>
+            <h1 className="text-lg font-bold text-slate-900">FinBox</h1>
             <p className="text-xs text-slate-500">Accounting & Inventory</p>
           </div>
         </Link>
@@ -174,7 +174,7 @@ function Sidebar({ currentPageName, mobile = false }) {
 
       {/* Footer */}
       <div className="p-4 border-t border-slate-100">
-        <p className="text-xs text-slate-400 text-center">© 2024 FyndERP</p>
+        <p className="text-xs text-slate-400 text-center">© 2024 FinBox</p>
       </div>
     </div>
   );
@@ -224,7 +224,7 @@ export default function Layout({ children, currentPageName }) {
               alt="Fynd Logo" 
               className="h-8 object-contain"
             />
-            <span className="font-bold text-slate-900">FyndERP</span>
+            <span className="font-bold text-slate-900">FinBox</span>
           </Link>
 
           <DropdownMenu>
