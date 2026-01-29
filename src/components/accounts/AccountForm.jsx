@@ -69,7 +69,8 @@ export default function AccountForm({ open, onOpenChange, account, accounts = []
     panId: '',
     tanId: '',
     vatId: '',
-    supplierCategory: ''
+    supplierCategory: '',
+    msme: ''
   });
   
   const [accountLevel, setAccountLevel] = useState('main');
@@ -110,7 +111,8 @@ export default function AccountForm({ open, onOpenChange, account, accounts = []
         panId: '',
         tanId: '',
         vatId: '',
-        supplierCategory: ''
+        supplierCategory: '',
+        msme: ''
       });
     }
   }, [account, open]);
@@ -469,15 +471,42 @@ export default function AccountForm({ open, onOpenChange, account, accounts = []
               </div>
             </div>
 
-            <div className="space-y-2 mt-4">
-              <Label htmlFor="taxId">Tax ID</Label>
-              <Input
-                id="taxId"
-                value={form.taxId || ''}
-                onChange={(e) => setForm({ ...form, taxId: e.target.value })}
-                placeholder="e.g., 12-3456789"
-                disabled={viewMode}
-              />
+            <div className="grid grid-cols-2 gap-4 mt-4">
+              <div className="space-y-2">
+                <Label htmlFor="taxId">Tax ID</Label>
+                <Input
+                  id="taxId"
+                  value={form.taxId || ''}
+                  onChange={(e) => setForm({ ...form, taxId: e.target.value })}
+                  placeholder="e.g., 12-3456789"
+                  disabled={viewMode}
+                />
+              </div>
+              {form.type === 'liability' && form.category === 'current_liability' && (() => {
+                const parentAccount = accounts.find(a => a.id === form.parentAccount);
+                const isTradePayable = parentAccount?.code === '10002' || parentAccount?.name?.includes('Trade Payable');
+                return accountLevel === 'sub' && isTradePayable;
+              })() && (
+                <div className="space-y-2">
+                  <Label>MSME</Label>
+                  <Select 
+                    value={form.msme || 'none'} 
+                    onValueChange={(v) => setForm({ ...form, msme: v === 'none' ? '' : v })}
+                    disabled={viewMode}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select MSME" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">None</SelectItem>
+                      <SelectItem value="Micro">Micro</SelectItem>
+                      <SelectItem value="Small">Small</SelectItem>
+                      <SelectItem value="Medium">Medium</SelectItem>
+                      <SelectItem value="Large">Large</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
             </div>
 
             <div className="grid grid-cols-2 gap-4 mt-4">
