@@ -7,6 +7,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Trash2 } from "lucide-react";
 
 export default function VendorBillForm({ open, onOpenChange, vendorBill, accounts = [], purchaseOrders = [], onSave, isLoading, viewMode = false }) {
+  // Filter accounts to get only Trade Payable suppliers (parent: 10002)
+  const tradePayableSuppliers = accounts.filter(acc => 
+    acc.parentAccount === '10002' && acc.active && !acc.is_deleted
+  );
   const [form, setForm] = useState({
     accountCode: '',
     supplier: '',
@@ -158,25 +162,32 @@ export default function VendorBillForm({ open, onOpenChange, vendorBill, account
             </div>
           </div>
 
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="accountCode">Account Code</Label>
-              <Input
-                id="accountCode"
-                value={form.accountCode}
-                onChange={(e) => setForm({ ...form, accountCode: e.target.value })}
+              <Label>Supplier *</Label>
+              <Select 
+                value={form.supplier} 
+                onValueChange={(v) => {
+                  const selectedAccount = tradePayableSuppliers.find(acc => acc.name === v);
+                  setForm({ 
+                    ...form, 
+                    supplier: v,
+                    accountCode: selectedAccount?.code || ''
+                  });
+                }} 
                 disabled={viewMode}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="supplier">Supplier *</Label>
-              <Input
-                id="supplier"
-                value={form.supplier}
-                onChange={(e) => setForm({ ...form, supplier: e.target.value })}
-                required
-                disabled={viewMode}
-              />
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select Supplier" />
+                </SelectTrigger>
+                <SelectContent>
+                  {tradePayableSuppliers.map((acc) => (
+                    <SelectItem key={acc.id} value={acc.name}>
+                      {acc.code} - {acc.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div className="space-y-2">
               <Label>Service Name</Label>

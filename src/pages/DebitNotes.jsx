@@ -36,6 +36,11 @@ export default function DebitNotes() {
     queryFn: () => base44.entities.VendorBill.list()
   });
 
+  const { data: accounts = [] } = useQuery({
+    queryKey: ['accounts'],
+    queryFn: () => base44.entities.Account.list()
+  });
+
   const createMutation = useMutation({
     mutationFn: async (data) => {
       const user = await base44.auth.me();
@@ -252,6 +257,7 @@ export default function DebitNotes() {
           }}
           debitNote={viewingNote || editingNote}
           vendorBills={vendorBills}
+          accounts={accounts}
           onSave={handleSave}
           isLoading={createMutation.isPending || updateMutation.isPending}
           viewMode={!!viewingNote}

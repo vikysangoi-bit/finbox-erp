@@ -70,6 +70,7 @@ import Suppliers from './pages/Suppliers';
 import Users from './pages/Users';
 import VendorBills from './pages/VendorBills';
 import DebitNotes from './pages/DebitNotes';
+import Payments from './pages/Payments';
 import __Layout from './Layout.jsx';
 
 
@@ -97,6 +98,7 @@ export const PAGES = {
     "Users": Users,
     "VendorBills": VendorBills,
     "DebitNotes": DebitNotes,
+    "Payments": Payments,
 }
 
 export const pagesConfig = {
