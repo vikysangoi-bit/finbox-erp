@@ -62,15 +62,24 @@ Deno.serve(async (req) => {
         const schemaProp = schemaProps[key];
         if (!schemaProp) continue;
         
+        // Skip empty values
+        if (value === '' || value === null || value === undefined) {
+          continue;
+        }
+        
         // Handle different types
         if (schemaProp.type === 'number') {
-          processed[key] = value === '' ? 0 : parseFloat(value) || 0;
+          processed[key] = parseFloat(value) || 0;
         } else if (schemaProp.type === 'boolean') {
           processed[key] = value === 'true' || value === true || value === 1;
         } else if (schemaProp.type === 'array') {
           processed[key] = typeof value === 'string' ? value.split(',').map(v => v.trim()) : value;
         } else {
-          processed[key] = value === '' ? undefined : String(value);
+          // For strings, trim whitespace and convert
+          const stringValue = String(value).trim();
+          if (stringValue) {
+            processed[key] = stringValue;
+          }
         }
       }
       
