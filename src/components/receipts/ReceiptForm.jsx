@@ -103,25 +103,14 @@ export default function ReceiptForm({ open, onOpenChange, receipt, invoices = []
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="customerCode">Customer Code</Label>
-              <Input
-                id="customerCode"
-                value={form.customerCode}
-                disabled
-                className="bg-slate-50"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="customerName">Customer Name</Label>
-              <Input
-                id="customerName"
-                value={form.customerName}
-                disabled
-                className="bg-slate-50"
-              />
-            </div>
+          <div className="space-y-2">
+            <Label htmlFor="customerName">Client Name</Label>
+            <Input
+              id="customerName"
+              value={form.customerName}
+              disabled
+              className="bg-slate-50"
+            />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
