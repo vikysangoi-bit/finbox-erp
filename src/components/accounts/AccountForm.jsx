@@ -190,7 +190,12 @@ export default function AccountForm({ open, onOpenChange, account, accounts = []
               <Label>Account Type *</Label>
               <Select 
                 value={form.type} 
-                onValueChange={(v) => setForm({ ...form, type: v, category: categoryOptions[v][0].value })}
+                onValueChange={(v) => {
+                  const newCategory = form.category && categoryOptions[v]?.some(opt => opt.value === form.category) 
+                    ? form.category 
+                    : categoryOptions[v][0].value;
+                  setForm({ ...form, type: v, category: newCategory });
+                }}
                 disabled={viewMode}
               >
                 <SelectTrigger>
@@ -207,7 +212,7 @@ export default function AccountForm({ open, onOpenChange, account, accounts = []
               <Label>Category *</Label>
               <Select value={form.category} onValueChange={(v) => setForm({ ...form, category: v })} disabled={viewMode}>
                 <SelectTrigger>
-                  <SelectValue />
+                  <SelectValue placeholder="Select category" />
                 </SelectTrigger>
                 <SelectContent>
                   {categoryOptions[form.type]?.map((c) => (
@@ -486,11 +491,7 @@ export default function AccountForm({ open, onOpenChange, account, accounts = []
                   disabled={viewMode}
                 />
               </div>
-              {form.type === 'liability' && form.category === 'current_liability' && (() => {
-                const parentAccount = accounts.find(a => a.id === form.parentAccount);
-                const isTradePayable = parentAccount?.code === '10002' || parentAccount?.name?.includes('Trade Payable');
-                return accountLevel === 'sub' && isTradePayable;
-              })() && (
+              {form.type === 'liability' && (
                 <div className="space-y-2">
                   <Label>MSME</Label>
                   <Select 
