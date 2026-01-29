@@ -67,6 +67,7 @@ export default function InvoiceForm({ open, onOpenChange, invoice, accounts = []
         customerCode: code,
         customerName: customer.name || '',
         customerRegion: customer.region || '',
+        invoiceCurrency: customer.currency || 'USD',
         paymentTerms: customer.paymentTerms || 'net_30'
       }));
     }

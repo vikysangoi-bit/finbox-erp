@@ -107,6 +107,7 @@ export default function SalesOrderForm({ open, onOpenChange, order, accounts = [
         customerAddress: customer.address || '',
         customerCountry: customer.country || '',
         customerGstId: customer.gstId || '',
+        currency: customer.currency || 'USD',
         paymentTerm: customer.paymentTerms || 'net_30',
         contactPersonName: customer.contactPerson || '',
         contactPersonPhone: customer.phone || '',

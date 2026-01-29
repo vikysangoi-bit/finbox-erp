@@ -71,7 +71,8 @@ export default function CreditNoteForm({ open, onOpenChange, creditNote, invoice
       setForm(prev => ({
         ...prev,
         customerCode: code,
-        customerName: customer.name || ''
+        customerName: customer.name || '',
+        cnCurrency: customer.currency || 'USD'
       }));
     }
   };
