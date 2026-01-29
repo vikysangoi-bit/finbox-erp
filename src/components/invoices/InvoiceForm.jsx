@@ -112,10 +112,9 @@ export default function InvoiceForm({ open, onOpenChange, invoice, accounts = []
     }
   };
 
-  // Filter accounts where parent account is "Trade Receivables"
+  // Filter accounts where parent account code is "10001" (Trade Receivables)
   const customerAccounts = accounts.filter(a => {
-    const parent = accounts.find(p => p.id === a.parentAccount);
-    return parent?.name === 'Trade Receivables';
+    return a.code === '10001' || (a.parentAccount && accounts.find(p => p.id === a.parentAccount)?.code === '10001');
   });
 
   return (
@@ -150,29 +149,18 @@ export default function InvoiceForm({ open, onOpenChange, invoice, accounts = []
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>Customer Code *</Label>
-              <Select value={form.customerCode} onValueChange={handleCustomerCodeChange} disabled={viewMode}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select customer" />
-                </SelectTrigger>
-                <SelectContent>
-                  {customerAccounts.map((acc) => (
-                    <SelectItem key={acc.id} value={acc.code}>{acc.code} - {acc.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="customerName">Customer Name</Label>
-              <Input
-                id="customerName"
-                value={form.customerName}
-                disabled
-                className="bg-slate-50"
-              />
-            </div>
+          <div className="space-y-2">
+            <Label>Client Name *</Label>
+            <Select value={form.customerCode} onValueChange={handleCustomerCodeChange} disabled={viewMode}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select client" />
+              </SelectTrigger>
+              <SelectContent>
+                {customerAccounts.map((acc) => (
+                  <SelectItem key={acc.id} value={acc.code}>{acc.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="grid grid-cols-2 gap-4">

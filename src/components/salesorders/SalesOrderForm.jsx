@@ -162,10 +162,7 @@ export default function SalesOrderForm({ open, onOpenChange, order, accounts = [
                       <SelectValue placeholder="Select customer" />
                     </SelectTrigger>
                     <SelectContent>
-                      {accounts.filter(a => {
-                        const parent = accounts.find(p => p.id === a.parentAccount);
-                        return parent?.name === 'Trade Receivables';
-                      }).map((acc) => (
+                      {accounts.filter(a => a.code === '10001' || (a.parentAccount && accounts.find(p => p.id === a.parentAccount)?.code === '10001')).map((acc) => (
                         <SelectItem key={acc.id} value={acc.code}>{acc.name}</SelectItem>
                       ))}
                     </SelectContent>
