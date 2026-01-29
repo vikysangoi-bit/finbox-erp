@@ -72,7 +72,7 @@ export default function ChartOfAccounts() {
     { id: 'panId', header: "PAN Number", accessor: "panId", render: (row) => <span className="text-slate-600 font-mono text-sm">{row.panId || '-'}</span> },
     { id: 'tanId', header: "TAN Number", accessor: "tanId", render: (row) => <span className="text-slate-600 font-mono text-sm">{row.tanId || '-'}</span> },
     { id: 'vatId', header: "VAT Number", accessor: "vatId", render: (row) => <span className="text-slate-600 font-mono text-sm">{row.vatId || '-'}</span> },
-    { id: 'supplierCategory', header: "Supplier Category", render: (row) => <span className="capitalize text-slate-600">{row.supplierCategory || '-'}</span> },
+    { id: 'supplierCategory', header: "Vendor Category", render: (row) => <span className="capitalize text-slate-600">{row.supplierCategory?.replace(/_/g, ' ') || '-'}</span> },
     { id: 'status', header: "Status", render: (row) => <StatusBadge status={row.active ? 'active' : 'inactive'} /> },
     {
       id: 'actions',

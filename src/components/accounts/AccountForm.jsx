@@ -532,7 +532,7 @@ export default function AccountForm({ open, onOpenChange, account, accounts = []
               return accountLevel === 'sub' && isTradePayable;
             })() && (
               <div className="space-y-2 mt-4">
-                <Label>Supplier Category</Label>
+                <Label>Vendor Category</Label>
                 <Select 
                   value={form.supplierCategory || 'none'} 
                   onValueChange={(v) => setForm({ ...form, supplierCategory: v === 'none' ? '' : v })}
@@ -543,12 +543,13 @@ export default function AccountForm({ open, onOpenChange, account, accounts = []
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="none">None</SelectItem>
-                    <SelectItem value="fabric">Fabric</SelectItem>
-                    <SelectItem value="trims">Trims</SelectItem>
-                    <SelectItem value="accessories">Accessories</SelectItem>
-                    <SelectItem value="packaging">Packaging</SelectItem>
-                    <SelectItem value="services">Services</SelectItem>
-                    <SelectItem value="other">Other</SelectItem>
+                    <SelectItem value="garment_mfg">Garment Mfg</SelectItem>
+                    <SelectItem value="testing_lab">Testing Lab</SelectItem>
+                    <SelectItem value="logistics">Logistics</SelectItem>
+                    <SelectItem value="cha">CHA</SelectItem>
+                    <SelectItem value="forwarder">Forwarder</SelectItem>
+                    <SelectItem value="insurance">Insurance</SelectItem>
+                    <SelectItem value="sales_partner">Sales Partner</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
