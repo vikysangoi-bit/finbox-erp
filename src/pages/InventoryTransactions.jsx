@@ -6,6 +6,8 @@ import SearchFilter from "@/components/shared/SearchFilter";
 import DataTable from "@/components/shared/DataTable";
 import StatusBadge from "@/components/shared/StatusBadge";
 import EmptyState from "@/components/shared/EmptyState";
+import BulkDeleteDialog from "@/components/shared/BulkDeleteDialog";
+import SyncDropdown from "@/components/shared/SyncDropdown";
 import TransactionForm from "@/components/inventory/TransactionForm";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -24,6 +26,7 @@ const typeConfig = {
 
 export default function InventoryTransactions() {
   const [showForm, setShowForm] = useState(false);
+  const [showBulkDelete, setShowBulkDelete] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState(null);
   const [deleteTransaction, setDeleteTransaction] = useState(null);
   const [search, setSearch] = useState('');
@@ -199,22 +202,26 @@ export default function InventoryTransactions() {
           subtitle="Track stock movements and adjustments"
           onAdd={() => { setEditingTransaction(null); setShowForm(true); }}
           addLabel="New Transaction"
-          onExport={() => {
-            const headers = ['Transaction Number', 'Transaction Date', 'Type', 'Item SKU', 'Item Name', 'Quantity', 'Unit Cost', 'Total Cost', 'Currency', 'Reference', 'From Location', 'To Location', 'Reason', 'Status'];
-            const rows = filteredTransactions.map(t => [
-              t.transaction_number || '', t.transaction_date || '', t.type || '', t.item_sku || '', 
-              t.item_name || '', t.quantity || 0, t.unit_cost || 0, t.total_cost || 0, t.currency || 'USD', 
-              t.reference || '', t.from_location || '', t.to_location || '', t.reason || '', t.status || 'draft'
-            ]);
-            const csv = [headers, ...rows].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
-            const blob = new Blob([csv], { type: 'text/csv' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `inventory_transactions_${new Date().toISOString().split('T')[0]}.csv`;
-            a.click();
-          }}
-        />
+        >
+          <SyncDropdown
+            onBulkDelete={() => setShowBulkDelete(true)}
+            onExportExcel={() => {
+              const headers = ['Transaction Number', 'Transaction Date', 'Type', 'Item SKU', 'Item Name', 'Quantity', 'Unit Cost', 'Total Cost', 'Currency', 'Reference', 'From Location', 'To Location', 'Reason', 'Status'];
+              const rows = filteredTransactions.map(t => [
+                t.transaction_number || '', t.transaction_date || '', t.type || '', t.item_sku || '', 
+                t.item_name || '', t.quantity || 0, t.unit_cost || 0, t.total_cost || 0, t.currency || 'USD', 
+                t.reference || '', t.from_location || '', t.to_location || '', t.reason || '', t.status || 'draft'
+              ]);
+              const csv = [headers, ...rows].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
+              const blob = new Blob([csv], { type: 'text/csv' });
+              const url = window.URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = url;
+              a.download = `inventory_transactions_${new Date().toISOString().split('T')[0]}.csv`;
+              a.click();
+            }}
+          />
+        </PageHeader>
 
         <SearchFilter
           searchValue={search}
@@ -264,6 +271,13 @@ export default function InventoryTransactions() {
           confirmLabel="Delete"
           onConfirm={() => deleteMutation.mutate(deleteTransaction.id)}
           variant="destructive"
+        />
+
+        <BulkDeleteDialog
+          open={showBulkDelete}
+          onOpenChange={setShowBulkDelete}
+          entityName="InventoryTransaction"
+          onSuccess={() => queryClient.invalidateQueries({ queryKey: ['inventory-transactions'] })}
         />
       </div>
     </div>

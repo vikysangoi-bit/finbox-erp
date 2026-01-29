@@ -9,6 +9,8 @@ import EmptyState from "@/components/shared/EmptyState";
 import PurchaseOrderForm from "@/components/purchaseorders/PurchaseOrderForm";
 import GoodsReceiptForm from "@/components/purchaseorders/GoodsReceiptForm";
 import BulkUploadDialog from "@/components/shared/BulkUploadDialog";
+import BulkDeleteDialog from "@/components/shared/BulkDeleteDialog";
+import SyncDropdown from "@/components/shared/SyncDropdown";
 import ConfirmDialog from "@/components/shared/ConfirmDialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -21,6 +23,7 @@ import { format } from "date-fns";
 export default function PurchaseOrders() {
   const [showForm, setShowForm] = useState(false);
   const [showBulkUpload, setShowBulkUpload] = useState(false);
+  const [showBulkDelete, setShowBulkDelete] = useState(false);
   const [editingPO, setEditingPO] = useState(null);
   const [deletePO, setDeletePO] = useState(null);
   const [viewPO, setViewPO] = useState(null);
@@ -282,27 +285,27 @@ export default function PurchaseOrders() {
           subtitle="Manage purchase orders and procurement"
           onAdd={() => { setEditingPO(null); setShowForm(true); }}
           addLabel="New PO"
-          onExport={() => {
-            const headers = ['PO Number', 'PO Date', 'Supplier Code', 'Supplier Name', 'Delivery Date', 'Currency', 'Items Count', 'Subtotal', 'Tax', 'Shipping', 'Total Amount', 'Status', 'Notes'];
-            const rows = filteredPOs.map(p => [
-              p.po_number || '', p.po_date || '', p.supplier_code || '', p.supplier_name || '', 
-              p.delivery_date || '', p.currency || 'USD', p.items?.length || 0, 
-              p.subtotal || 0, p.tax_amount || 0, p.shipping_cost || 0, p.total_amount || 0, 
-              p.status || 'draft', p.notes || ''
-            ]);
-            const csv = [headers, ...rows].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
-            const blob = new Blob([csv], { type: 'text/csv' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `purchase_orders_${new Date().toISOString().split('T')[0]}.csv`;
-            a.click();
-          }}
         >
-          <Button variant="outline" onClick={() => setShowBulkUpload(true)} className="border-slate-200">
-            <Upload className="w-4 h-4 mr-2" />
-            Bulk Upload
-          </Button>
+          <SyncDropdown
+            onBulkUpload={() => setShowBulkUpload(true)}
+            onBulkDelete={() => setShowBulkDelete(true)}
+            onExportExcel={() => {
+              const headers = ['PO Number', 'PO Date', 'Supplier Code', 'Supplier Name', 'Delivery Date', 'Currency', 'Items Count', 'Subtotal', 'Tax', 'Shipping', 'Total Amount', 'Status', 'Notes'];
+              const rows = filteredPOs.map(p => [
+                p.po_number || '', p.po_date || '', p.supplier_code || '', p.supplier_name || '', 
+                p.delivery_date || '', p.currency || 'USD', p.items?.length || 0, 
+                p.subtotal || 0, p.tax_amount || 0, p.shipping_cost || 0, p.total_amount || 0, 
+                p.status || 'draft', p.notes || ''
+              ]);
+              const csv = [headers, ...rows].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
+              const blob = new Blob([csv], { type: 'text/csv' });
+              const url = window.URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = url;
+              a.download = `purchase_orders_${new Date().toISOString().split('T')[0]}.csv`;
+              a.click();
+            }}
+          />
         </PageHeader>
 
         <SearchFilter
@@ -453,6 +456,13 @@ export default function PurchaseOrders() {
             'po_number,po_date,supplier_name,total_amount,currency,status',
             'Note: For complex PO uploads with line items, please use the individual PO form'
           ]}
+          onSuccess={() => queryClient.invalidateQueries({ queryKey: ['purchase-orders'] })}
+        />
+
+        <BulkDeleteDialog
+          open={showBulkDelete}
+          onOpenChange={setShowBulkDelete}
+          entityName="PurchaseOrder"
           onSuccess={() => queryClient.invalidateQueries({ queryKey: ['purchase-orders'] })}
         />
       </div>

@@ -8,6 +8,8 @@ import StatusBadge from "@/components/shared/StatusBadge";
 import EmptyState from "@/components/shared/EmptyState";
 import InventoryItemForm from "@/components/inventory/InventoryItemForm";
 import BulkUploadDialog from "@/components/shared/BulkUploadDialog";
+import BulkDeleteDialog from "@/components/shared/BulkDeleteDialog";
+import SyncDropdown from "@/components/shared/SyncDropdown";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -17,6 +19,7 @@ import ConfirmDialog from "@/components/shared/ConfirmDialog";
 export default function Inventory() {
   const [showForm, setShowForm] = useState(false);
   const [showBulkUpload, setShowBulkUpload] = useState(false);
+  const [showBulkDelete, setShowBulkDelete] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
   const [deleteItem, setDeleteItem] = useState(null);
   const [search, setSearch] = useState('');
@@ -153,27 +156,27 @@ export default function Inventory() {
           subtitle="Manage stock and materials"
           onAdd={() => { setEditingItem(null); setShowForm(true); }}
           addLabel="New Item"
-          onExport={() => {
-            const headers = ['SKU', 'Name', 'Category', 'Sub Category', 'Unit', 'Quantity', 'Reorder Level', 'Unit Cost', 'Currency', 'Total Value', 'Warehouse Location', 'Supplier', 'Color', 'Size', 'GSM', 'Composition', 'Is Active', 'Notes'];
-            const rows = filteredItems.map(i => [
-              i.sku, i.name, i.category, i.sub_category || '', i.unit, i.quantity_on_hand || 0, 
-              i.reorder_level || 0, i.unit_cost || 0, i.currency || 'USD', i.total_value || 0, 
-              i.warehouse_location || '', i.supplier || '', i.color || '', i.size || '', i.gsm || '', 
-              i.composition || '', i.is_active ? 'Yes' : 'No', i.notes || ''
-            ]);
-            const csv = [headers, ...rows].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
-            const blob = new Blob([csv], { type: 'text/csv' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `inventory_${new Date().toISOString().split('T')[0]}.csv`;
-            a.click();
-          }}
         >
-          <Button variant="outline" onClick={() => setShowBulkUpload(true)} className="border-slate-200">
-            <Upload className="w-4 h-4 mr-2" />
-            Bulk Upload
-          </Button>
+          <SyncDropdown
+            onBulkUpload={() => setShowBulkUpload(true)}
+            onBulkDelete={() => setShowBulkDelete(true)}
+            onExportExcel={() => {
+              const headers = ['SKU', 'Name', 'Category', 'Sub Category', 'Unit', 'Quantity', 'Reorder Level', 'Unit Cost', 'Currency', 'Total Value', 'Warehouse Location', 'Supplier', 'Color', 'Size', 'GSM', 'Composition', 'Is Active', 'Notes'];
+              const rows = filteredItems.map(i => [
+                i.sku, i.name, i.category, i.sub_category || '', i.unit, i.quantity_on_hand || 0, 
+                i.reorder_level || 0, i.unit_cost || 0, i.currency || 'USD', i.total_value || 0, 
+                i.warehouse_location || '', i.supplier || '', i.color || '', i.size || '', i.gsm || '', 
+                i.composition || '', i.is_active ? 'Yes' : 'No', i.notes || ''
+              ]);
+              const csv = [headers, ...rows].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
+              const blob = new Blob([csv], { type: 'text/csv' });
+              const url = window.URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = url;
+              a.download = `inventory_${new Date().toISOString().split('T')[0]}.csv`;
+              a.click();
+            }}
+          />
         </PageHeader>
 
         <SearchFilter
@@ -262,6 +265,13 @@ export default function Inventory() {
             'FAB-001,Cotton Fabric,fabric,Cotton,meters,1000,200,5.50,USD,A-1-1,ABC Fabrics,White,150cm,180,100% Cotton,true,',
             'TRM-001,Buttons,trims,Buttons,pieces,5000,1000,0.10,USD,B-1-1,XYZ Trims,Black,1cm,,,true,'
           ]}
+          onSuccess={() => queryClient.invalidateQueries({ queryKey: ['inventory-items'] })}
+        />
+
+        <BulkDeleteDialog
+          open={showBulkDelete}
+          onOpenChange={setShowBulkDelete}
+          entityName="InventoryItem"
           onSuccess={() => queryClient.invalidateQueries({ queryKey: ['inventory-items'] })}
         />
       </div>

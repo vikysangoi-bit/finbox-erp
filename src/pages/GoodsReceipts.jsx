@@ -6,6 +6,8 @@ import SearchFilter from "@/components/shared/SearchFilter";
 import DataTable from "@/components/shared/DataTable";
 import StatusBadge from "@/components/shared/StatusBadge";
 import EmptyState from "@/components/shared/EmptyState";
+import BulkDeleteDialog from "@/components/shared/BulkDeleteDialog";
+import SyncDropdown from "@/components/shared/SyncDropdown";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Card } from "@/components/ui/card";
@@ -17,6 +19,7 @@ export default function GoodsReceipts() {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [viewReceipt, setViewReceipt] = useState(null);
+  const [showBulkDelete, setShowBulkDelete] = useState(false);
 
   const { data: receipts = [], isLoading } = useQuery({
     queryKey: ['goods-receipts'],
@@ -104,22 +107,26 @@ export default function GoodsReceipts() {
         <PageHeader 
           title="Goods Receipts" 
           subtitle="Track all received goods and inventory updates"
-          onExport={() => {
-            const headers = ['Receipt Number', 'Receipt Date', 'PO Number', 'Supplier Name', 'Items Count', 'Total Amount', 'Currency', 'Invoice Number', 'Quality Check Status', 'Received By', 'Status'];
-            const rows = filteredReceipts.map(r => [
-              r.receipt_number || '', r.receipt_date || '', r.po_number || '', r.supplier_name || '', 
-              r.items?.length || 0, r.total_amount || 0, r.currency || 'USD', r.invoice_number || '', 
-              r.quality_check_status || 'pending', r.received_by || '', r.status || 'draft'
-            ]);
-            const csv = [headers, ...rows].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
-            const blob = new Blob([csv], { type: 'text/csv' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `goods_receipts_${new Date().toISOString().split('T')[0]}.csv`;
-            a.click();
-          }}
-        />
+        >
+          <SyncDropdown
+            onBulkDelete={() => setShowBulkDelete(true)}
+            onExportExcel={() => {
+              const headers = ['Receipt Number', 'Receipt Date', 'PO Number', 'Supplier Name', 'Items Count', 'Total Amount', 'Currency', 'Invoice Number', 'Quality Check Status', 'Received By', 'Status'];
+              const rows = filteredReceipts.map(r => [
+                r.receipt_number || '', r.receipt_date || '', r.po_number || '', r.supplier_name || '', 
+                r.items?.length || 0, r.total_amount || 0, r.currency || 'USD', r.invoice_number || '', 
+                r.quality_check_status || 'pending', r.received_by || '', r.status || 'draft'
+              ]);
+              const csv = [headers, ...rows].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
+              const blob = new Blob([csv], { type: 'text/csv' });
+              const url = window.URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = url;
+              a.download = `goods_receipts_${new Date().toISOString().split('T')[0]}.csv`;
+              a.click();
+            }}
+          />
+        </PageHeader>
 
         <SearchFilter
           searchValue={search}
@@ -154,6 +161,13 @@ export default function GoodsReceipts() {
             emptyMessage="No receipts match your search"
           />
         )}
+
+        <BulkDeleteDialog
+          open={showBulkDelete}
+          onOpenChange={setShowBulkDelete}
+          entityName="GoodsReceipt"
+          onSuccess={() => {}}
+        />
 
         {/* View Receipt Dialog */}
         <Dialog open={!!viewReceipt} onOpenChange={() => setViewReceipt(null)}>
