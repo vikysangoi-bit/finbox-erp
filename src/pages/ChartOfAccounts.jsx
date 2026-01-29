@@ -72,6 +72,9 @@ export default function ChartOfAccounts() {
     { id: 'panId', header: "PAN Number", accessor: "panId", render: (row) => <span className="text-slate-600 font-mono text-sm">{row.panId || '-'}</span> },
     { id: 'tanId', header: "TAN Number", accessor: "tanId", render: (row) => <span className="text-slate-600 font-mono text-sm">{row.tanId || '-'}</span> },
     { id: 'vatId', header: "VAT Number", accessor: "vatId", render: (row) => <span className="text-slate-600 font-mono text-sm">{row.vatId || '-'}</span> },
+    { id: 'cinLlpin', header: "CIN/LLPIN", accessor: "cinLlpin", render: (row) => <span className="text-slate-600 font-mono text-sm">{row.cinLlpin || '-'}</span> },
+    { id: 'coi', header: "COI", accessor: "coi", render: (row) => <span className="text-slate-600 font-mono text-sm">{row.coi || '-'}</span> },
+    { id: 'msme', header: "MSME", accessor: "msme", render: (row) => <span className="text-slate-600">{row.msme || '-'}</span> },
     { id: 'supplierCategory', header: "Vendor Category", render: (row) => <span className="capitalize text-slate-600">{row.supplierCategory?.replace(/_/g, ' ') || '-'}</span> },
     { id: 'status', header: "Status", render: (row) => <StatusBadge status={row.active ? 'active' : 'inactive'} /> },
     {
@@ -303,8 +306,20 @@ export default function ChartOfAccounts() {
             onGoogleSheetsImport={() => setShowGoogleSheetsImport(true)}
             onGoogleSheetsExport={() => setShowGoogleSheetsExport(true)}
             onExportToExcel={() => {
-              const headers = ['code', 'name', 'type', 'category'];
-              const rows = filteredAccounts.map(a => [a.code, a.name, a.type, a.category]);
+              const headers = ['code', 'name', 'type', 'category', 'brand', 'alias', 'parentAccount', 'supplierCategory', 'currency', 'openingBalance', 'currentBalance', 'description', 'contactType', 'contactPerson', 'phone', 'email', 'address', 'city', 'state', 'country', 'region', 'pincode', 'placeOfSupply', 'taxId', 'gstId', 'panId', 'tanId', 'vatId', 'cinLlpin', 'coi', 'msme', 'paymentTerms', 'creditLimit', 'active'];
+              const rows = filteredAccounts.map(a => {
+                const parentAccount = a.parentAccount ? accounts.find(acc => acc.id === a.parentAccount) : null;
+                return [
+                  a.code || '', a.name || '', a.type || '', a.category || '', a.brand || '', a.alias || '', 
+                  parentAccount ? parentAccount.code : '', a.supplierCategory || '', a.currency || '', 
+                  a.openingBalance || 0, a.currentBalance || 0, a.description || '', a.contactType || '', 
+                  a.contactPerson || '', a.phone || '', a.email || '', a.address || '', a.city || '', 
+                  a.state || '', a.country || '', a.region || '', a.pincode || '', a.placeOfSupply || '', 
+                  a.taxId || '', a.gstId || '', a.panId || '', a.tanId || '', a.vatId || '', 
+                  a.cinLlpin || '', a.coi || '', a.msme || '', a.paymentTerms || '', a.creditLimit || 0, 
+                  a.active ? 'true' : 'false'
+                ];
+              });
               const csv = [headers, ...rows].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
               const blob = new Blob([csv], { type: 'text/csv' });
               const url = window.URL.createObjectURL(blob);
@@ -510,6 +525,9 @@ export default function ChartOfAccounts() {
                 panId: { type: "string" },
                 tanId: { type: "string" },
                 vatId: { type: "string" },
+                cinLlpin: { type: "string" },
+                coi: { type: "string" },
+                msme: { type: "string", enum: ["Micro", "Small", "Medium", "Large"] },
                 paymentTerms: { type: "string", enum: ["net_7", "net_15", "net_30", "net_45", "net_60", "net_90", "cod", "advance"] },
                 creditLimit: { type: "number" },
                 active: { type: "boolean" }
@@ -518,12 +536,12 @@ export default function ChartOfAccounts() {
             }
           }}
           templateData={[
-            'code,name,type,category,brand,alias,parentAccount,supplierCategory,currency,openingBalance,description,contactType,contactPerson,phone,email,address,city,state,country,region,pincode,placeOfSupply,gstId,panId,tanId,vatId,paymentTerms,creditLimit,active',
-            '1000,Cash,asset,current_asset,ABC Corp,Cash Account,,,USD,10000,Main cash account,business,John Doe,+919876543210,john@example.com,123 Business St,Mumbai,Maharashtra,India,Western India,400001,Maharashtra,22AAAAA0000A1Z5,ABCDE1234F,ABCD12345E,GB123456789,net_30,50000,true',
-            '2000,Accounts Payable,liability,current_liability,XYZ Ltd,AP Account,,,USD,0,Supplier payables,finance,Jane Smith,+919876543211,jane@example.com,456 Finance Ave,Delhi,Delhi,India,Northern India,110001,Delhi,,,,,net_30,0,true',
-            '3000,Sales Revenue,revenue,operating_revenue,,,,,USD,0,Sales income,,,,,,,,India,,,,,,,,true',
-            '4000,Cost of Goods Sold,expense,cost_of_goods,,,fabric,,USD,0,Material costs,,,,,,,,India,,,,,,,,true',
-            '5000,Operating Expenses,expense,operating_expense,,,,,USD,0,Daily operations,,,,,,,,India,,,,,,,,true'
+            'code,name,type,category,brand,alias,parentAccount,supplierCategory,currency,openingBalance,description,contactType,contactPerson,phone,email,address,city,state,country,region,pincode,placeOfSupply,taxId,gstId,panId,tanId,vatId,cinLlpin,coi,msme,paymentTerms,creditLimit,active',
+            '1000,Cash,asset,current_asset,ABC Corp,Cash Account,,,USD,10000,Main cash account,business,John Doe,+919876543210,john@example.com,123 Business St,Mumbai,Maharashtra,India,Western India,400001,Maharashtra,TAX123,22AAAAA0000A1Z5,ABCDE1234F,ABCD12345E,GB123456789,U12345AB1234ABC123456,COI789,,net_30,50000,true',
+            '2000,Accounts Payable,liability,current_liability,XYZ Ltd,AP Account,,,USD,0,Supplier payables,finance,Jane Smith,+919876543211,jane@example.com,456 Finance Ave,Delhi,Delhi,India,Northern India,110001,Delhi,TAX456,,,,,,,,,net_30,0,true',
+            '3000,Sales Revenue,revenue,operating_revenue,,,,,USD,0,Sales income,,,,,,,,India,,,,,,,,,,,,true',
+            '4000,Cost of Goods Sold,expense,cost_of_goods,,,fabric,,USD,0,Material costs,,,,,,,,India,,,,,,,,,,,,true',
+            '5000,Operating Expenses,expense,operating_expense,,,,,USD,0,Daily operations,,,,,,,,India,,,,,,,,,,,,true'
           ]}
           onSuccess={() => queryClient.invalidateQueries({ queryKey: ['accounts'] })}
         />
