@@ -526,7 +526,11 @@ export default function AccountForm({ open, onOpenChange, account, accounts = []
               </div>
             </div>
 
-            {form.type === 'expense' && (
+            {form.type === 'liability' && form.category === 'current_liability' && (() => {
+              const parentAccount = accounts.find(a => a.id === form.parentAccount);
+              const isTradePayable = parentAccount?.code === '10002' || parentAccount?.name?.includes('Trade Payable');
+              return accountLevel === 'sub' && isTradePayable;
+            })() && (
               <div className="space-y-2 mt-4">
                 <Label>Supplier Category</Label>
                 <Select 
