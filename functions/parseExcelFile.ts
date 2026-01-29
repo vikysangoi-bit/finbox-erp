@@ -62,22 +62,33 @@ Deno.serve(async (req) => {
         const schemaProp = schemaProps[key];
         if (!schemaProp) continue;
         
-        // Skip empty values
-        if (value === '' || value === null || value === undefined) {
-          continue;
-        }
-        
         // Handle different types
         if (schemaProp.type === 'number') {
+          // Skip truly empty values for numbers
+          if (value === '' || value === null || value === undefined) {
+            continue;
+          }
           processed[key] = parseFloat(value) || 0;
         } else if (schemaProp.type === 'boolean') {
+          // Skip truly empty values for booleans
+          if (value === '' || value === null || value === undefined) {
+            continue;
+          }
           processed[key] = value === 'true' || value === true || value === 1;
         } else if (schemaProp.type === 'array') {
+          // Skip truly empty values for arrays
+          if (value === '' || value === null || value === undefined) {
+            continue;
+          }
           processed[key] = typeof value === 'string' ? value.split(',').map(v => v.trim()) : value;
         } else {
-          // For strings, trim whitespace and convert
+          // For strings (including enums), trim whitespace and convert
+          // Only skip if the value is truly empty after trimming
+          if (value === null || value === undefined) {
+            continue;
+          }
           const stringValue = String(value).trim();
-          if (stringValue) {
+          if (stringValue !== '') {
             processed[key] = stringValue;
           }
         }
