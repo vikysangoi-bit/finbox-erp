@@ -550,6 +550,10 @@ export default function AccountForm({ open, onOpenChange, account, accounts = []
                     <SelectItem value="forwarder">Forwarder</SelectItem>
                     <SelectItem value="insurance">Insurance</SelectItem>
                     <SelectItem value="sales_partner">Sales Partner</SelectItem>
+                    <SelectItem value="fabric">Fabric</SelectItem>
+                    <SelectItem value="trims">Trims</SelectItem>
+                    <SelectItem value="packaging">Packaging</SelectItem>
+                    <SelectItem value="other">Other</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
