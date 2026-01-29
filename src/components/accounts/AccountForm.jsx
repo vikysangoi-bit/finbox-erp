@@ -559,6 +559,29 @@ export default function AccountForm({ open, onOpenChange, account, accounts = []
               </div>
             </div>
 
+            <div className="grid grid-cols-2 gap-4 mt-4">
+              <div className="space-y-2">
+                <Label htmlFor="cinLlpin">CIN/LLPIN</Label>
+                <Input
+                  id="cinLlpin"
+                  value={form.cinLlpin || ''}
+                  onChange={(e) => setForm({ ...form, cinLlpin: e.target.value })}
+                  placeholder="Enter CIN/LLPIN"
+                  disabled={viewMode}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="coi">COI</Label>
+                <Input
+                  id="coi"
+                  value={form.coi || ''}
+                  onChange={(e) => setForm({ ...form, coi: e.target.value })}
+                  placeholder="Enter COI"
+                  disabled={viewMode}
+                />
+              </div>
+            </div>
+
             {form.type === 'liability' && form.category === 'current_liability' && (() => {
               const parentAccount = accounts.find(a => a.id === form.parentAccount);
               const isTradePayable = parentAccount?.code === '10002' || parentAccount?.name?.includes('Trade Payable');
