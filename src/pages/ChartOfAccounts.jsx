@@ -341,7 +341,7 @@ export default function ChartOfAccounts() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4 text-sm text-slate-600">
               <div>
-                <span className="font-semibold text-slate-900">{accounts.length}</span> Total
+                <span className="font-semibold text-slate-900">{accounts.filter(a => !a.is_deleted).length}</span> Total
               </div>
               <div className="h-4 w-px bg-slate-200" />
               <div>
