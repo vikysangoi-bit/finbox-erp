@@ -118,8 +118,10 @@ export default function BulkUploadDialog({ open, onOpenChange, entityName, schem
       let accountsMap = {};
       if (entityName === 'Account') {
         const existingAccounts = await base44.entities.Account.list();
-        existingCodes = existingAccounts.map(acc => acc.code);
-        accountsMap = existingAccounts.reduce((map, acc) => {
+        // Filter out soft-deleted accounts
+        const activeAccounts = existingAccounts.filter(acc => !acc.is_deleted);
+        existingCodes = activeAccounts.map(acc => acc.code);
+        accountsMap = activeAccounts.reduce((map, acc) => {
           map[acc.code] = acc.id;
           return map;
         }, {});
