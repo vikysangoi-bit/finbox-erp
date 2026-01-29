@@ -8,10 +8,14 @@ import EmptyState from "@/components/shared/EmptyState";
 import PaymentForm from "@/components/payments/PaymentForm";
 import BulkUploadDialog from "@/components/shared/BulkUploadDialog";
 import SyncDropdown from "@/components/shared/SyncDropdown";
+import ColumnSelector from "@/components/shared/ColumnSelector";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal, DollarSign, Eye, Edit, Trash2 } from "lucide-react";
 import ConfirmDialog from "@/components/shared/ConfirmDialog";
+import { useEffect } from 'react';
+
+const STORAGE_KEY = 'payments_visibleColumns';
 
 export default function Payments() {
   const [showForm, setShowForm] = useState(false);
@@ -110,7 +114,7 @@ export default function Payments() {
     return matchesSearch && matchesSupplier;
   });
 
-  const columns = [
+  const allColumns = [
     { id: 'billNo', header: "Bill No", accessor: "billNo", render: (row) => <span className="font-mono font-medium">{row.billNo}</span> },
     { id: 'paymentDate', header: "Date", accessor: "paymentDate" },
     { id: 'supplier', header: "Supplier", accessor: "supplier" },
@@ -147,6 +151,19 @@ export default function Payments() {
     }
   ];
 
+  const [visibleColumns, setVisibleColumns] = useState(() => {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    const savedColumns = saved ? JSON.parse(saved) : allColumns.map(c => c.id);
+    if (!savedColumns.includes('actions')) savedColumns.push('actions');
+    return savedColumns;
+  });
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(visibleColumns));
+  }, [visibleColumns]);
+
+  const totalValue = filteredPayments.reduce((sum, p) => sum + (p.paymentValue || 0), 0);
+
   const handleSave = (data) => {
     if (editingPayment) {
       updateMutation.mutate({ id: editingPayment.id, data });
@@ -164,6 +181,11 @@ export default function Payments() {
           onAdd={() => { setEditingPayment(null); setViewingPayment(null); setShowForm(true); }}
           addLabel="New Payment"
         >
+          <ColumnSelector
+            columns={allColumns.filter(c => c.id !== 'actions')}
+            visibleColumns={visibleColumns}
+            onVisibilityChange={setVisibleColumns}
+          />
           <SyncDropdown
             onBulkUpload={() => setShowBulkUpload(true)}
             onBulkDelete={() => {}}
@@ -189,6 +211,8 @@ export default function Payments() {
               <div><span className="font-semibold text-slate-900">{payments.length}</span> Total</div>
               <div className="h-4 w-px bg-slate-200" />
               <div><span className="font-semibold text-slate-900">{filteredPayments.length}</span> Filtered</div>
+              <div className="h-4 w-px bg-slate-200" />
+              <div><span className="font-semibold text-slate-900">{totalValue.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</span> Total Value</div>
             </div>
           </div>
 
@@ -221,7 +245,8 @@ export default function Payments() {
           />
         ) : (
           <DataTable 
-            columns={columns} 
+            columns={allColumns}
+            visibleColumns={visibleColumns} 
             data={filteredPayments} 
             isLoading={isLoading}
             emptyMessage="No payments match your search"

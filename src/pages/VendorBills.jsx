@@ -9,10 +9,14 @@ import VendorBillForm from "@/components/vendorbills/VendorBillForm";
 import BulkUploadDialog from "@/components/shared/BulkUploadDialog";
 import SyncDropdown from "@/components/shared/SyncDropdown";
 import StatusBadge from "@/components/shared/StatusBadge";
+import ColumnSelector from "@/components/shared/ColumnSelector";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal, FileText, Eye, Edit, Trash2 } from "lucide-react";
 import ConfirmDialog from "@/components/shared/ConfirmDialog";
+import { useEffect } from 'react';
+
+const STORAGE_KEY = 'vendorBills_visibleColumns';
 
 export default function VendorBills() {
   const [showForm, setShowForm] = useState(false);
@@ -120,7 +124,7 @@ export default function VendorBills() {
     return matchesSearch && matchesStatus && matchesService && matchesSupplier;
   });
 
-  const columns = [
+  const allColumns = [
     { id: 'billNo', header: "Bill No", accessor: "billNo", render: (row) => <span className="font-mono font-medium">{row.billNo}</span> },
     { id: 'billDate', header: "Date", accessor: "billDate" },
     { id: 'accountCode', header: "Account Code", accessor: "accountCode" },
@@ -159,6 +163,19 @@ export default function VendorBills() {
     }
   ];
 
+  const [visibleColumns, setVisibleColumns] = useState(() => {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    const savedColumns = saved ? JSON.parse(saved) : allColumns.map(c => c.id);
+    if (!savedColumns.includes('actions')) savedColumns.push('actions');
+    return savedColumns;
+  });
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(visibleColumns));
+  }, [visibleColumns]);
+
+  const totalValue = filteredVendorBills.reduce((sum, bill) => sum + (bill.billValue || 0), 0);
+
   const handleSave = (data) => {
     if (editingBill) {
       updateMutation.mutate({ id: editingBill.id, data });
@@ -176,6 +193,11 @@ export default function VendorBills() {
           onAdd={() => { setEditingBill(null); setViewingBill(null); setShowForm(true); }}
           addLabel="New Vendor Bill"
         >
+          <ColumnSelector
+            columns={allColumns.filter(c => c.id !== 'actions')}
+            visibleColumns={visibleColumns}
+            onVisibilityChange={setVisibleColumns}
+          />
           <SyncDropdown
             onBulkUpload={() => setShowBulkUpload(true)}
             onBulkDelete={() => {}}
@@ -255,7 +277,8 @@ export default function VendorBills() {
           />
         ) : (
           <DataTable 
-            columns={columns} 
+            columns={allColumns}
+            visibleColumns={visibleColumns} 
             data={filteredBills} 
             isLoading={isLoading}
             emptyMessage="No vendor bills match your search"

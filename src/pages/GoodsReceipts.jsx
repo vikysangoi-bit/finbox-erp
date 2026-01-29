@@ -15,6 +15,8 @@ import { Button } from "@/components/ui/button";
 import { Package, Eye } from "lucide-react";
 import { format } from "date-fns";
 
+const STORAGE_KEY = 'goodsReceipts_visibleColumns';
+
 export default function GoodsReceipts() {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -35,7 +37,7 @@ export default function GoodsReceipts() {
     return matchesSearch && matchesStatus;
   });
 
-  const columns = [
+  const allColumns = [
     { 
       header: "Receipt #", 
       render: (row) => <span className="font-mono font-medium text-slate-900">{row.receipt_number || '-'}</span>
@@ -155,7 +157,8 @@ export default function GoodsReceipts() {
           />
         ) : (
           <DataTable 
-            columns={columns} 
+            columns={allColumns}
+            visibleColumns={visibleColumns} 
             data={filteredReceipts} 
             isLoading={isLoading}
             emptyMessage="No receipts match your search"

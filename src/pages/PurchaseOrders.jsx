@@ -20,6 +20,8 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { MoreHorizontal, Pencil, Trash2, FileText, Send, Eye, Package, CheckCircle, Upload } from "lucide-react";
 import { format } from "date-fns";
 
+const STORAGE_KEY = 'purchaseOrders_visibleColumns';
+
 export default function PurchaseOrders() {
   const [showForm, setShowForm] = useState(false);
   const [showBulkUpload, setShowBulkUpload] = useState(false);
@@ -105,7 +107,7 @@ export default function PurchaseOrders() {
     return `PO-${new Date().getFullYear()}-${String(count).padStart(5, '0')}`;
   };
 
-  const columns = [
+  const allColumns = [
     { 
       header: "PO Number", 
       render: (row) => <span className="font-mono font-medium text-slate-900">{row.po_number || '-'}</span>
@@ -188,6 +190,19 @@ export default function PurchaseOrders() {
       )
     }
   ];
+
+  const [visibleColumns, setVisibleColumns] = useState(() => {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    const savedColumns = saved ? JSON.parse(saved) : allColumns.map(c => c.id);
+    if (!savedColumns.includes('actions')) savedColumns.push('actions');
+    return savedColumns;
+  });
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(visibleColumns));
+  }, [visibleColumns]);
+
+  const totalValue = filteredOrders.reduce((sum, po) => sum + (po.total_amount || 0), 0);
 
   const handleSave = (data) => {
     if (editingPO) {
@@ -286,6 +301,11 @@ export default function PurchaseOrders() {
           onAdd={() => { setEditingPO(null); setShowForm(true); }}
           addLabel="New PO"
         >
+          <ColumnSelector
+            columns={allColumns.filter(c => c.id !== 'actions')}
+            visibleColumns={visibleColumns}
+            onVisibilityChange={setVisibleColumns}
+          />
           <SyncDropdown
             onBulkUpload={() => setShowBulkUpload(true)}
             onBulkDelete={() => setShowBulkDelete(true)}
@@ -340,7 +360,8 @@ export default function PurchaseOrders() {
           />
         ) : (
           <DataTable 
-            columns={columns} 
+            columns={allColumns}
+            visibleColumns={visibleColumns} 
             data={filteredPOs} 
             isLoading={isLoading}
             emptyMessage="No purchase orders match your search"

@@ -24,6 +24,8 @@ const typeConfig = {
   return: { label: "Return", color: "bg-purple-100 text-purple-700", icon: ArrowDownLeft },
 };
 
+const STORAGE_KEY = 'inventoryTransactions_visibleColumns';
+
 export default function InventoryTransactions() {
   const [showForm, setShowForm] = useState(false);
   const [showBulkDelete, setShowBulkDelete] = useState(false);
@@ -106,7 +108,7 @@ export default function InventoryTransactions() {
     return `TXN-${new Date().getFullYear()}-${String(count).padStart(5, '0')}`;
   };
 
-  const columns = [
+  const allColumns = [
     { 
       header: "Transaction #", 
       render: (row) => <span className="font-mono font-medium text-slate-900">{row.transaction_number || '-'}</span>
@@ -186,6 +188,20 @@ export default function InventoryTransactions() {
     }
   ];
 
+  const [visibleColumns, setVisibleColumns] = useState(() => {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    const savedColumns = saved ? JSON.parse(saved) : allColumns.map(c => c.id);
+    if (!savedColumns.includes('actions')) savedColumns.push('actions');
+    return savedColumns;
+  });
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(visibleColumns));
+  }, [visibleColumns]);
+
+  const totalQty = filteredTransactions.reduce((sum, txn) => sum + (txn.quantity || 0), 0);
+  const totalCost = filteredTransactions.reduce((sum, txn) => sum + (txn.total_cost || 0), 0);
+
   const handleSave = (data) => {
     if (editingTransaction) {
       updateMutation.mutate({ id: editingTransaction.id, data });
@@ -203,6 +219,11 @@ export default function InventoryTransactions() {
           onAdd={() => { setEditingTransaction(null); setShowForm(true); }}
           addLabel="New Transaction"
         >
+          <ColumnSelector
+            columns={allColumns.filter(c => c.id !== 'actions')}
+            visibleColumns={visibleColumns}
+            onVisibilityChange={setVisibleColumns}
+          />
           <SyncDropdown
             onBulkDelete={() => setShowBulkDelete(true)}
             onExportExcel={() => {
@@ -248,7 +269,8 @@ export default function InventoryTransactions() {
           />
         ) : (
           <DataTable 
-            columns={columns} 
+            columns={allColumns}
+            visibleColumns={visibleColumns} 
             data={filteredTransactions} 
             isLoading={isLoading}
             emptyMessage="No transactions match your search"

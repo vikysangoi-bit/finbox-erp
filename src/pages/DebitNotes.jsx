@@ -9,10 +9,14 @@ import DebitNoteForm from "@/components/debitnotes/DebitNoteForm";
 import BulkUploadDialog from "@/components/shared/BulkUploadDialog";
 import SyncDropdown from "@/components/shared/SyncDropdown";
 import StatusBadge from "@/components/shared/StatusBadge";
+import ColumnSelector from "@/components/shared/ColumnSelector";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal, FileText, Eye, Edit, Trash2 } from "lucide-react";
 import ConfirmDialog from "@/components/shared/ConfirmDialog";
+import { useEffect } from 'react';
+
+const STORAGE_KEY = 'debitNotes_visibleColumns';
 
 export default function DebitNotes() {
   const [showForm, setShowForm] = useState(false);
@@ -118,7 +122,7 @@ export default function DebitNotes() {
     return matchesSearch && matchesStatus && matchesSupplier;
   });
 
-  const columns = [
+  const allColumns = [
     { id: 'debitNoteNo', header: "Debit Note No", accessor: "debitNoteNo", render: (row) => <span className="font-mono font-medium">{row.debitNoteNo}</span> },
     { id: 'dnDate', header: "Date", accessor: "dnDate" },
     { id: 'accountCode', header: "Account Code", accessor: "accountCode" },
@@ -155,6 +159,19 @@ export default function DebitNotes() {
     }
   ];
 
+  const [visibleColumns, setVisibleColumns] = useState(() => {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    const savedColumns = saved ? JSON.parse(saved) : allColumns.map(c => c.id);
+    if (!savedColumns.includes('actions')) savedColumns.push('actions');
+    return savedColumns;
+  });
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(visibleColumns));
+  }, [visibleColumns]);
+
+  const totalValue = filteredNotes.reduce((sum, dn) => sum + (dn.dnValue || 0), 0);
+
   const handleSave = (data) => {
     if (editingNote) {
       updateMutation.mutate({ id: editingNote.id, data });
@@ -172,6 +189,11 @@ export default function DebitNotes() {
           onAdd={() => { setEditingNote(null); setViewingNote(null); setShowForm(true); }}
           addLabel="New Debit Note"
         >
+          <ColumnSelector
+            columns={allColumns.filter(c => c.id !== 'actions')}
+            visibleColumns={visibleColumns}
+            onVisibilityChange={setVisibleColumns}
+          />
           <SyncDropdown
             onBulkUpload={() => setShowBulkUpload(true)}
             onBulkDelete={() => {}}
@@ -197,6 +219,8 @@ export default function DebitNotes() {
               <div><span className="font-semibold text-slate-900">{debitNotes.length}</span> Total</div>
               <div className="h-4 w-px bg-slate-200" />
               <div><span className="font-semibold text-slate-900">{filteredNotes.length}</span> Filtered</div>
+              <div className="h-4 w-px bg-slate-200" />
+              <div><span className="font-semibold text-slate-900">{totalValue.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</span> Total Value</div>
             </div>
           </div>
 
@@ -239,7 +263,8 @@ export default function DebitNotes() {
           />
         ) : (
           <DataTable 
-            columns={columns} 
+            columns={allColumns}
+            visibleColumns={visibleColumns} 
             data={filteredNotes} 
             isLoading={isLoading}
             emptyMessage="No debit notes match your search"

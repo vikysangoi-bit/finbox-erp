@@ -16,6 +16,8 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { MoreHorizontal, Pencil, Trash2, Package, AlertTriangle, Upload } from "lucide-react";
 import ConfirmDialog from "@/components/shared/ConfirmDialog";
 
+const STORAGE_KEY = 'inventory_visibleColumns';
+
 export default function Inventory() {
   const [showForm, setShowForm] = useState(false);
   const [showBulkUpload, setShowBulkUpload] = useState(false);
@@ -66,7 +68,7 @@ export default function Inventory() {
     return matchesSearch && matchesCategory;
   });
 
-  const columns = [
+  const allColumns = [
     { 
       header: "SKU", 
       render: (row) => <span className="font-mono font-medium text-slate-900">{row.sku}</span>
@@ -140,6 +142,20 @@ export default function Inventory() {
     }
   ];
 
+  const [visibleColumns, setVisibleColumns] = useState(() => {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    const savedColumns = saved ? JSON.parse(saved) : allColumns.map(c => c.id);
+    if (!savedColumns.includes('actions')) savedColumns.push('actions');
+    return savedColumns;
+  });
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(visibleColumns));
+  }, [visibleColumns]);
+
+  const totalQty = filteredItems.reduce((sum, item) => sum + (item.quantity_on_hand || 0), 0);
+  const totalValue = filteredItems.reduce((sum, item) => sum + (item.total_value || 0), 0);
+
   const handleSave = (data) => {
     if (editingItem) {
       updateMutation.mutate({ id: editingItem.id, data });
@@ -157,6 +173,11 @@ export default function Inventory() {
           onAdd={() => { setEditingItem(null); setShowForm(true); }}
           addLabel="New Item"
         >
+          <ColumnSelector
+            columns={allColumns.filter(c => c.id !== 'actions')}
+            visibleColumns={visibleColumns}
+            onVisibilityChange={setVisibleColumns}
+          />
           <SyncDropdown
             onBulkUpload={() => setShowBulkUpload(true)}
             onBulkDelete={() => setShowBulkDelete(true)}
@@ -211,7 +232,8 @@ export default function Inventory() {
           />
         ) : (
           <DataTable 
-            columns={columns} 
+            columns={allColumns}
+            visibleColumns={visibleColumns} 
             data={filteredItems} 
             isLoading={isLoading}
             emptyMessage="No items match your search"
