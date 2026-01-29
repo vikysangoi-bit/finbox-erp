@@ -9,10 +9,14 @@ import InvoiceForm from "@/components/invoices/InvoiceForm";
 import BulkUploadDialog from "@/components/shared/BulkUploadDialog";
 import SyncDropdown from "@/components/shared/SyncDropdown";
 import StatusBadge from "@/components/shared/StatusBadge";
+import ColumnSelector from "@/components/shared/ColumnSelector";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal, FileText, Eye, Edit, Trash2 } from "lucide-react";
 import ConfirmDialog from "@/components/shared/ConfirmDialog";
+import { useEffect } from 'react';
+
+const STORAGE_KEY = 'invoices_visibleColumns';
 
 export default function Invoices() {
   const [showForm, setShowForm] = useState(false);
@@ -131,7 +135,7 @@ export default function Invoices() {
     return matchesSearch && matchesStatus && matchesService && matchesClient && matchesSalesPerson && matchesInvoiceMonth && matchesRegion;
   });
 
-  const columns = [
+  const allColumns = [
     { id: 'invoiceNo', header: "Invoice No", accessor: "invoiceNo", render: (row) => <span className="font-mono font-medium">{row.invoiceNo}</span> },
     { id: 'invoiceDate', header: "Date", accessor: "invoiceDate" },
     { id: 'customerCode', header: "Customer Code", accessor: "customerCode" },
@@ -139,8 +143,12 @@ export default function Invoices() {
     { id: 'orderFormNo', header: "Order No", accessor: "orderFormNo" },
     { id: 'serviceName', header: "Service", accessor: "serviceName" },
     { id: 'invoiceType', header: "Type", accessor: "invoiceType" },
-    { id: 'invoiceValue', header: "Value", render: (row) => <span className="font-medium">{(row.invoiceValue || 0).toLocaleString('en-US', { style: 'currency', currency: row.invoiceCurrency || 'USD' })}</span> },
+    { id: 'invoiceNetValue', header: "Net Value", render: (row) => <span>{(row.invoiceNetValue || 0).toLocaleString('en-US', { style: 'currency', currency: row.invoiceCurrency || 'USD' })}</span> },
+    { id: 'invoiceTaxValue', header: "Tax Value", render: (row) => <span>{(row.invoiceTaxValue || 0).toLocaleString('en-US', { style: 'currency', currency: row.invoiceCurrency || 'USD' })}</span> },
+    { id: 'invoiceValue', header: "Total Value", render: (row) => <span className="font-medium">{(row.invoiceValue || 0).toLocaleString('en-US', { style: 'currency', currency: row.invoiceCurrency || 'USD' })}</span> },
     { id: 'paymentDueDate', header: "Due Date", accessor: "paymentDueDate" },
+    { id: 'salesPersonName', header: "Sales Person", accessor: "salesPersonName" },
+    { id: 'customerRegion', header: "Region", accessor: "customerRegion" },
     { id: 'status', header: "Status", render: (row) => <StatusBadge status={row.invoiceStatus?.toLowerCase().replace(/ /g, '_')} /> },
     {
       id: 'actions',
@@ -171,6 +179,23 @@ export default function Invoices() {
     }
   ];
 
+  const [visibleColumns, setVisibleColumns] = useState(() => {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    const savedColumns = saved ? JSON.parse(saved) : allColumns.map(c => c.id);
+    if (!savedColumns.includes('actions')) {
+      savedColumns.push('actions');
+    }
+    return savedColumns;
+  });
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(visibleColumns));
+  }, [visibleColumns]);
+
+  const totalNetValue = filteredInvoices.reduce((sum, inv) => sum + (inv.invoiceNetValue || 0), 0);
+  const totalTaxValue = filteredInvoices.reduce((sum, inv) => sum + (inv.invoiceTaxValue || 0), 0);
+  const totalValue = filteredInvoices.reduce((sum, inv) => sum + (inv.invoiceValue || 0), 0);
+
   const handleSave = (data) => {
     if (editingInvoice) {
       updateMutation.mutate({ id: editingInvoice.id, data });
@@ -188,6 +213,11 @@ export default function Invoices() {
           onAdd={() => { setEditingInvoice(null); setViewingInvoice(null); setShowForm(true); }}
           addLabel="New Invoice"
         >
+          <ColumnSelector
+            columns={allColumns.filter(c => c.id !== 'actions')}
+            visibleColumns={visibleColumns}
+            onVisibilityChange={setVisibleColumns}
+          />
           <SyncDropdown
             onBulkUpload={() => setShowBulkUpload(true)}
             onBulkDelete={() => {}}
@@ -213,6 +243,8 @@ export default function Invoices() {
               <div><span className="font-semibold text-slate-900">{invoices.length}</span> Total</div>
               <div className="h-4 w-px bg-slate-200" />
               <div><span className="font-semibold text-slate-900">{filteredInvoices.length}</span> Filtered</div>
+              <div className="h-4 w-px bg-slate-200" />
+              <div><span className="font-semibold text-slate-900">{totalValue.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</span> Total Value</div>
             </div>
           </div>
 
@@ -302,10 +334,11 @@ export default function Invoices() {
           />
         ) : (
           <DataTable 
-            columns={columns} 
+            columns={allColumns} 
             data={filteredInvoices} 
             isLoading={isLoading}
             emptyMessage="No invoices match your search"
+            visibleColumns={visibleColumns}
           />
         )}
 
