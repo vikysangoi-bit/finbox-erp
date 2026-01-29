@@ -8,10 +8,14 @@ import EmptyState from "@/components/shared/EmptyState";
 import ReceiptForm from "@/components/receipts/ReceiptForm";
 import BulkUploadDialog from "@/components/shared/BulkUploadDialog";
 import SyncDropdown from "@/components/shared/SyncDropdown";
+import ColumnSelector from "@/components/shared/ColumnSelector";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal, Receipt, Eye, Edit, Trash2 } from "lucide-react";
 import ConfirmDialog from "@/components/shared/ConfirmDialog";
+import { useEffect } from 'react';
+
+const STORAGE_KEY = 'receipts_visibleColumns';
 
 export default function Receipts() {
   const [showForm, setShowForm] = useState(false);
@@ -122,7 +126,7 @@ export default function Receipts() {
     return matchesSearch && matchesClient && matchesReceiptMonth;
   });
 
-  const columns = [
+  const allColumns = [
     { id: 'receiptDate', header: "Date", accessor: "receiptDate" },
     { id: 'customerCode', header: "Customer Code", accessor: "customerCode" },
     { id: 'customerName', header: "Customer Name", accessor: "customerName" },
@@ -130,6 +134,8 @@ export default function Receipts() {
     { id: 'utr', header: "UTR", accessor: "utr" },
     { id: 'receiptValue', header: "Receipt Value", render: (row) => <span className="font-medium">{(row.receiptValue || 0).toLocaleString('en-US', { style: 'currency', currency: row.receiptCurrency || 'USD' })}</span> },
     { id: 'tdsHoldValue', header: "TDS Hold", render: (row) => <span>{(row.tdsHoldValue || 0).toLocaleString('en-US', { style: 'currency', currency: row.receiptCurrency || 'USD' })}</span> },
+    { id: 'gstHoldValue', header: "GST Hold", render: (row) => <span>{(row.gstHoldValue || 0).toLocaleString('en-US', { style: 'currency', currency: row.receiptCurrency || 'USD' })}</span> },
+    { id: 'otherHoldValue', header: "Other Hold", render: (row) => <span>{(row.otherHoldValue || 0).toLocaleString('en-US', { style: 'currency', currency: row.receiptCurrency || 'USD' })}</span> },
     { id: 'receiverBank', header: "Bank", accessor: "receiverBank" },
     {
       id: 'actions',
@@ -160,6 +166,21 @@ export default function Receipts() {
     }
   ];
 
+  const [visibleColumns, setVisibleColumns] = useState(() => {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    const savedColumns = saved ? JSON.parse(saved) : allColumns.map(c => c.id);
+    if (!savedColumns.includes('actions')) {
+      savedColumns.push('actions');
+    }
+    return savedColumns;
+  });
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(visibleColumns));
+  }, [visibleColumns]);
+
+  const totalValue = filteredReceipts.reduce((sum, r) => sum + (r.receiptValue || 0), 0);
+
   const handleSave = (data) => {
     if (editingReceipt) {
       updateMutation.mutate({ id: editingReceipt.id, data });
@@ -177,6 +198,11 @@ export default function Receipts() {
           onAdd={() => { setEditingReceipt(null); setViewingReceipt(null); setShowForm(true); }}
           addLabel="New Receipt"
         >
+          <ColumnSelector
+            columns={allColumns.filter(c => c.id !== 'actions')}
+            visibleColumns={visibleColumns}
+            onVisibilityChange={setVisibleColumns}
+          />
           <SyncDropdown
             onBulkUpload={() => setShowBulkUpload(true)}
             onBulkDelete={() => {}}
@@ -202,6 +228,8 @@ export default function Receipts() {
               <div><span className="font-semibold text-slate-900">{receipts.length}</span> Total</div>
               <div className="h-4 w-px bg-slate-200" />
               <div><span className="font-semibold text-slate-900">{filteredReceipts.length}</span> Filtered</div>
+              <div className="h-4 w-px bg-slate-200" />
+              <div><span className="font-semibold text-slate-900">{totalValue.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</span> Total Value</div>
             </div>
           </div>
 
@@ -249,10 +277,11 @@ export default function Receipts() {
           />
         ) : (
           <DataTable 
-            columns={columns} 
+            columns={allColumns} 
             data={filteredReceipts} 
             isLoading={isLoading}
             emptyMessage="No receipts match your search"
+            visibleColumns={visibleColumns}
           />
         )}
 

@@ -9,10 +9,14 @@ import CreditNoteForm from "@/components/creditnotes/CreditNoteForm";
 import BulkUploadDialog from "@/components/shared/BulkUploadDialog";
 import SyncDropdown from "@/components/shared/SyncDropdown";
 import StatusBadge from "@/components/shared/StatusBadge";
+import ColumnSelector from "@/components/shared/ColumnSelector";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal, FileText, Eye, Edit, Trash2 } from "lucide-react";
 import ConfirmDialog from "@/components/shared/ConfirmDialog";
+import { useEffect } from 'react';
+
+const STORAGE_KEY = 'creditNotes_visibleColumns';
 
 export default function CreditNotes() {
   const [showForm, setShowForm] = useState(false);
@@ -124,13 +128,15 @@ export default function CreditNotes() {
     return matchesSearch && matchesStatus && matchesClient;
   });
 
-  const columns = [
+  const allColumns = [
     { id: 'creditNoteNo', header: "CN No", accessor: "creditNoteNo", render: (row) => <span className="font-mono font-medium">{row.creditNoteNo}</span> },
     { id: 'cnDate', header: "Date", accessor: "cnDate" },
     { id: 'customerCode', header: "Customer Code", accessor: "customerCode" },
     { id: 'customerName', header: "Customer Name", accessor: "customerName" },
     { id: 'invoiceNo', header: "Invoice No", accessor: "invoiceNo", render: (row) => row.invoiceNo || <span className="text-slate-400">-</span> },
-    { id: 'cnValue', header: "Value", render: (row) => <span className="font-medium">{(row.cnValue || 0).toLocaleString('en-US', { style: 'currency', currency: row.cnCurrency || 'USD' })}</span> },
+    { id: 'cnNetValue', header: "Net Value", render: (row) => <span>{(row.cnNetValue || 0).toLocaleString('en-US', { style: 'currency', currency: row.cnCurrency || 'USD' })}</span> },
+    { id: 'cnTaxValue', header: "Tax Value", render: (row) => <span>{(row.cnTaxValue || 0).toLocaleString('en-US', { style: 'currency', currency: row.cnCurrency || 'USD' })}</span> },
+    { id: 'cnValue', header: "Total Value", render: (row) => <span className="font-medium">{(row.cnValue || 0).toLocaleString('en-US', { style: 'currency', currency: row.cnCurrency || 'USD' })}</span> },
     { id: 'status', header: "Status", render: (row) => <StatusBadge status={row.cnStatus?.toLowerCase()} /> },
     {
       id: 'actions',
@@ -161,6 +167,21 @@ export default function CreditNotes() {
     }
   ];
 
+  const [visibleColumns, setVisibleColumns] = useState(() => {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    const savedColumns = saved ? JSON.parse(saved) : allColumns.map(c => c.id);
+    if (!savedColumns.includes('actions')) {
+      savedColumns.push('actions');
+    }
+    return savedColumns;
+  });
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(visibleColumns));
+  }, [visibleColumns]);
+
+  const totalValue = filteredCreditNotes.reduce((sum, cn) => sum + (cn.cnValue || 0), 0);
+
   const handleSave = (data) => {
     if (editingCreditNote) {
       updateMutation.mutate({ id: editingCreditNote.id, data });
@@ -178,6 +199,11 @@ export default function CreditNotes() {
           onAdd={() => { setEditingCreditNote(null); setViewingCreditNote(null); setShowForm(true); }}
           addLabel="New Credit Note"
         >
+          <ColumnSelector
+            columns={allColumns.filter(c => c.id !== 'actions')}
+            visibleColumns={visibleColumns}
+            onVisibilityChange={setVisibleColumns}
+          />
           <SyncDropdown
             onBulkUpload={() => setShowBulkUpload(true)}
             onBulkDelete={() => {}}
@@ -203,6 +229,8 @@ export default function CreditNotes() {
               <div><span className="font-semibold text-slate-900">{creditNotes.length}</span> Total</div>
               <div className="h-4 w-px bg-slate-200" />
               <div><span className="font-semibold text-slate-900">{filteredCreditNotes.length}</span> Filtered</div>
+              <div className="h-4 w-px bg-slate-200" />
+              <div><span className="font-semibold text-slate-900">{totalValue.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</span> Total Value</div>
             </div>
           </div>
 
@@ -245,10 +273,11 @@ export default function CreditNotes() {
           />
         ) : (
           <DataTable 
-            columns={columns} 
+            columns={allColumns} 
             data={filteredCreditNotes} 
             isLoading={isLoading}
             emptyMessage="No credit notes match your search"
+            visibleColumns={visibleColumns}
           />
         )}
 
