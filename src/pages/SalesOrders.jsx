@@ -10,10 +10,14 @@ import SalesOrderPrintView from "@/components/salesorders/SalesOrderPrintView";
 import BulkUploadDialog from "@/components/shared/BulkUploadDialog";
 import SyncDropdown from "@/components/shared/SyncDropdown";
 import StatusBadge from "@/components/shared/StatusBadge";
+import ColumnSelector from "@/components/shared/ColumnSelector";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal, FileText, Eye, Edit, Trash2, Printer } from "lucide-react";
 import ConfirmDialog from "@/components/shared/ConfirmDialog";
+import { useEffect } from 'react';
+
+const STORAGE_KEY = 'salesOrders_visibleColumns';
 
 export default function SalesOrders() {
   const [showForm, setShowForm] = useState(false);
@@ -188,12 +192,16 @@ export default function SalesOrders() {
     return matchesSearch && matchesStatus && matchesService && matchesClient && matchesSalesPerson && matchesDeliveryMonth && matchesOrderMonth;
   });
 
-  const columns = [
+  const allColumns = [
     { id: 'orderFormNo', header: "Order No", accessor: "orderFormNo", render: (row) => <span className="font-mono font-medium">{row.orderFormNo}</span> },
     { id: 'customerCode', header: "Customer Code", accessor: "customerCode" },
     { id: 'customerName', header: "Customer Name", accessor: "customerName" },
+    { id: 'serviceName', header: "Service", accessor: "serviceName" },
     { id: 'orderFormValue', header: "Value", render: (row) => <span className="font-medium">{(row.orderFormValue || 0).toLocaleString('en-US', { style: 'currency', currency: row.currency || 'USD' })}</span> },
+    { id: 'salesPersonName', header: "Sales Person", accessor: "salesPersonName" },
     { id: 'expectedDelivery', header: "Expected Delivery", accessor: "expectedDelivery" },
+    { id: 'startDate', header: "Start Date", accessor: "startDate" },
+    { id: 'endDate', header: "End Date", accessor: "endDate" },
     { id: 'status', header: "Status", render: (row) => {
       const now = new Date();
       const endDate = row.endDate ? new Date(row.endDate) : null;
@@ -233,6 +241,21 @@ export default function SalesOrders() {
     }
   ];
 
+  const [visibleColumns, setVisibleColumns] = useState(() => {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    const savedColumns = saved ? JSON.parse(saved) : allColumns.map(c => c.id);
+    if (!savedColumns.includes('actions')) {
+      savedColumns.push('actions');
+    }
+    return savedColumns;
+  });
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(visibleColumns));
+  }, [visibleColumns]);
+
+  const totalValue = filteredOrders.reduce((sum, order) => sum + (order.orderFormValue || 0), 0);
+
   const handleSave = (data) => {
     if (editingOrder) {
       updateMutation.mutate({ id: editingOrder.id, data });
@@ -250,6 +273,11 @@ export default function SalesOrders() {
           onAdd={() => { setEditingOrder(null); setViewingOrder(null); setShowForm(true); }}
           addLabel="New Sales Order"
         >
+          <ColumnSelector
+            columns={allColumns.filter(c => c.id !== 'actions')}
+            visibleColumns={visibleColumns}
+            onVisibilityChange={setVisibleColumns}
+          />
           <SyncDropdown
             onBulkUpload={() => setShowBulkUpload(true)}
             onBulkDelete={() => {}}
@@ -275,6 +303,8 @@ export default function SalesOrders() {
               <div><span className="font-semibold text-slate-900">{orders.length}</span> Total</div>
               <div className="h-4 w-px bg-slate-200" />
               <div><span className="font-semibold text-slate-900">{filteredOrders.length}</span> Filtered</div>
+              <div className="h-4 w-px bg-slate-200" />
+              <div><span className="font-semibold text-slate-900">{totalValue.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</span> Total Value</div>
             </div>
           </div>
 
@@ -372,10 +402,11 @@ export default function SalesOrders() {
           />
         ) : (
           <DataTable 
-            columns={columns} 
+            columns={allColumns} 
             data={filteredOrders} 
             isLoading={isLoading}
             emptyMessage="No sales orders match your search"
+            visibleColumns={visibleColumns}
           />
         )}
 

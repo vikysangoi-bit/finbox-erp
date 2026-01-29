@@ -53,6 +53,7 @@ import ChartOfAccounts from './pages/ChartOfAccounts';
 import CreditNotes from './pages/CreditNotes';
 import Currencies from './pages/Currencies';
 import Dashboard from './pages/Dashboard';
+import DebitNotes from './pages/DebitNotes';
 import Documents from './pages/Documents';
 import FinancialReports from './pages/FinancialReports';
 import GoodsReceipts from './pages/GoodsReceipts';
@@ -61,6 +62,7 @@ import InventoryReports from './pages/InventoryReports';
 import InventoryTransactions from './pages/InventoryTransactions';
 import Invoices from './pages/Invoices';
 import JournalEntries from './pages/JournalEntries';
+import Payments from './pages/Payments';
 import PurchaseOrders from './pages/PurchaseOrders';
 import PurchaseReports from './pages/PurchaseReports';
 import Receipts from './pages/Receipts';
@@ -69,8 +71,6 @@ import SalesOrders from './pages/SalesOrders';
 import Suppliers from './pages/Suppliers';
 import Users from './pages/Users';
 import VendorBills from './pages/VendorBills';
-import DebitNotes from './pages/DebitNotes';
-import Payments from './pages/Payments';
 import __Layout from './Layout.jsx';
 
 
@@ -81,6 +81,7 @@ export const PAGES = {
     "CreditNotes": CreditNotes,
     "Currencies": Currencies,
     "Dashboard": Dashboard,
+    "DebitNotes": DebitNotes,
     "Documents": Documents,
     "FinancialReports": FinancialReports,
     "GoodsReceipts": GoodsReceipts,
@@ -89,6 +90,7 @@ export const PAGES = {
     "InventoryTransactions": InventoryTransactions,
     "Invoices": Invoices,
     "JournalEntries": JournalEntries,
+    "Payments": Payments,
     "PurchaseOrders": PurchaseOrders,
     "PurchaseReports": PurchaseReports,
     "Receipts": Receipts,
@@ -97,8 +99,6 @@ export const PAGES = {
     "Suppliers": Suppliers,
     "Users": Users,
     "VendorBills": VendorBills,
-    "DebitNotes": DebitNotes,
-    "Payments": Payments,
 }
 
 export const pagesConfig = {
