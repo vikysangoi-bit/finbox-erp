@@ -69,6 +69,8 @@ export default function AccountForm({ open, onOpenChange, account, accounts = []
     panId: '',
     tanId: '',
     vatId: '',
+    cinLlpin: '',
+    coi: '',
     supplierCategory: '',
     msme: ''
   });
@@ -111,6 +113,8 @@ export default function AccountForm({ open, onOpenChange, account, accounts = []
         panId: '',
         tanId: '',
         vatId: '',
+        cinLlpin: '',
+        coi: '',
         supplierCategory: '',
         msme: ''
       });
