@@ -24,6 +24,7 @@ export default function Invoices() {
   const [editingInvoice, setEditingInvoice] = useState(null);
   const [viewingInvoice, setViewingInvoice] = useState(null);
   const [deleteInvoice, setDeleteInvoice] = useState(null);
+  const [selectedRows, setSelectedRows] = useState([]);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [serviceFilter, setServiceFilter] = useState('all');
@@ -339,6 +340,9 @@ export default function Invoices() {
             isLoading={isLoading}
             emptyMessage="No invoices match your search"
             visibleColumns={visibleColumns}
+            enableRowSelection={true}
+            selectedRows={selectedRows}
+            onSelectionChange={setSelectedRows}
           />
         )}
 

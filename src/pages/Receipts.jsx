@@ -23,6 +23,7 @@ export default function Receipts() {
   const [editingReceipt, setEditingReceipt] = useState(null);
   const [viewingReceipt, setViewingReceipt] = useState(null);
   const [deleteReceipt, setDeleteReceipt] = useState(null);
+  const [selectedRows, setSelectedRows] = useState([]);
   const [search, setSearch] = useState('');
   const [clientFilter, setClientFilter] = useState('all');
   const [receiptMonthFilter, setReceiptMonthFilter] = useState('all');
@@ -282,6 +283,9 @@ export default function Receipts() {
             isLoading={isLoading}
             emptyMessage="No receipts match your search"
             visibleColumns={visibleColumns}
+            enableRowSelection={true}
+            selectedRows={selectedRows}
+            onSelectionChange={setSelectedRows}
           />
         )}
 

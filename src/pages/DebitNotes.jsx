@@ -24,6 +24,7 @@ export default function DebitNotes() {
   const [editingNote, setEditingNote] = useState(null);
   const [viewingNote, setViewingNote] = useState(null);
   const [deleteNote, setDeleteNote] = useState(null);
+  const [selectedRows, setSelectedRows] = useState([]);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [supplierFilter, setSupplierFilter] = useState('all');
@@ -268,6 +269,9 @@ export default function DebitNotes() {
             data={filteredNotes} 
             isLoading={isLoading}
             emptyMessage="No debit notes match your search"
+            enableRowSelection={true}
+            selectedRows={selectedRows}
+            onSelectionChange={setSelectedRows}
           />
         )}
 

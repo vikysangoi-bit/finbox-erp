@@ -23,6 +23,7 @@ export default function GoodsReceipts() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [viewReceipt, setViewReceipt] = useState(null);
   const [showBulkDelete, setShowBulkDelete] = useState(false);
+  const [selectedRows, setSelectedRows] = useState([]);
 
   const { data: receipts = [], isLoading } = useQuery({
     queryKey: ['goods-receipts'],
@@ -189,6 +190,9 @@ export default function GoodsReceipts() {
             data={filteredReceipts} 
             isLoading={isLoading}
             emptyMessage="No receipts match your search"
+            enableRowSelection={true}
+            selectedRows={selectedRows}
+            onSelectionChange={setSelectedRows}
           />
         )}
 
