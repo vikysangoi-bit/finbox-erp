@@ -155,6 +155,35 @@ export default function VendorBillForm({ open, onOpenChange, vendorBill, account
     setForm({ ...form, billTaxValue: taxValue, billValue: netValue + taxValue });
   };
 
+  // Auto-calculate bill values from line items
+  useEffect(() => {
+    if (form.lineItems?.length > 0) {
+      const totalNet = form.lineItems.reduce((sum, item) => sum + (parseFloat(item.net_amount) || 0), 0);
+      const totalTax = form.lineItems.reduce((sum, item) => sum + (parseFloat(item.tax_amount) || 0), 0);
+      const totalGross = form.lineItems.reduce((sum, item) => sum + (parseFloat(item.gross_amount) || 0), 0);
+      
+      setForm(prev => ({
+        ...prev,
+        billNetValue: totalNet,
+        billTaxValue: totalTax,
+        billValue: totalGross
+      }));
+    }
+  }, [form.lineItems]);
+
+  // Auto-calculate payment due date based on payment terms and bill date
+  useEffect(() => {
+    if (form.billDate && form.paymentTerms) {
+      const billDate = new Date(form.billDate);
+      const daysToAdd = parseInt(form.paymentTerms.replace('net_', '')) || 30;
+      const dueDate = new Date(billDate);
+      dueDate.setDate(dueDate.getDate() + daysToAdd);
+      
+      const formattedDueDate = dueDate.toISOString().split('T')[0];
+      setForm(prev => ({ ...prev, paymentDueDate: formattedDueDate }));
+    }
+  }, [form.billDate, form.paymentTerms]);
+
   const handleRemoveItem = (index) => {
     const newItems = form.lineItems.filter((_, i) => i !== index);
     setForm({ ...form, lineItems: newItems });
