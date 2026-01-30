@@ -197,8 +197,10 @@ export default function VendorBillForm({ open, onOpenChange, vendorBill, account
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value={null}>None</SelectItem>
-                  {inventoryTransactions.filter(txn => txn.status === 'completed').map((txn) => (
-                    <SelectItem key={txn.id} value={txn.transaction_number}>{txn.transaction_number}</SelectItem>
+                  {inventoryTransactions.map((txn) => (
+                    <SelectItem key={txn.id} value={txn.transaction_number}>
+                      {txn.transaction_number} ({txn.application_status || 'Unapplied'})
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
