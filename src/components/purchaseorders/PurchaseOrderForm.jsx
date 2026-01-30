@@ -50,14 +50,9 @@ export default function PurchaseOrderForm({ open, onOpenChange, po, onSave, isLo
     queryFn: () => base44.entities.Account.list()
   });
 
-  // Find Trade Payable account
-  const tradePayableAccount = allAccounts.find(acc => 
-    acc.name === 'Trade Payable' && acc.type === 'liability'
-  );
-
-  // Filter suppliers with Trade Payable as parent
+  // Filter suppliers with Trade Payable as parent (ID: 697babaff819e89ea60692b6)
   const suppliers = allAccounts.filter(acc => 
-    acc.parentAccount === tradePayableAccount?.id && acc.active && !acc.is_deleted
+    acc.parentAccount === '697babaff819e89ea60692b6' && acc.active && !acc.is_deleted
   );
 
   useEffect(() => {
