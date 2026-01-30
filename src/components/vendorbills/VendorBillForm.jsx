@@ -401,20 +401,183 @@ export default function VendorBillForm({ open, onOpenChange, vendorBill, account
                     {form.lineItems?.length > 0 ? (
                       form.lineItems.map((item, idx) => (
                         <tr key={idx} className="border-b border-slate-200">
-                          <td className="p-2 border-r border-slate-200">{item.itemCode || '-'}</td>
-                          <td className="p-2 border-r border-slate-200">{item.articleNo || '-'}</td>
-                          <td className="p-2 border-r border-slate-200">{item.styleID || '-'}</td>
-                          <td className="p-2 border-r border-slate-200">{item.itemCategory || '-'}</td>
-                          <td className="p-2 border-r border-slate-200">{item.description || '-'}</td>
-                          <td className="p-2 border-r border-slate-200">{item.composition || '-'}</td>
-                          <td className="p-2 border-r border-slate-200">{item.size || '-'}</td>
-                          <td className="p-2 border-r border-slate-200">{item.color || '-'}</td>
-                          <td className="p-2 border-r border-slate-200">{item.hsnCode || '-'}</td>
-                          <td className="p-2 border-r border-slate-200">{item.quantity || 0}</td>
-                          <td className="p-2 border-r border-slate-200">{item.rate || 0}</td>
-                          <td className="p-2 border-r border-slate-200">{item.net_amount || 0}</td>
-                          <td className="p-2 border-r border-slate-200">{item.tax_amount || 0}</td>
-                          <td className="p-2 border-r border-slate-200">{item.gross_amount || 0}</td>
+                          <td className="p-1 border-r border-slate-200">
+                            <Input 
+                              value={item.itemCode || ''} 
+                              onChange={(e) => {
+                                const newItems = [...form.lineItems];
+                                newItems[idx].itemCode = e.target.value;
+                                setForm({ ...form, lineItems: newItems });
+                              }}
+                              disabled={viewMode}
+                              className="h-8 text-xs"
+                            />
+                          </td>
+                          <td className="p-1 border-r border-slate-200">
+                            <Input 
+                              value={item.articleNo || ''} 
+                              onChange={(e) => {
+                                const newItems = [...form.lineItems];
+                                newItems[idx].articleNo = e.target.value;
+                                setForm({ ...form, lineItems: newItems });
+                              }}
+                              disabled={viewMode}
+                              className="h-8 text-xs"
+                            />
+                          </td>
+                          <td className="p-1 border-r border-slate-200">
+                            <Input 
+                              value={item.styleID || ''} 
+                              onChange={(e) => {
+                                const newItems = [...form.lineItems];
+                                newItems[idx].styleID = e.target.value;
+                                setForm({ ...form, lineItems: newItems });
+                              }}
+                              disabled={viewMode}
+                              className="h-8 text-xs"
+                            />
+                          </td>
+                          <td className="p-1 border-r border-slate-200">
+                            <Input 
+                              value={item.itemCategory || ''} 
+                              onChange={(e) => {
+                                const newItems = [...form.lineItems];
+                                newItems[idx].itemCategory = e.target.value;
+                                setForm({ ...form, lineItems: newItems });
+                              }}
+                              disabled={viewMode}
+                              className="h-8 text-xs"
+                            />
+                          </td>
+                          <td className="p-1 border-r border-slate-200">
+                            <Input 
+                              value={item.description || ''} 
+                              onChange={(e) => {
+                                const newItems = [...form.lineItems];
+                                newItems[idx].description = e.target.value;
+                                setForm({ ...form, lineItems: newItems });
+                              }}
+                              disabled={viewMode}
+                              className="h-8 text-xs"
+                            />
+                          </td>
+                          <td className="p-1 border-r border-slate-200">
+                            <Input 
+                              value={item.composition || ''} 
+                              onChange={(e) => {
+                                const newItems = [...form.lineItems];
+                                newItems[idx].composition = e.target.value;
+                                setForm({ ...form, lineItems: newItems });
+                              }}
+                              disabled={viewMode}
+                              className="h-8 text-xs"
+                            />
+                          </td>
+                          <td className="p-1 border-r border-slate-200">
+                            <Input 
+                              value={item.size || ''} 
+                              onChange={(e) => {
+                                const newItems = [...form.lineItems];
+                                newItems[idx].size = e.target.value;
+                                setForm({ ...form, lineItems: newItems });
+                              }}
+                              disabled={viewMode}
+                              className="h-8 text-xs"
+                            />
+                          </td>
+                          <td className="p-1 border-r border-slate-200">
+                            <Input 
+                              value={item.color || ''} 
+                              onChange={(e) => {
+                                const newItems = [...form.lineItems];
+                                newItems[idx].color = e.target.value;
+                                setForm({ ...form, lineItems: newItems });
+                              }}
+                              disabled={viewMode}
+                              className="h-8 text-xs"
+                            />
+                          </td>
+                          <td className="p-1 border-r border-slate-200">
+                            <Input 
+                              value={item.hsnCode || ''} 
+                              onChange={(e) => {
+                                const newItems = [...form.lineItems];
+                                newItems[idx].hsnCode = e.target.value;
+                                setForm({ ...form, lineItems: newItems });
+                              }}
+                              disabled={viewMode}
+                              className="h-8 text-xs"
+                            />
+                          </td>
+                          <td className="p-1 border-r border-slate-200">
+                            <Input 
+                              type="number"
+                              value={item.quantity || 0} 
+                              onChange={(e) => {
+                                const newItems = [...form.lineItems];
+                                newItems[idx].quantity = parseFloat(e.target.value) || 0;
+                                setForm({ ...form, lineItems: newItems });
+                              }}
+                              disabled={viewMode}
+                              className="h-8 text-xs"
+                            />
+                          </td>
+                          <td className="p-1 border-r border-slate-200">
+                            <Input 
+                              type="number"
+                              step="0.01"
+                              value={item.rate || 0} 
+                              onChange={(e) => {
+                                const newItems = [...form.lineItems];
+                                newItems[idx].rate = parseFloat(e.target.value) || 0;
+                                setForm({ ...form, lineItems: newItems });
+                              }}
+                              disabled={viewMode}
+                              className="h-8 text-xs"
+                            />
+                          </td>
+                          <td className="p-1 border-r border-slate-200">
+                            <Input 
+                              type="number"
+                              step="0.01"
+                              value={item.net_amount || 0} 
+                              onChange={(e) => {
+                                const newItems = [...form.lineItems];
+                                newItems[idx].net_amount = parseFloat(e.target.value) || 0;
+                                setForm({ ...form, lineItems: newItems });
+                              }}
+                              disabled={viewMode}
+                              className="h-8 text-xs"
+                            />
+                          </td>
+                          <td className="p-1 border-r border-slate-200">
+                            <Input 
+                              type="number"
+                              step="0.01"
+                              value={item.tax_amount || 0} 
+                              onChange={(e) => {
+                                const newItems = [...form.lineItems];
+                                newItems[idx].tax_amount = parseFloat(e.target.value) || 0;
+                                setForm({ ...form, lineItems: newItems });
+                              }}
+                              disabled={viewMode}
+                              className="h-8 text-xs"
+                            />
+                          </td>
+                          <td className="p-1 border-r border-slate-200">
+                            <Input 
+                              type="number"
+                              step="0.01"
+                              value={item.gross_amount || 0} 
+                              onChange={(e) => {
+                                const newItems = [...form.lineItems];
+                                newItems[idx].gross_amount = parseFloat(e.target.value) || 0;
+                                setForm({ ...form, lineItems: newItems });
+                              }}
+                              disabled={viewMode}
+                              className="h-8 text-xs"
+                            />
+                          </td>
                           {!viewMode && (
                             <td className="p-2">
                               <Button 
