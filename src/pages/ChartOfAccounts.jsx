@@ -221,8 +221,15 @@ export default function ChartOfAccounts() {
   });
 
   const bulkDeleteMutation = useMutation({
-    mutationFn: async (ids) => {
-      await Promise.all(ids.map(id => base44.entities.Account.delete(id)));
+    mutationFn: async (rows) => {
+      const user = await base44.auth.me();
+      await Promise.all(rows.map(row => 
+        base44.entities.Account.update(row.id, {
+          is_deleted: true,
+          deleted_by: user.email,
+          deleted_on: new Date().toISOString()
+        })
+      ));
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['accounts'] });
@@ -262,28 +269,8 @@ export default function ChartOfAccounts() {
     }
   };
 
-  const handleSelectRow = (row) => {
-    setSelectedRows(prev => {
-      const exists = prev.some(r => r.id === row.id);
-      if (exists) {
-        return prev.filter(r => r.id !== row.id);
-      } else {
-        return [...prev, row];
-      }
-    });
-  };
-
-  const handleSelectAll = () => {
-    if (selectedRows.length === filteredAccounts.length) {
-      setSelectedRows([]);
-    } else {
-      setSelectedRows([...filteredAccounts]);
-    }
-  };
-
   const handleBulkDelete = () => {
-    const ids = selectedRows.map(row => row.id);
-    bulkDeleteMutation.mutate(ids);
+    bulkDeleteMutation.mutate(selectedRows);
   };
 
   return (
@@ -422,10 +409,9 @@ export default function ChartOfAccounts() {
             data={filteredAccounts} 
             isLoading={isLoading}
             emptyMessage="No accounts match your search"
-            selectable={true}
+            enableRowSelection={true}
             selectedRows={selectedRows}
-            onSelectRow={handleSelectRow}
-            onSelectAll={handleSelectAll}
+            onSelectionChange={setSelectedRows}
             visibleColumns={visibleColumns}
           />
         )}
