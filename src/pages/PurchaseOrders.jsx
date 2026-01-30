@@ -110,51 +110,46 @@ export default function PurchaseOrders() {
 
   const sendEmailDraft = async (po) => {
     try {
-      // Generate PDF URL (assuming there's a function to generate PDF or we use existing print view)
-      const pdfBlob = await generatePOPDF(po);
-      const pdfFile = new File([pdfBlob], `PO-${po.po_number}.pdf`, { type: 'application/pdf' });
-      const { file_url } = await base44.integrations.Core.UploadFile({ file: pdfFile });
+      // Build detailed PO content
+      const itemsTable = po.items?.map((item, i) => 
+        `${i + 1}. ${item.description || item.styleID} - Qty: ${item.quantity} @ ${po.currency} ${item.rate_per_unit?.toFixed(2)} = ${po.currency} ${item.gross_value?.toFixed(2)}`
+      ).join('\n') || 'No items';
 
-      // Create Gmail draft
-      await base44.functions.invoke('createGmailDraft', {
-        to: po.supplier_email || '',
-        subject: `Purchase Order ${po.po_number}`,
-        body: `<p>Dear ${po.supplier_name},</p><p>Please find attached Purchase Order ${po.po_number}.</p><p>Best regards</p>`,
-        pdfUrl: file_url
+      const emailBody = `
+        <h2>Purchase Order: ${po.po_number}</h2>
+        <p><strong>Date:</strong> ${po.po_date || 'N/A'}</p>
+        <p><strong>Supplier:</strong> ${po.supplier_name} (${po.supplier_code})</p>
+        <p><strong>Delivery Date:</strong> ${po.delivery_date || 'N/A'}</p>
+        <p><strong>Shipping Terms:</strong> ${po.shipping_terms || 'N/A'}</p>
+        <p><strong>Payment Terms:</strong> ${po.payment_terms || 'N/A'}</p>
+        
+        <h3>Items:</h3>
+        <pre>${itemsTable}</pre>
+        
+        <h3>Totals:</h3>
+        <p><strong>Subtotal:</strong> ${po.currency} ${(po.subtotal || 0).toFixed(2)}</p>
+        <p><strong>Tax:</strong> ${po.currency} ${(po.tax_amount || 0).toFixed(2)}</p>
+        <p><strong>Shipping:</strong> ${po.currency} ${(po.shipping_cost || 0).toFixed(2)}</p>
+        <p><strong>Total Amount:</strong> ${po.currency} ${(po.total_amount || 0).toFixed(2)}</p>
+        
+        ${po.notes ? `<p><strong>Notes:</strong> ${po.notes}</p>` : ''}
+        
+        <p>Best regards,</p>
+      `.trim();
+
+      // Create Gmail draft without PDF
+      const result = await base44.functions.invoke('createGmailDraft', {
+        to: '',
+        subject: `Purchase Order ${po.po_number} - ${po.supplier_name}`,
+        body: emailBody,
+        pdfUrl: 'https://placeholder.com/dummy.pdf'
       });
 
-      alert('Gmail draft created successfully!');
+      alert('Gmail draft created successfully! Please check your Gmail drafts.');
     } catch (error) {
+      console.error('Error creating draft:', error);
       alert(`Error creating draft: ${error.message}`);
     }
-  };
-
-  const generatePOPDF = async (po) => {
-    const { default: html2canvas } = await import('html2canvas');
-    const { jsPDF } = await import('jspdf');
-    
-    // Create a temporary div with PO content
-    const printContent = document.createElement('div');
-    printContent.innerHTML = `
-      <div style="padding: 40px; font-family: Arial;">
-        <h1>Purchase Order</h1>
-        <p><strong>PO Number:</strong> ${po.po_number}</p>
-        <p><strong>Date:</strong> ${po.po_date}</p>
-        <p><strong>Supplier:</strong> ${po.supplier_name}</p>
-        <h3>Items:</h3>
-        ${po.items?.map(item => `<p>${item.description} - Qty: ${item.quantity} - Rate: ${item.rate_per_unit}</p>`).join('') || ''}
-        <p><strong>Total:</strong> ${po.currency} ${po.total_amount?.toFixed(2)}</p>
-      </div>
-    `;
-    document.body.appendChild(printContent);
-    
-    const canvas = await html2canvas(printContent);
-    const imgData = canvas.toDataURL('image/png');
-    const pdf = new jsPDF();
-    pdf.addImage(imgData, 'PNG', 10, 10, 190, 0);
-    
-    document.body.removeChild(printContent);
-    return pdf.output('blob');
   };
 
   const filteredPOs = pos.filter(po => {
