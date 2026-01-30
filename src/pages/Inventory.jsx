@@ -87,6 +87,11 @@ export default function Inventory() {
       header: "EAN", 
       render: (row) => <span className="text-slate-700">{row.ean || '-'}</span>
     },
+    { 
+      id: "hsnCode",
+      header: "HSN Code", 
+      render: (row) => <span className="text-slate-700">{row.hsnCode || '-'}</span>
+    },
     { id: "name", header: "Name", accessor: "name", render: (row) => <span className="font-medium">{row.name}</span> },
     { 
       id: "category",
@@ -197,9 +202,9 @@ export default function Inventory() {
             onBulkUpload={() => setShowBulkUpload(true)}
             onBulkDelete={() => setShowBulkDelete(true)}
             onExportExcel={() => {
-              const headers = ['SKU', 'Article No', 'EAN', 'Name', 'Category', 'Sub Category', 'Unit', 'Quantity', 'Reorder Level', 'MRP', 'Total Value', 'Warehouse Location', 'Supplier', 'Color', 'Size', 'GSM', 'Composition', 'Notes'];
+              const headers = ['SKU', 'Article No', 'EAN', 'HSN Code', 'Name', 'Category', 'Sub Category', 'Unit', 'Quantity', 'Reorder Level', 'MRP', 'Total Value', 'Warehouse Location', 'Supplier', 'Color', 'Size', 'GSM', 'Composition', 'Notes'];
               const rows = filteredItems.map(i => [
-                i.sku, i.articleNo || '', i.ean || '', i.name, i.category, i.sub_category || '', i.unit, i.quantity_on_hand || 0, 
+                i.sku, i.articleNo || '', i.ean || '', i.hsnCode || '', i.name, i.category, i.sub_category || '', i.unit, i.quantity_on_hand || 0, 
                 i.reorder_level || 0, i.mrp || 0, i.total_value || 0, 
                 i.warehouse_location || '', i.supplier || '', i.color || '', i.size || '', i.gsm || '', 
                 i.composition || '', i.notes || ''
@@ -285,6 +290,7 @@ export default function Inventory() {
                 sku: { type: "string" },
                 articleNo: { type: "string" },
                 ean: { type: "string" },
+                hsnCode: { type: "string" },
                 name: { type: "string" },
                 category: { type: "string", enum: ["fabric", "trims", "accessories", "packaging", "garments", "samples"] },
                 sub_category: { type: "string" },
@@ -298,9 +304,9 @@ export default function Inventory() {
             }
           }}
           templateData={[
-            'sku,articleNo,ean,name,category,sub_category,unit,quantity_on_hand,reorder_level,mrp,warehouse_location,supplier,color,size,gsm,composition,notes',
-            'FAB-001,ART-001,1234567890123,Cotton Fabric,fabric,Cotton,meters,1000,200,550.00,A-1-1,ABC Fabrics,White,150cm,180,100% Cotton,',
-            'GAR-001,ART-002,9876543210987,T-Shirt,garments,,pieces,500,100,499.00,B-1-1,XYZ Garments,Blue,M,,100% Cotton,'
+            'sku,articleNo,ean,hsnCode,name,category,sub_category,unit,quantity_on_hand,reorder_level,mrp,warehouse_location,supplier,color,size,gsm,composition,notes',
+            'FAB-001,ART-001,1234567890123,5208,Cotton Fabric,fabric,Cotton,meters,1000,200,550.00,A-1-1,ABC Fabrics,White,150cm,180,100% Cotton,',
+            'GAR-001,ART-002,9876543210987,6109,T-Shirt,garments,,pieces,500,100,499.00,B-1-1,XYZ Garments,Blue,M,,100% Cotton,'
           ]}
           onSuccess={() => queryClient.invalidateQueries({ queryKey: ['inventory-items'] })}
         />
