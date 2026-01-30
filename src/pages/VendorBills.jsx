@@ -23,6 +23,7 @@ export default function VendorBills() {
   const [editingBill, setEditingBill] = useState(null);
   const [viewingBill, setViewingBill] = useState(null);
   const [deleteBill, setDeleteBill] = useState(null);
+  const [selectedRows, setSelectedRows] = useState([]);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [serviceFilter, setServiceFilter] = useState('all');
@@ -281,6 +282,9 @@ export default function VendorBills() {
             data={filteredBills} 
             isLoading={isLoading}
             emptyMessage="No vendor bills match your search"
+            enableRowSelection={true}
+            selectedRows={selectedRows}
+            onSelectionChange={setSelectedRows}
           />
         )}
 

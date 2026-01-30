@@ -24,6 +24,7 @@ export default function CreditNotes() {
   const [editingCreditNote, setEditingCreditNote] = useState(null);
   const [viewingCreditNote, setViewingCreditNote] = useState(null);
   const [deleteCreditNote, setDeleteCreditNote] = useState(null);
+  const [selectedRows, setSelectedRows] = useState([]);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [clientFilter, setClientFilter] = useState('all');
@@ -278,6 +279,9 @@ export default function CreditNotes() {
             isLoading={isLoading}
             emptyMessage="No credit notes match your search"
             visibleColumns={visibleColumns}
+            enableRowSelection={true}
+            selectedRows={selectedRows}
+            onSelectionChange={setSelectedRows}
           />
         )}
 

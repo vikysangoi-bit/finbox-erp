@@ -23,6 +23,7 @@ export default function Payments() {
   const [editingPayment, setEditingPayment] = useState(null);
   const [viewingPayment, setViewingPayment] = useState(null);
   const [deletePayment, setDeletePayment] = useState(null);
+  const [selectedRows, setSelectedRows] = useState([]);
   const [search, setSearch] = useState('');
   const [supplierFilter, setSupplierFilter] = useState('all');
 
@@ -250,6 +251,9 @@ export default function Payments() {
             data={filteredPayments} 
             isLoading={isLoading}
             emptyMessage="No payments match your search"
+            enableRowSelection={true}
+            selectedRows={selectedRows}
+            onSelectionChange={setSelectedRows}
           />
         )}
 
