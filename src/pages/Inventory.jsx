@@ -63,6 +63,7 @@ export default function Inventory() {
   const filteredItems = items.filter(item => {
     const matchesSearch = 
       item.sku?.toLowerCase().includes(search.toLowerCase()) ||
+      item.styleID?.toLowerCase().includes(search.toLowerCase()) ||
       item.name?.toLowerCase().includes(search.toLowerCase()) ||
       item.supplier?.toLowerCase().includes(search.toLowerCase()) ||
       item.articleNo?.toLowerCase().includes(search.toLowerCase()) ||
@@ -76,6 +77,11 @@ export default function Inventory() {
       id: "sku",
       header: "SKU", 
       render: (row) => <span className="font-mono font-medium text-slate-900">{row.sku}</span>
+    },
+    { 
+      id: "styleID",
+      header: "Style ID", 
+      render: (row) => <span className="text-slate-700">{row.styleID || '-'}</span>
     },
     { 
       id: "articleNo",
@@ -202,9 +208,9 @@ export default function Inventory() {
             onBulkUpload={() => setShowBulkUpload(true)}
             onBulkDelete={() => setShowBulkDelete(true)}
             onExportExcel={() => {
-              const headers = ['SKU', 'Article No', 'EAN', 'HSN Code', 'Name', 'Category', 'Sub Category', 'Unit', 'Quantity', 'Reorder Level', 'MRP', 'Total Value', 'Warehouse Location', 'Supplier', 'Color', 'Size', 'GSM', 'Composition', 'Notes'];
+              const headers = ['SKU', 'Style ID', 'Article No', 'EAN', 'HSN Code', 'Name', 'Category', 'Sub Category', 'Unit', 'Quantity', 'Reorder Level', 'MRP', 'Total Value', 'Warehouse Location', 'Supplier', 'Color', 'Size', 'GSM', 'Composition', 'Notes'];
               const rows = filteredItems.map(i => [
-                i.sku, i.articleNo || '', i.ean || '', i.hsnCode || '', i.name, i.category, i.sub_category || '', i.unit, i.quantity_on_hand || 0, 
+                i.sku, i.styleID || '', i.articleNo || '', i.ean || '', i.hsnCode || '', i.name, i.category, i.sub_category || '', i.unit, i.quantity_on_hand || 0, 
                 i.reorder_level || 0, i.mrp || 0, i.total_value || 0, 
                 i.warehouse_location || '', i.supplier || '', i.color || '', i.size || '', i.gsm || '', 
                 i.composition || '', i.notes || ''
@@ -223,7 +229,7 @@ export default function Inventory() {
         <SearchFilter
           searchValue={search}
           onSearchChange={setSearch}
-          searchPlaceholder="Search by SKU, name, article no, EAN, supplier..."
+          searchPlaceholder="Search by SKU, style ID, name, article no, EAN, supplier..."
           filters={[
             {
               key: 'category',
@@ -288,6 +294,7 @@ export default function Inventory() {
               type: "object",
               properties: {
                 sku: { type: "string" },
+                styleID: { type: "string" },
                 articleNo: { type: "string" },
                 ean: { type: "string" },
                 hsnCode: { type: "string" },
@@ -304,9 +311,9 @@ export default function Inventory() {
             }
           }}
           templateData={[
-            'sku,articleNo,ean,hsnCode,name,category,sub_category,unit,quantity_on_hand,reorder_level,mrp,warehouse_location,supplier,color,size,gsm,composition,notes',
-            'FAB-001,ART-001,1234567890123,5208,Cotton Fabric,fabric,Cotton,meters,1000,200,550.00,A-1-1,ABC Fabrics,White,150cm,180,100% Cotton,',
-            'GAR-001,ART-002,9876543210987,6109,T-Shirt,garments,,pieces,500,100,499.00,B-1-1,XYZ Garments,Blue,M,,100% Cotton,'
+            'sku,styleID,articleNo,ean,hsnCode,name,category,sub_category,unit,quantity_on_hand,reorder_level,mrp,warehouse_location,supplier,color,size,gsm,composition,notes',
+            'FAB-001,STY-001,ART-001,1234567890123,5208,Cotton Fabric,fabric,Cotton,meters,1000,200,550.00,A-1-1,ABC Fabrics,White,150cm,180,100% Cotton,',
+            'GAR-001,STY-002,ART-002,9876543210987,6109,T-Shirt,garments,,pieces,500,100,499.00,B-1-1,XYZ Garments,Blue,M,,100% Cotton,'
           ]}
           onSuccess={() => queryClient.invalidateQueries({ queryKey: ['inventory-items'] })}
         />

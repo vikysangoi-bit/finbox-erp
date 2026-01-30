@@ -33,11 +33,15 @@ export default function InventoryItemForm({ open, onOpenChange, item, onSave, is
     queryFn: () => base44.entities.Account.list()
   });
 
-  const tradePayableAccount = accounts.find(a => a.name === 'Trade Payable');
-  const suppliers = accounts.filter(a => a.parentAccount === tradePayableAccount?.id);
+  const tradePayableAccount = accounts.find(a => 
+    a.name?.toLowerCase().includes('trade payable') || 
+    (a.type === 'liability' && a.category === 'current_liability' && a.name?.toLowerCase().includes('payable'))
+  );
+  const suppliers = accounts.filter(a => a.parentAccount === tradePayableAccount?.id && a.active !== false);
 
   const [form, setForm] = useState({
     sku: '',
+    styleID: '',
     articleNo: '',
     ean: '',
     hsnCode: '',
@@ -63,6 +67,7 @@ export default function InventoryItemForm({ open, onOpenChange, item, onSave, is
     } else {
       setForm({
         sku: '',
+        styleID: '',
         articleNo: '',
         ean: '',
         hsnCode: '',
@@ -99,7 +104,7 @@ export default function InventoryItemForm({ open, onOpenChange, item, onSave, is
           <DialogTitle>{item ? 'Edit Inventory Item' : 'New Inventory Item'}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-3 gap-4">
             <div className="space-y-2">
               <Label htmlFor="sku">SKU *</Label>
               <Input
@@ -108,6 +113,15 @@ export default function InventoryItemForm({ open, onOpenChange, item, onSave, is
                 onChange={(e) => setForm({ ...form, sku: e.target.value })}
                 placeholder="e.g., FAB-COT-001"
                 required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="styleID">Style ID</Label>
+              <Input
+                id="styleID"
+                value={form.styleID || ''}
+                onChange={(e) => setForm({ ...form, styleID: e.target.value })}
+                placeholder="Style ID"
               />
             </div>
             <div className="space-y-2">
