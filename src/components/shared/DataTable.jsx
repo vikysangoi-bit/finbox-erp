@@ -10,14 +10,13 @@ export default function DataTable({
   isLoading, 
   onRowClick,
   emptyMessage = "No data available",
-  selectable = false,
+  enableRowSelection = false,
   selectedRows = [],
-  onSelectRow,
-  onSelectAll,
+  onSelectionChange,
   visibleColumns = null
 }) {
-  const allSelected = selectable && data.length > 0 && selectedRows.length === data.length;
-  const someSelected = selectable && selectedRows.length > 0 && selectedRows.length < data.length;
+  const allSelected = enableRowSelection && data.length > 0 && selectedRows.length === data.length;
+  const someSelected = enableRowSelection && selectedRows.length > 0 && selectedRows.length < data.length;
 
   // Filter and sort columns based on visibility
   const displayColumns = visibleColumns 
@@ -32,6 +31,22 @@ export default function DataTable({
     displayColumns.push(actionsColumn);
   }
 
+  const handleSelectAll = (checked) => {
+    if (checked) {
+      onSelectionChange?.(data);
+    } else {
+      onSelectionChange?.([]);
+    }
+  };
+
+  const handleSelectRow = (row, checked) => {
+    if (checked) {
+      onSelectionChange?.([...selectedRows, row]);
+    } else {
+      onSelectionChange?.(selectedRows.filter(selected => selected.id !== row.id));
+    }
+  };
+
   if (isLoading) {
     return (
       <Card className="border-0 bg-white/80 backdrop-blur-sm overflow-hidden">
@@ -39,7 +54,7 @@ export default function DataTable({
           <Table>
             <TableHeader className="sticky top-0 z-10 bg-slate-50/95 backdrop-blur-sm">
               <TableRow className="border-b border-slate-100">
-                {selectable && <TableHead className="w-12"><Skeleton className="h-4 w-4" /></TableHead>}
+                {enableRowSelection && <TableHead className="w-12"><Skeleton className="h-4 w-4" /></TableHead>}
                 {displayColumns.map((col, i) => (
                   <TableHead key={i} className="text-slate-600 font-semibold">
                     {col.header}
@@ -50,7 +65,7 @@ export default function DataTable({
             <TableBody>
               {[...Array(5)].map((_, i) => (
                 <TableRow key={i}>
-                  {selectable && <TableCell><Skeleton className="h-4 w-4" /></TableCell>}
+                  {enableRowSelection && <TableCell><Skeleton className="h-4 w-4" /></TableCell>}
                   {displayColumns.map((_, j) => (
                     <TableCell key={j}>
                       <Skeleton className="h-4 w-24" />
@@ -71,11 +86,11 @@ export default function DataTable({
         <Table>
           <TableHeader className="sticky top-0 z-10 bg-slate-50/95 backdrop-blur-sm shadow-sm">
             <TableRow className="border-b border-slate-100">
-              {selectable && (
+              {enableRowSelection && (
                 <TableHead className="w-12">
                   <Checkbox
                     checked={allSelected}
-                    onCheckedChange={onSelectAll}
+                    onCheckedChange={handleSelectAll}
                     aria-label="Select all"
                     className={someSelected ? "data-[state=checked]:bg-slate-400" : ""}
                   />
@@ -91,7 +106,7 @@ export default function DataTable({
           <TableBody>
             {data.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={displayColumns.length + (selectable ? 1 : 0)} className="text-center py-12 text-slate-500">
+                <TableCell colSpan={displayColumns.length + (enableRowSelection ? 1 : 0)} className="text-center py-12 text-slate-500">
                   {emptyMessage}
                 </TableCell>
               </TableRow>
@@ -101,11 +116,11 @@ export default function DataTable({
                   key={row.id || i} 
                   className={`border-b border-slate-50 hover:bg-slate-50/50 transition-colors ${onRowClick ? 'cursor-pointer' : ''}`}
                 >
-                  {selectable && (
+                  {enableRowSelection && (
                     <TableCell onClick={(e) => e.stopPropagation()}>
                       <Checkbox
                         checked={selectedRows.some(selected => selected.id === row.id)}
-                        onCheckedChange={() => onSelectRow(row)}
+                        onCheckedChange={(checked) => handleSelectRow(row, checked)}
                         aria-label={`Select row ${i + 1}`}
                       />
                     </TableCell>
