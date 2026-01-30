@@ -5,6 +5,7 @@ import PageHeader from "@/components/shared/PageHeader";
 import SearchFilter from "@/components/shared/SearchFilter";
 import DataTable from "@/components/shared/DataTable";
 import EmptyState from "@/components/shared/EmptyState";
+import AssignRoleDialog from "@/components/users/AssignRoleDialog";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,11 +13,16 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Users as UsersIcon, UserPlus, Mail, Shield } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Users as UsersIcon, UserPlus, Mail, Shield, MoreHorizontal, Settings, Link as LinkIcon } from "lucide-react";
 import { format } from "date-fns";
+import { createPageUrl } from "@/utils";
+import { Link } from "react-router-dom";
 
 export default function Users() {
   const [showInvite, setShowInvite] = useState(false);
+  const [showAssignRole, setShowAssignRole] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
   const [search, setSearch] = useState('');
   const [roleFilter, setRoleFilter] = useState('all');
   const [inviteForm, setInviteForm] = useState({ email: '', role: 'user' });
@@ -41,6 +47,15 @@ export default function Users() {
       queryClient.invalidateQueries({ queryKey: ['users'] });
       setShowInvite(false);
       setInviteForm({ email: '', role: 'user' });
+    }
+  });
+
+  const updateUserMutation = useMutation({
+    mutationFn: ({ id, data }) => base44.entities.User.update(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['users'] });
+      setShowAssignRole(false);
+      setSelectedUser(null);
     }
   });
 
@@ -77,13 +92,20 @@ export default function Users() {
     { 
       header: "Role", 
       render: (row) => (
-        <Badge 
-          variant="outline" 
-          className={row.role === 'admin' ? 'bg-purple-50 text-purple-700 border-purple-200' : 'bg-slate-50 text-slate-700 border-slate-200'}
-        >
-          <Shield className="w-3 h-3 mr-1" />
-          {row.role === 'admin' ? 'Admin' : 'User'}
-        </Badge>
+        <div className="flex flex-col gap-1">
+          <Badge 
+            variant="outline" 
+            className={row.role === 'admin' ? 'bg-purple-50 text-purple-700 border-purple-200' : 'bg-slate-50 text-slate-700 border-slate-200'}
+          >
+            <Shield className="w-3 h-3 mr-1" />
+            {row.role === 'admin' ? 'Admin' : 'User'}
+          </Badge>
+          {row.custom_role_name && (
+            <Badge variant="secondary" className="text-xs">
+              {row.custom_role_name}
+            </Badge>
+          )}
+        </div>
       )
     },
     { 
@@ -102,6 +124,25 @@ export default function Users() {
         </span>
       )
     },
+    {
+      header: "",
+      cellClassName: "text-right",
+      render: (row) => (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon" className="h-8 w-8">
+              <MoreHorizontal className="w-4 h-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={() => { setSelectedUser(row); setShowAssignRole(true); }}>
+              <Settings className="w-4 h-4 mr-2" />
+              Assign Custom Role
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      )
+    }
   ];
 
   const handleInvite = (e) => {
@@ -119,7 +160,16 @@ export default function Users() {
           subtitle="Manage team members and access"
           onAdd={isAdmin ? () => setShowInvite(true) : undefined}
           addLabel="Invite User"
-        />
+        >
+          {isAdmin && (
+            <Link to={createPageUrl('CustomRoles')}>
+              <Button variant="outline" className="border-slate-200">
+                <Shield className="w-4 h-4 mr-2" />
+                Manage Roles
+              </Button>
+            </Link>
+          )}
+        </PageHeader>
 
         <SearchFilter
           searchValue={search}
@@ -211,6 +261,14 @@ export default function Users() {
             </form>
           </DialogContent>
         </Dialog>
+
+        <AssignRoleDialog
+          open={showAssignRole}
+          onOpenChange={setShowAssignRole}
+          user={selectedUser}
+          onSave={(data) => updateUserMutation.mutate({ id: selectedUser.id, data })}
+          isLoading={updateUserMutation.isPending}
+        />
       </div>
     </div>
   );

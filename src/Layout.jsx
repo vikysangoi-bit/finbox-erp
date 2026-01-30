@@ -83,7 +83,14 @@ const navigation = [
   { name: 'Approvals', icon: CheckSquare, page: 'Approvals' },
   { name: 'Currencies', icon: Coins, page: 'Currencies' },
   { name: 'Documents', icon: FolderOpen, page: 'Documents' },
-  { name: 'Users', icon: Users, page: 'Users' },
+  { 
+    name: 'Users & Roles', 
+    icon: Users, 
+    children: [
+      { name: 'Users', page: 'Users' },
+      { name: 'Custom Roles', page: 'CustomRoles' },
+    ]
+  },
   { name: 'Audit Logs', icon: ScrollText, page: 'AuditLogs' },
 ];
 
