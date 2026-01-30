@@ -13,7 +13,7 @@ import StatusBadge from "@/components/shared/StatusBadge";
 import ColumnSelector from "@/components/shared/ColumnSelector";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, FileText, Eye, Edit, Trash2, Printer } from "lucide-react";
+import { MoreHorizontal, FileText, Eye, Edit, Trash2, Printer, Mail } from "lucide-react";
 import ConfirmDialog from "@/components/shared/ConfirmDialog";
 import { useEffect } from 'react';
 
@@ -255,6 +255,10 @@ export default function SalesOrders() {
               <Trash2 className="w-4 h-4 mr-2" />
               Delete
             </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => sendEmailDraft(row)}>
+              <Mail className="w-4 h-4 mr-2" />
+              Send Email Draft
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       )
@@ -286,6 +290,50 @@ export default function SalesOrders() {
 
   const handleBulkDelete = () => {
     bulkDeleteMutation.mutate(selectedRows);
+  };
+
+  const sendEmailDraft = async (order) => {
+    try {
+      const pdfBlob = await generateSOPDF(order);
+      const pdfFile = new File([pdfBlob], `SO-${order.orderFormNo}.pdf`, { type: 'application/pdf' });
+      const { file_url } = await base44.integrations.Core.UploadFile({ file: pdfFile });
+
+      await base44.functions.invoke('createGmailDraft', {
+        to: order.contactPersonEmail || '',
+        subject: `Sales Order ${order.orderFormNo}`,
+        body: `<p>Dear ${order.customerName},</p><p>Please find attached Sales Order ${order.orderFormNo}.</p><p>Best regards</p>`,
+        pdfUrl: file_url
+      });
+
+      alert('Gmail draft created successfully!');
+    } catch (error) {
+      alert(`Error creating draft: ${error.message}`);
+    }
+  };
+
+  const generateSOPDF = async (order) => {
+    const { default: html2canvas } = await import('html2canvas');
+    const { jsPDF } = await import('jspdf');
+    
+    const printContent = document.createElement('div');
+    printContent.innerHTML = `
+      <div style="padding: 40px; font-family: Arial;">
+        <h1>Sales Order</h1>
+        <p><strong>Order No:</strong> ${order.orderFormNo}</p>
+        <p><strong>Customer:</strong> ${order.customerName}</p>
+        <p><strong>Service:</strong> ${order.serviceName}</p>
+        <p><strong>Value:</strong> ${order.currency} ${order.orderFormValue?.toFixed(2)}</p>
+      </div>
+    `;
+    document.body.appendChild(printContent);
+    
+    const canvas = await html2canvas(printContent);
+    const imgData = canvas.toDataURL('image/png');
+    const pdf = new jsPDF();
+    pdf.addImage(imgData, 'PNG', 10, 10, 190, 0);
+    
+    document.body.removeChild(printContent);
+    return pdf.output('blob');
   };
 
   return (
