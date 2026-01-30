@@ -257,7 +257,7 @@ export default function VendorBills() {
               <div className="h-4 w-px bg-slate-200" />
               <div><span className="font-semibold text-slate-900">{filteredBills.length}</span> Filtered</div>
               <div className="h-4 w-px bg-slate-200" />
-              <div><span className="font-semibold text-slate-900">${totalValue.toFixed(2)}</span> Total Value</div>
+              <div><span className="font-semibold text-slate-900">₹{totalValue.toFixed(2)}</span> Total Value</div>
               {selectedRows.length > 0 && (
                 <>
                   <div className="h-4 w-px bg-slate-200" />
