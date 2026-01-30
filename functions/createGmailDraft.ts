@@ -9,43 +9,25 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { to, subject, body, pdfUrl } = await req.json();
+    const { to, subject, body } = await req.json();
 
-    if (!to || !subject || !pdfUrl) {
+    if (!to || !subject || !body) {
       return Response.json({ 
-        error: 'Missing required fields: to, subject, pdfUrl' 
+        error: 'Missing required fields: to, subject, body' 
       }, { status: 400 });
     }
 
     // Get Gmail access token
     const accessToken = await base44.asServiceRole.connectors.getAccessToken('gmail');
 
-    // Fetch the PDF file
-    const pdfResponse = await fetch(pdfUrl);
-    const pdfBuffer = await pdfResponse.arrayBuffer();
-    const pdfBase64 = btoa(String.fromCharCode(...new Uint8Array(pdfBuffer)));
-
-    // Create email with attachment
-    const boundary = '----=_Part_' + Math.random().toString(36).substring(2);
-    
+    // Create email as HTML (no attachment)
     const emailLines = [
-      'Content-Type: multipart/mixed; boundary="' + boundary + '"',
+      'Content-Type: text/html; charset=UTF-8',
       'MIME-Version: 1.0',
       'To: ' + to,
       'Subject: ' + subject,
       '',
-      '--' + boundary,
-      'Content-Type: text/html; charset=UTF-8',
-      '',
-      body || '',
-      '',
-      '--' + boundary,
-      'Content-Type: application/pdf; name="document.pdf"',
-      'Content-Disposition: attachment; filename="document.pdf"',
-      'Content-Transfer-Encoding: base64',
-      '',
-      pdfBase64,
-      '--' + boundary + '--'
+      body,
     ];
 
     const email = emailLines.join('\r\n');
