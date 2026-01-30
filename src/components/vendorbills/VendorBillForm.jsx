@@ -5,17 +5,20 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Trash2 } from "lucide-react";
+import { base44 } from "@/api/base44Client";
 
 export default function VendorBillForm({ open, onOpenChange, vendorBill, accounts = [], purchaseOrders = [], onSave, isLoading, viewMode = false }) {
   // Filter accounts to get only Trade Payable suppliers (ID: 697babaff819e89ea60692b6)
   const tradePayableSuppliers = accounts.filter(acc => 
     acc.parentAccount === '697babaff819e89ea60692b6' && acc.active && !acc.is_deleted
   );
+  const [inventoryTransactions, setInventoryTransactions] = React.useState([]);
   const [form, setForm] = useState({
     accountCode: '',
     supplier: '',
     serviceName: 'DaaS',
     poNo: '',
+    grn_number: '',
     billNo: '',
     billDate: '',
     billingCurrency: 'USD',
@@ -33,14 +36,22 @@ export default function VendorBillForm({ open, onOpenChange, vendorBill, account
   });
 
   useEffect(() => {
+    if (open) {
+      // Fetch inventory transactions for Txn no dropdown
+      base44.entities.InventoryTransaction.filter({ type: 'receipt' }).then(txns => {
+        setInventoryTransactions(txns.filter(t => !t.is_deleted));
+      });
+    }
+
     if (vendorBill) {
-      setForm({ ...vendorBill, lineItems: vendorBill.lineItems || [] });
+      setForm({ ...vendorBill, lineItems: vendorBill.lineItems || [], grn_number: vendorBill.grn_number || '' });
     } else {
       setForm({
         accountCode: '',
         supplier: '',
         serviceName: 'DaaS',
         poNo: '',
+        grn_number: '',
         billNo: '',
         billDate: '',
         billingCurrency: 'USD',
@@ -62,34 +73,69 @@ export default function VendorBillForm({ open, onOpenChange, vendorBill, account
   const handlePOChange = (poNo) => {
     setForm({ ...form, poNo });
     
-    // Auto-fetch PO details
-    const po = purchaseOrders.find(p => p.po_number === poNo);
-    if (po) {
-      setForm(prev => ({
-        ...prev,
-        poNo,
-        po_id: po.id,
-        supplier: po.supplier_name || '',
-        supplier_id: po.supplier_id || '',
-        billingCurrency: po.currency || 'USD',
-        paymentTerms: po.payment_terms || 'net_30',
-        lineItems: po.items?.map(item => ({
-          itemCode: item.itemCode || '',
-          articleNo: item.articleNo || '',
-          styleID: item.styleID || '',
-          itemCategory: item.itemCategory || '',
-          description: item.description || '',
-          composition: item.composition || '',
-          size: item.size || '',
-          color: item.color || '',
-          hsnCode: item.hsnCode || '',
-          quantity: item.quantity || 0,
-          rate: item.rate_per_unit || 0,
-          net_amount: item.net_before_gst || 0,
-          tax_amount: (item.gross_value || 0) - (item.net_before_gst || 0),
-          gross_amount: item.gross_value || 0
-        })) || []
-      }));
+    // Only populate from PO if grn_number is not set
+    if (!form.grn_number) {
+      const po = purchaseOrders.find(p => p.po_number === poNo);
+      if (po) {
+        setForm(prev => ({
+          ...prev,
+          poNo,
+          po_id: po.id,
+          supplier: po.supplier_name || '',
+          supplier_id: po.supplier_id || '',
+          billingCurrency: po.currency || 'USD',
+          paymentTerms: po.payment_terms || 'net_30',
+          lineItems: po.items?.map(item => ({
+            itemCode: item.itemCode || '',
+            articleNo: item.articleNo || '',
+            styleID: item.styleID || '',
+            itemCategory: item.itemCategory || '',
+            description: item.description || '',
+            composition: item.composition || '',
+            size: item.size || '',
+            color: item.color || '',
+            hsnCode: item.hsnCode || '',
+            quantity: item.quantity || 0,
+            rate: item.rate_per_unit || 0,
+            net_amount: item.net_before_gst || 0,
+            tax_amount: (item.gross_value || 0) - (item.net_before_gst || 0),
+            gross_amount: item.gross_value || 0
+          })) || []
+        }));
+      }
+    }
+  };
+
+  const handleTxnChange = (txnNumber) => {
+    setForm({ ...form, grn_number: txnNumber });
+    
+    // Auto-fetch transaction details if txn is selected
+    if (txnNumber) {
+      const txn = inventoryTransactions.find(t => t.transaction_number === txnNumber);
+      if (txn) {
+        setForm(prev => ({
+          ...prev,
+          grn_number: txnNumber,
+          poNo: txn.po_number || prev.poNo,
+          po_id: txn.po_id || prev.po_id,
+          lineItems: txn.items?.map(item => ({
+            itemCode: item.item_sku || '',
+            articleNo: '',
+            styleID: item.styleID || '',
+            itemCategory: '',
+            description: item.name || '',
+            composition: '',
+            size: item.size || '',
+            color: item.color || '',
+            hsnCode: '',
+            quantity: item.quantity || 0,
+            rate: 0,
+            net_amount: 0,
+            tax_amount: 0,
+            gross_amount: 0
+          })) || []
+        }));
+      }
     }
   };
 
@@ -140,6 +186,20 @@ export default function VendorBillForm({ open, onOpenChange, vendorBill, account
               </Select>
             </div>
             <div className="space-y-2">
+              <Label>Txn No (GRN)</Label>
+              <Select value={form.grn_number} onValueChange={handleTxnChange} disabled={viewMode}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select Transaction" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={null}>None</SelectItem>
+                  {inventoryTransactions.filter(txn => txn.status === 'completed').map((txn) => (
+                    <SelectItem key={txn.id} value={txn.transaction_number}>{txn.transaction_number}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
               <Label htmlFor="billNo">Bill No *</Label>
               <Input
                 id="billNo"
@@ -149,6 +209,9 @@ export default function VendorBillForm({ open, onOpenChange, vendorBill, account
                 disabled={viewMode}
               />
             </div>
+          </div>
+
+          <div className="grid grid-cols-3 gap-4">
             <div className="space-y-2">
               <Label htmlFor="billDate">Bill Date *</Label>
               <Input
