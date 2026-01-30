@@ -415,6 +415,8 @@ export default function PurchaseOrders() {
               <div><span className="font-semibold text-slate-900">{pos.length}</span> Total</div>
               <div className="h-4 w-px bg-slate-200" />
               <div><span className="font-semibold text-slate-900">{filteredPOs.length}</span> Filtered</div>
+              <div className="h-4 w-px bg-slate-200" />
+              <div><span className="font-semibold text-slate-900">${totalValue.toFixed(2)}</span> Total Value</div>
               {selectedRows.length > 0 && (
                 <>
                   <div className="h-4 w-px bg-slate-200" />
