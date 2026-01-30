@@ -18,7 +18,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Card } from "@/components/ui/card";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, Pencil, Trash2, FileText, Send, Eye, Package, CheckCircle, Upload } from "lucide-react";
+import { MoreHorizontal, Pencil, Trash2, FileText, Send, Eye, Package, CheckCircle, Upload, Mail } from "lucide-react";
 import { format } from "date-fns";
 
 const STORAGE_KEY = 'purchaseOrders_visibleColumns';
@@ -106,6 +106,55 @@ export default function PurchaseOrders() {
     
     queryClient.invalidateQueries({ queryKey: ['purchase-orders'] });
     queryClient.invalidateQueries({ queryKey: ['approval-requests'] });
+  };
+
+  const sendEmailDraft = async (po) => {
+    try {
+      // Generate PDF URL (assuming there's a function to generate PDF or we use existing print view)
+      const pdfBlob = await generatePOPDF(po);
+      const pdfFile = new File([pdfBlob], `PO-${po.po_number}.pdf`, { type: 'application/pdf' });
+      const { file_url } = await base44.integrations.Core.UploadFile({ file: pdfFile });
+
+      // Create Gmail draft
+      await base44.functions.invoke('createGmailDraft', {
+        to: po.supplier_email || '',
+        subject: `Purchase Order ${po.po_number}`,
+        body: `<p>Dear ${po.supplier_name},</p><p>Please find attached Purchase Order ${po.po_number}.</p><p>Best regards</p>`,
+        pdfUrl: file_url
+      });
+
+      alert('Gmail draft created successfully!');
+    } catch (error) {
+      alert(`Error creating draft: ${error.message}`);
+    }
+  };
+
+  const generatePOPDF = async (po) => {
+    const { default: html2canvas } = await import('html2canvas');
+    const { jsPDF } = await import('jspdf');
+    
+    // Create a temporary div with PO content
+    const printContent = document.createElement('div');
+    printContent.innerHTML = `
+      <div style="padding: 40px; font-family: Arial;">
+        <h1>Purchase Order</h1>
+        <p><strong>PO Number:</strong> ${po.po_number}</p>
+        <p><strong>Date:</strong> ${po.po_date}</p>
+        <p><strong>Supplier:</strong> ${po.supplier_name}</p>
+        <h3>Items:</h3>
+        ${po.items?.map(item => `<p>${item.description} - Qty: ${item.quantity} - Rate: ${item.rate_per_unit}</p>`).join('') || ''}
+        <p><strong>Total:</strong> ${po.currency} ${po.total_amount?.toFixed(2)}</p>
+      </div>
+    `;
+    document.body.appendChild(printContent);
+    
+    const canvas = await html2canvas(printContent);
+    const imgData = canvas.toDataURL('image/png');
+    const pdf = new jsPDF();
+    pdf.addImage(imgData, 'PNG', 10, 10, 190, 0);
+    
+    document.body.removeChild(printContent);
+    return pdf.output('blob');
   };
 
   const filteredPOs = pos.filter(po => {
@@ -207,6 +256,11 @@ export default function PurchaseOrders() {
                 Receive Goods
               </DropdownMenuItem>
             )}
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => sendEmailDraft(row)}>
+              <Mail className="w-4 h-4 mr-2" />
+              Send Email Draft
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       )
