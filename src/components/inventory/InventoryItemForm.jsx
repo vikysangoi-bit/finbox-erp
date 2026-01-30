@@ -5,6 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useQuery } from "@tanstack/react-query";
+import { base44 } from "@/api/base44Client";
 
 const categories = [
   { value: "fabric", label: "Fabric" },
@@ -26,10 +28,19 @@ const units = [
 ];
 
 export default function InventoryItemForm({ open, onOpenChange, item, onSave, isLoading }) {
+  const { data: accounts = [] } = useQuery({
+    queryKey: ['accounts'],
+    queryFn: () => base44.entities.Account.list()
+  });
+
+  const tradePayableAccount = accounts.find(a => a.name === 'Trade Payable');
+  const suppliers = accounts.filter(a => a.parentAccount === tradePayableAccount?.id);
+
   const [form, setForm] = useState({
     sku: '',
     articleNo: '',
     ean: '',
+    hsnCode: '',
     name: '',
     category: 'fabric',
     sub_category: '',
@@ -54,6 +65,7 @@ export default function InventoryItemForm({ open, onOpenChange, item, onSave, is
         sku: '',
         articleNo: '',
         ean: '',
+        hsnCode: '',
         name: '',
         category: 'fabric',
         sub_category: '',
@@ -110,7 +122,7 @@ export default function InventoryItemForm({ open, onOpenChange, item, onSave, is
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-3 gap-4">
             <div className="space-y-2">
               <Label htmlFor="articleNo">Article No</Label>
               <Input
@@ -127,6 +139,15 @@ export default function InventoryItemForm({ open, onOpenChange, item, onSave, is
                 value={form.ean || ''}
                 onChange={(e) => setForm({ ...form, ean: e.target.value })}
                 placeholder="EAN / Barcode"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="hsnCode">HSN Code</Label>
+              <Input
+                id="hsnCode"
+                value={form.hsnCode || ''}
+                onChange={(e) => setForm({ ...form, hsnCode: e.target.value })}
+                placeholder="HSN code"
               />
             </div>
           </div>
@@ -211,13 +232,17 @@ export default function InventoryItemForm({ open, onOpenChange, item, onSave, is
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="supplier">Supplier</Label>
-              <Input
-                id="supplier"
-                value={form.supplier || ''}
-                onChange={(e) => setForm({ ...form, supplier: e.target.value })}
-                placeholder="Supplier name"
-              />
+              <Label>Supplier</Label>
+              <Select value={form.supplier || ''} onValueChange={(v) => setForm({ ...form, supplier: v })}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select supplier" />
+                </SelectTrigger>
+                <SelectContent>
+                  {suppliers.map((s) => (
+                    <SelectItem key={s.id} value={s.name}>{s.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
