@@ -32,6 +32,7 @@ export default function InventoryTransactions() {
   const [showBulkDelete, setShowBulkDelete] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState(null);
   const [deleteTransaction, setDeleteTransaction] = useState(null);
+  const [selectedRows, setSelectedRows] = useState([]);
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState('all');
 
@@ -265,6 +266,9 @@ export default function InventoryTransactions() {
             data={filteredTransactions} 
             isLoading={isLoading}
             emptyMessage="No transactions match your search"
+            enableRowSelection={true}
+            selectedRows={selectedRows}
+            onSelectionChange={setSelectedRows}
           />
         )}
 

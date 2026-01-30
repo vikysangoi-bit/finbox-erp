@@ -25,6 +25,7 @@ export default function Inventory() {
   const [showBulkDelete, setShowBulkDelete] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
   const [deleteItem, setDeleteItem] = useState(null);
+  const [selectedRows, setSelectedRows] = useState([]);
   const [search, setSearch] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
 
@@ -263,6 +264,9 @@ export default function Inventory() {
             data={filteredItems} 
             isLoading={isLoading}
             emptyMessage="No items match your search"
+            enableRowSelection={true}
+            selectedRows={selectedRows}
+            onSelectionChange={setSelectedRows}
           />
         )}
 
