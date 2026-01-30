@@ -70,6 +70,47 @@ export default function Invoices() {
           }
         }
       }
+
+      // Update GON application status if gon_number exists
+      if (data.gon_number) {
+        const txns = await base44.entities.InventoryTransaction.filter({ transaction_number: data.gon_number });
+        if (txns.length > 0) {
+          const txn = txns[0];
+          
+          // Get all invoices using this GON
+          const allInvoices = await base44.entities.Invoice.filter({ gon_number: data.gon_number });
+          
+          // Calculate total quantities used across all invoices
+          const usedQuantities = {};
+          allInvoices.forEach(inv => {
+            if (inv.lineItems) {
+              inv.lineItems.forEach(item => {
+                const key = item.itemCode;
+                if (key) {
+                  usedQuantities[key] = (usedQuantities[key] || 0) + (item.quantity || 0);
+                }
+              });
+            }
+          });
+          
+          // Compare with GON quantities
+          let allUsed = true;
+          let someUsed = false;
+          if (txn.items) {
+            txn.items.forEach(item => {
+              const key = item.item_sku || item.itemCode;
+              const used = usedQuantities[key] || 0;
+              const total = item.quantity || 0;
+              
+              if (used < total) allUsed = false;
+              if (used > 0) someUsed = true;
+            });
+          }
+          
+          const applicationStatus = allUsed ? 'Applied' : (someUsed ? 'Partial Applied' : 'Unapplied');
+          await base44.entities.InventoryTransaction.update(txn.id, { application_status: applicationStatus });
+        }
+      }
       
       await base44.functions.invoke('logAuditEntry', {
         action: 'create',
@@ -81,6 +122,7 @@ export default function Invoices() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['invoices'] });
       queryClient.invalidateQueries({ queryKey: ['inventory-items'] });
+      queryClient.invalidateQueries({ queryKey: ['inventory-transactions'] });
       setShowForm(false);
     }
   });
