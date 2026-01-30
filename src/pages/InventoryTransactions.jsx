@@ -33,6 +33,7 @@ export default function InventoryTransactions() {
   const [editingTransaction, setEditingTransaction] = useState(null);
   const [deleteTransaction, setDeleteTransaction] = useState(null);
   const [selectedRows, setSelectedRows] = useState([]);
+  const [showBulkDeleteConfirm, setShowBulkDeleteConfirm] = useState(false);
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState('all');
 
@@ -70,6 +71,17 @@ export default function InventoryTransactions() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['inventory-transactions'] });
       setDeleteTransaction(null);
+    }
+  });
+
+  const bulkDeleteMutation = useMutation({
+    mutationFn: async (rows) => {
+      await Promise.all(rows.map(row => base44.entities.InventoryTransaction.delete(row.id)));
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['inventory-transactions'] });
+      setSelectedRows([]);
+      setShowBulkDeleteConfirm(false);
     }
   });
 
@@ -146,6 +158,7 @@ export default function InventoryTransactions() {
       render: (row) => <StatusBadge status={row.status || 'draft'} />
     },
     {
+      id: "actions",
       header: "",
       cellClassName: "text-right",
       render: (row) => (
@@ -200,6 +213,10 @@ export default function InventoryTransactions() {
     }
   };
 
+  const handleBulkDelete = () => {
+    bulkDeleteMutation.mutate(selectedRows);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 p-4 md:p-8">
       <div className="max-w-7xl mx-auto space-y-6">
@@ -216,7 +233,7 @@ export default function InventoryTransactions() {
           />
           <SyncDropdown
             onBulkDelete={() => setShowBulkDelete(true)}
-            onExportExcel={() => {
+            onExportToExcel={() => {
               const headers = ['Transaction Number', 'Transaction Date', 'Type', 'PO Number', 'Style ID', 'Name', 'Color', 'Size', 'Quantity', 'From Location', 'To Location', 'Status'];
               const rows = filteredTransactions.flatMap(t => 
                 (t.items || []).map(item => [
@@ -234,6 +251,12 @@ export default function InventoryTransactions() {
               a.click();
             }}
           />
+          {selectedRows.length > 0 && (
+            <Button variant="destructive" onClick={() => setShowBulkDeleteConfirm(true)}>
+              <Trash2 className="w-4 h-4 mr-2" />
+              Delete Selected ({selectedRows.length})
+            </Button>
+          )}
         </PageHeader>
 
         <SearchFilter
@@ -287,6 +310,16 @@ export default function InventoryTransactions() {
           description={`Are you sure you want to delete this transaction? This action cannot be undone.`}
           confirmLabel="Delete"
           onConfirm={() => deleteMutation.mutate(deleteTransaction.id)}
+          variant="destructive"
+        />
+
+        <ConfirmDialog
+          open={showBulkDeleteConfirm}
+          onOpenChange={setShowBulkDeleteConfirm}
+          title="Delete Selected Transactions"
+          description={`Are you sure you want to delete ${selectedRows.length} selected transaction(s)? This action cannot be undone.`}
+          confirmLabel="Delete All"
+          onConfirm={handleBulkDelete}
           variant="destructive"
         />
 

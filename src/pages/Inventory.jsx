@@ -26,6 +26,7 @@ export default function Inventory() {
   const [editingItem, setEditingItem] = useState(null);
   const [deleteItem, setDeleteItem] = useState(null);
   const [selectedRows, setSelectedRows] = useState([]);
+  const [showBulkDeleteConfirm, setShowBulkDeleteConfirm] = useState(false);
   const [search, setSearch] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
 
@@ -58,6 +59,17 @@ export default function Inventory() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['inventory-items'] });
       setDeleteItem(null);
+    }
+  });
+
+  const bulkDeleteMutation = useMutation({
+    mutationFn: async (rows) => {
+      await Promise.all(rows.map(row => base44.entities.InventoryItem.delete(row.id)));
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['inventory-items'] });
+      setSelectedRows([]);
+      setShowBulkDeleteConfirm(false);
     }
   });
 
@@ -191,6 +203,10 @@ export default function Inventory() {
     }
   };
 
+  const handleBulkDelete = () => {
+    bulkDeleteMutation.mutate(selectedRows);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 p-4 md:p-8">
       <div className="max-w-7xl mx-auto space-y-6">
@@ -208,7 +224,7 @@ export default function Inventory() {
           <SyncDropdown
             onBulkUpload={() => setShowBulkUpload(true)}
             onBulkDelete={() => setShowBulkDelete(true)}
-            onExportExcel={() => {
+            onExportToExcel={() => {
               const headers = ['SKU', 'Style ID', 'Article No', 'EAN', 'HSN Code', 'Name', 'Category', 'Sub Category', 'Unit', 'Quantity', 'Reorder Level', 'MRP', 'Total Value', 'Warehouse Location', 'Supplier', 'Color', 'Size', 'GSM', 'Composition', 'Notes'];
               const rows = filteredItems.map(i => [
                 i.sku, i.styleID || '', i.articleNo || '', i.ean || '', i.hsnCode || '', i.name, i.category, i.sub_category || '', i.unit, i.quantity_on_hand || 0, 
@@ -225,6 +241,12 @@ export default function Inventory() {
               a.click();
             }}
           />
+          {selectedRows.length > 0 && (
+            <Button variant="destructive" onClick={() => setShowBulkDeleteConfirm(true)}>
+              <Trash2 className="w-4 h-4 mr-2" />
+              Delete Selected ({selectedRows.length})
+            </Button>
+          )}
         </PageHeader>
 
         <SearchFilter
@@ -285,6 +307,16 @@ export default function Inventory() {
           description={`Are you sure you want to delete "${deleteItem?.name}"? This action cannot be undone.`}
           confirmLabel="Delete"
           onConfirm={() => deleteMutation.mutate(deleteItem.id)}
+          variant="destructive"
+        />
+
+        <ConfirmDialog
+          open={showBulkDeleteConfirm}
+          onOpenChange={setShowBulkDeleteConfirm}
+          title="Delete Selected Items"
+          description={`Are you sure you want to delete ${selectedRows.length} selected item(s)? This action cannot be undone.`}
+          confirmLabel="Delete All"
+          onConfirm={handleBulkDelete}
           variant="destructive"
         />
 
