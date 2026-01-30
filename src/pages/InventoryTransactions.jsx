@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import PageHeader from "@/components/shared/PageHeader";
@@ -8,6 +8,7 @@ import StatusBadge from "@/components/shared/StatusBadge";
 import EmptyState from "@/components/shared/EmptyState";
 import BulkDeleteDialog from "@/components/shared/BulkDeleteDialog";
 import SyncDropdown from "@/components/shared/SyncDropdown";
+import ColumnSelector from "@/components/shared/ColumnSelector";
 import TransactionForm from "@/components/inventory/TransactionForm";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -110,14 +111,17 @@ export default function InventoryTransactions() {
 
   const allColumns = [
     { 
+      id: "transaction_number",
       header: "Transaction #", 
       render: (row) => <span className="font-mono font-medium text-slate-900">{row.transaction_number || '-'}</span>
     },
     { 
+      id: "transaction_date",
       header: "Date", 
       render: (row) => row.transaction_date ? format(new Date(row.transaction_date), 'MMM d, yyyy') : '-'
     },
     { 
+      id: "type",
       header: "Type", 
       render: (row) => {
         const config = typeConfig[row.type] || { label: row.type, color: "bg-slate-100 text-slate-700" };
@@ -129,6 +133,7 @@ export default function InventoryTransactions() {
       }
     },
     { 
+      id: "item",
       header: "Item", 
       render: (row) => (
         <div>
@@ -138,10 +143,12 @@ export default function InventoryTransactions() {
       )
     },
     { 
+      id: "quantity",
       header: "Quantity", 
       render: (row) => <span className="font-medium">{row.quantity}</span>
     },
     { 
+      id: "total_cost",
       header: "Total Cost", 
       render: (row) => (
         <span className="font-medium">
@@ -149,8 +156,14 @@ export default function InventoryTransactions() {
         </span>
       )
     },
-    { header: "Reference", accessor: "reference", render: (row) => <span className="text-slate-500">{row.reference || '-'}</span> },
     { 
+      id: "reference",
+      header: "Reference", 
+      accessor: "reference", 
+      render: (row) => <span className="text-slate-500">{row.reference || '-'}</span> 
+    },
+    { 
+      id: "status",
       header: "Status", 
       render: (row) => <StatusBadge status={row.status || 'draft'} />
     },
