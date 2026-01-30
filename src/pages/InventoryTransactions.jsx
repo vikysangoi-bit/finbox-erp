@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import PageHeader from "@/components/shared/PageHeader";
 import SearchFilter from "@/components/shared/SearchFilter";
-import DataTable from "@/components/shared/DataTable";
+import ResizableTable from "@/components/shared/ResizableTable";
 import StatusBadge from "@/components/shared/StatusBadge";
 import EmptyState from "@/components/shared/EmptyState";
 import BulkDeleteDialog from "@/components/shared/BulkDeleteDialog";
@@ -262,7 +262,7 @@ export default function InventoryTransactions() {
             onAction={() => setShowForm(true)}
           />
         ) : (
-          <DataTable 
+          <ResizableTable 
             columns={allColumns}
             visibleColumns={visibleColumns} 
             data={filteredTransactions} 
@@ -271,6 +271,7 @@ export default function InventoryTransactions() {
             enableRowSelection={true}
             selectedRows={selectedRows}
             onSelectionChange={setSelectedRows}
+            storageKey={STORAGE_KEY}
           />
         )}
 

@@ -375,22 +375,22 @@ export default function SalesOrderForm({ open, onOpenChange, order, accounts = [
 
                   <div className="border border-slate-300 rounded-lg overflow-hidden">
                     <div className="overflow-x-auto">
-                      <table className="w-full text-sm">
+                      <table className="w-full text-sm table-fixed">
                         <thead className="bg-slate-100 border-b border-slate-300">
                           <tr>
-                            <th className="p-2 text-left font-bold border-r border-slate-300">Item Code</th>
-                            <th className="p-2 text-left font-bold border-r border-slate-300">Article No</th>
-                            <th className="p-2 text-left font-bold border-r border-slate-300">Style ID</th>
-                            <th className="p-2 text-left font-bold border-r border-slate-300">Item Category</th>
-                            <th className="p-2 text-left font-bold border-r border-slate-300">Item Name</th>
-                            <th className="p-2 text-left font-bold border-r border-slate-300">Description</th>
-                            <th className="p-2 text-left font-bold border-r border-slate-300">Composition</th>
-                            <th className="p-2 text-left font-bold border-r border-slate-300">Size</th>
-                            <th className="p-2 text-left font-bold border-r border-slate-300">Color</th>
-                            <th className="p-2 text-left font-bold border-r border-slate-300">HSN</th>
-                            <th className="p-2 text-left font-bold border-r border-slate-300">Qty</th>
-                            <th className="p-2 text-left font-bold border-r border-slate-300">Rate</th>
-                            <th className="p-2 text-left font-bold border-r border-slate-300">Expected Delivery Date</th>
+                            <th className="p-2 text-left font-bold border-r border-slate-300 resize-x overflow-auto" style={{ width: '100px' }}>Item Code</th>
+                            <th className="p-2 text-left font-bold border-r border-slate-300 resize-x overflow-auto" style={{ width: '100px' }}>Article No</th>
+                            <th className="p-2 text-left font-bold border-r border-slate-300 resize-x overflow-auto" style={{ width: '100px' }}>Style ID</th>
+                            <th className="p-2 text-left font-bold border-r border-slate-300 resize-x overflow-auto" style={{ width: '120px' }}>Item Category</th>
+                            <th className="p-2 text-left font-bold border-r border-slate-300 resize-x overflow-auto" style={{ width: '120px' }}>Item Name</th>
+                            <th className="p-2 text-left font-bold border-r border-slate-300 resize-x overflow-auto" style={{ width: '150px' }}>Description</th>
+                            <th className="p-2 text-left font-bold border-r border-slate-300 resize-x overflow-auto" style={{ width: '120px' }}>Composition</th>
+                            <th className="p-2 text-left font-bold border-r border-slate-300 resize-x overflow-auto" style={{ width: '80px' }}>Size</th>
+                            <th className="p-2 text-left font-bold border-r border-slate-300 resize-x overflow-auto" style={{ width: '100px' }}>Color</th>
+                            <th className="p-2 text-left font-bold border-r border-slate-300 resize-x overflow-auto" style={{ width: '100px' }}>HSN</th>
+                            <th className="p-2 text-left font-bold border-r border-slate-300 resize-x overflow-auto" style={{ width: '80px' }}>Qty</th>
+                            <th className="p-2 text-left font-bold border-r border-slate-300 resize-x overflow-auto" style={{ width: '100px' }}>Rate</th>
+                            <th className="p-2 text-left font-bold border-r border-slate-300 resize-x overflow-auto" style={{ width: '130px' }}>Expected Delivery Date</th>
                             {!viewMode && <th className="p-2 text-left font-bold w-12"></th>}
                           </tr>
                         </thead>

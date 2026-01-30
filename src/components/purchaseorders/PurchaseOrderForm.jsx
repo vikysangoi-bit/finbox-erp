@@ -334,24 +334,24 @@ export default function PurchaseOrderForm({ open, onOpenChange, po, onSave, isLo
             </div>
 
             <div className="overflow-x-auto">
-              <table className="w-full text-xs border border-slate-300">
+              <table className="w-full text-xs border border-slate-300 table-fixed">
                 <thead className="bg-slate-50">
                   <tr>
-                    <th className="p-2 border border-slate-300 font-bold">Item Code</th>
-                    <th className="p-2 border border-slate-300 font-bold">Article No.</th>
-                    <th className="p-2 border border-slate-300 font-bold">Style ID</th>
-                    <th className="p-2 border border-slate-300 font-bold">Item Category</th>
-                    <th className="p-2 border border-slate-300 font-bold">Description</th>
-                    <th className="p-2 border border-slate-300 font-bold">Composition</th>
-                    <th className="p-2 border border-slate-300 font-bold">Size</th>
-                    <th className="p-2 border border-slate-300 font-bold">Color</th>
-                    <th className="p-2 border border-slate-300 font-bold">Item Expected Delivery</th>
-                    <th className="p-2 border border-slate-300 font-bold">HSN code</th>
-                    <th className="p-2 border border-slate-300 font-bold">Qty</th>
-                    <th className="p-2 border border-slate-300 font-bold">Per Unit Rate</th>
-                    <th className="p-2 border border-slate-300 font-bold">Net before GST</th>
-                    <th className="p-2 border border-slate-300 font-bold">GST%</th>
-                    <th className="p-2 border border-slate-300 font-bold">Total Amt</th>
+                    <th className="p-2 border border-slate-300 font-bold resize-x overflow-auto" style={{ width: '100px' }}>Item Code</th>
+                    <th className="p-2 border border-slate-300 font-bold resize-x overflow-auto" style={{ width: '100px' }}>Article No.</th>
+                    <th className="p-2 border border-slate-300 font-bold resize-x overflow-auto" style={{ width: '100px' }}>Style ID</th>
+                    <th className="p-2 border border-slate-300 font-bold resize-x overflow-auto" style={{ width: '100px' }}>Item Category</th>
+                    <th className="p-2 border border-slate-300 font-bold resize-x overflow-auto" style={{ width: '150px' }}>Description</th>
+                    <th className="p-2 border border-slate-300 font-bold resize-x overflow-auto" style={{ width: '120px' }}>Composition</th>
+                    <th className="p-2 border border-slate-300 font-bold resize-x overflow-auto" style={{ width: '80px' }}>Size</th>
+                    <th className="p-2 border border-slate-300 font-bold resize-x overflow-auto" style={{ width: '100px' }}>Color</th>
+                    <th className="p-2 border border-slate-300 font-bold resize-x overflow-auto" style={{ width: '130px' }}>Item Expected Delivery</th>
+                    <th className="p-2 border border-slate-300 font-bold resize-x overflow-auto" style={{ width: '100px' }}>HSN code</th>
+                    <th className="p-2 border border-slate-300 font-bold resize-x overflow-auto" style={{ width: '80px' }}>Qty</th>
+                    <th className="p-2 border border-slate-300 font-bold resize-x overflow-auto" style={{ width: '100px' }}>Per Unit Rate</th>
+                    <th className="p-2 border border-slate-300 font-bold resize-x overflow-auto" style={{ width: '100px' }}>Net before GST</th>
+                    <th className="p-2 border border-slate-300 font-bold resize-x overflow-auto" style={{ width: '80px' }}>GST%</th>
+                    <th className="p-2 border border-slate-300 font-bold resize-x overflow-auto" style={{ width: '100px' }}>Total Amt</th>
                     <th className="p-2 border border-slate-300 w-10"></th>
                   </tr>
                 </thead>
