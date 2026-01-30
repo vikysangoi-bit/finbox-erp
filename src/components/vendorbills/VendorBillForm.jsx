@@ -41,7 +41,7 @@ export default function VendorBillForm({ open, onOpenChange, vendorBill, account
       base44.entities.InventoryTransaction.filter({ type: 'receipt' }).then(txns => {
         setInventoryTransactions(txns.filter(t => 
           !t.is_deleted && 
-          t.status === 'completed' && 
+          (t.status === 'completed' || t.status === 'approved') && 
           (t.application_status === 'Unapplied' || t.application_status === 'Partial Applied')
         ));
       });
