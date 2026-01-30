@@ -32,6 +32,7 @@ export default function PurchaseOrders() {
   const [viewPO, setViewPO] = useState(null);
   const [receivingPO, setReceivingPO] = useState(null);
   const [selectedRows, setSelectedRows] = useState([]);
+  const [showBulkDeleteConfirm, setShowBulkDeleteConfirm] = useState(false);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
 
@@ -69,6 +70,17 @@ export default function PurchaseOrders() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['purchase-orders'] });
       setDeletePO(null);
+    }
+  });
+
+  const bulkDeleteMutation = useMutation({
+    mutationFn: async (rows) => {
+      await Promise.all(rows.map(row => base44.entities.PurchaseOrder.delete(row.id)));
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['purchase-orders'] });
+      setSelectedRows([]);
+      setShowBulkDeleteConfirm(false);
     }
   });
 
@@ -302,6 +314,10 @@ export default function PurchaseOrders() {
     setReceivingPO(null);
   };
 
+  const handleBulkDelete = () => {
+    bulkDeleteMutation.mutate(selectedRows);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 p-4 md:p-8">
       <div className="max-w-7xl mx-auto space-y-6">
@@ -319,7 +335,7 @@ export default function PurchaseOrders() {
           <SyncDropdown
             onBulkUpload={() => setShowBulkUpload(true)}
             onBulkDelete={() => setShowBulkDelete(true)}
-            onExportExcel={() => {
+            onExportToExcel={() => {
               const headers = ['PO Number', 'PO Date', 'Supplier Code', 'Supplier Name', 'Delivery Date', 'Order Form No', 'Ship To', 'Shipping Address', 'Items Count', 'Subtotal', 'Tax', 'Shipping', 'Total Amount', 'Status', 'Notes'];
               const rows = filteredPOs.map(p => [
                 p.po_number || '', p.po_date || '', p.supplier_code || '', p.supplier_name || '', 
@@ -336,6 +352,12 @@ export default function PurchaseOrders() {
               a.click();
             }}
           />
+          {selectedRows.length > 0 && (
+            <Button variant="destructive" onClick={() => setShowBulkDeleteConfirm(true)}>
+              <Trash2 className="w-4 h-4 mr-2" />
+              Delete Selected ({selectedRows.length})
+            </Button>
+          )}
         </PageHeader>
 
         <SearchFilter
@@ -404,6 +426,16 @@ export default function PurchaseOrders() {
           description={`Are you sure you want to delete PO ${deletePO?.po_number}?`}
           confirmLabel="Delete"
           onConfirm={() => deleteMutation.mutate(deletePO.id)}
+          variant="destructive"
+        />
+
+        <ConfirmDialog
+          open={showBulkDeleteConfirm}
+          onOpenChange={setShowBulkDeleteConfirm}
+          title="Delete Selected Purchase Orders"
+          description={`Are you sure you want to delete ${selectedRows.length} selected purchase order(s)? This action cannot be undone.`}
+          confirmLabel="Delete All"
+          onConfirm={handleBulkDelete}
           variant="destructive"
         />
 
