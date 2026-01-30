@@ -25,6 +25,7 @@ export default function DebitNotes() {
   const [viewingNote, setViewingNote] = useState(null);
   const [deleteNote, setDeleteNote] = useState(null);
   const [selectedRows, setSelectedRows] = useState([]);
+  const [showBulkDeleteConfirm, setShowBulkDeleteConfirm] = useState(false);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [supplierFilter, setSupplierFilter] = useState('all');
@@ -109,6 +110,24 @@ export default function DebitNotes() {
     }
   });
 
+  const bulkDeleteMutation = useMutation({
+    mutationFn: async (rows) => {
+      const user = await base44.auth.me();
+      await Promise.all(rows.map(row => 
+        base44.entities.DebitNote.update(row.id, {
+          is_deleted: true,
+          deleted_by: user.email,
+          deleted_on: new Date().toISOString()
+        })
+      ));
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['debit-notes'] });
+      setSelectedRows([]);
+      setShowBulkDeleteConfirm(false);
+    }
+  });
+
   const filteredNotes = debitNotes.filter(note => {
     if (note.is_deleted) return false;
     
@@ -181,6 +200,10 @@ export default function DebitNotes() {
     }
   };
 
+  const handleBulkDelete = () => {
+    bulkDeleteMutation.mutate(selectedRows);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 p-4 md:p-8">
       <div className="max-w-7xl mx-auto space-y-6">
@@ -212,6 +235,12 @@ export default function DebitNotes() {
               a.click();
             }}
           />
+          {selectedRows.length > 0 && (
+            <Button variant="destructive" onClick={() => setShowBulkDeleteConfirm(true)}>
+              <Trash2 className="w-4 h-4 mr-2" />
+              Delete Selected ({selectedRows.length})
+            </Button>
+          )}
         </PageHeader>
 
         <div className="space-y-4">
@@ -220,6 +249,12 @@ export default function DebitNotes() {
               <div><span className="font-semibold text-slate-900">{debitNotes.length}</span> Total</div>
               <div className="h-4 w-px bg-slate-200" />
               <div><span className="font-semibold text-slate-900">{filteredNotes.length}</span> Filtered</div>
+              {selectedRows.length > 0 && (
+                <>
+                  <div className="h-4 w-px bg-slate-200" />
+                  <div><span className="font-semibold text-blue-600">{selectedRows.length}</span> Selected</div>
+                </>
+              )}
               <div className="h-4 w-px bg-slate-200" />
               <div><span className="font-semibold text-slate-900">{totalValue.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</span> Total Value</div>
             </div>
@@ -299,6 +334,16 @@ export default function DebitNotes() {
           description={`Are you sure you want to delete debit note "${deleteNote?.debitNoteNo}"?`}
           confirmLabel="Delete"
           onConfirm={() => deleteMutation.mutate(deleteNote.id)}
+          variant="destructive"
+        />
+
+        <ConfirmDialog
+          open={showBulkDeleteConfirm}
+          onOpenChange={setShowBulkDeleteConfirm}
+          title="Delete Selected Debit Notes"
+          description={`Are you sure you want to delete ${selectedRows.length} selected debit note(s)? This action cannot be undone.`}
+          confirmLabel="Delete All"
+          onConfirm={handleBulkDelete}
           variant="destructive"
         />
 
