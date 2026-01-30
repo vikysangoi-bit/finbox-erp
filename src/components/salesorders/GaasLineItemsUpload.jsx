@@ -24,8 +24,8 @@ export default function GaasLineItemsUpload({ open, onOpenChange, onSuccess }) {
 
   const downloadTemplate = () => {
     const csvContent = [
-      'itemCode,styleId,articleName,itemCategory,articleId,description,composition,size,color,hsn,quantity,rate,expectedDeliveryDate',
-      'SKU001,STY001,Fabric Item,Menswear,AR12401,Cotton Fabric,100% Cotton,Large,Blue,520100,100,150,2026-03-25'
+      'styleId,quantity,rate,expectedDeliveryDate',
+      'STY001,100,150,2026-03-25'
     ].join('\n');
     
     const blob = new Blob([csvContent], { type: 'text/csv' });
@@ -61,15 +61,9 @@ export default function GaasLineItemsUpload({ open, onOpenChange, onSuccess }) {
               type: "object",
               properties: {
                 styleId: { type: "string" },
-                itemCode: { type: "string" },
-                itemName: { type: "string" },
-                description: { type: "string" },
-                composition: { type: "string" },
-                size: { type: "string" },
-                color: { type: "string" },
-                hsn: { type: "string" },
                 quantity: { type: "number" },
-                rate: { type: "number" }
+                rate: { type: "number" },
+                expectedDeliveryDate: { type: "string" }
               }
             }
           }
@@ -83,16 +77,7 @@ export default function GaasLineItemsUpload({ open, onOpenChange, onSuccess }) {
             items: {
               type: "object",
               properties: {
-                itemCode: { type: "string" },
                 styleId: { type: "string" },
-                articleName: { type: "string" },
-                itemCategory: { type: "string" },
-                articleId: { type: "string" },
-                description: { type: "string" },
-                composition: { type: "string" },
-                size: { type: "string" },
-                color: { type: "string" },
-                hsn: { type: "string" },
                 quantity: { type: "number" },
                 rate: { type: "number" },
                 expectedDeliveryDate: { type: "string" }
@@ -110,10 +95,12 @@ export default function GaasLineItemsUpload({ open, onOpenChange, onSuccess }) {
         return;
       }
 
-      // Fetch inventory items to validate item codes
+      // Fetch inventory items to validate and enrich
       const inventoryItems = await base44.entities.InventoryItem.list();
-      const inventoryMap = inventoryItems.reduce((map, item) => {
-        map[item.itemCode || item.sku] = item;
+      const inventoryMapByStyleId = inventoryItems.reduce((map, item) => {
+        if (item.styleID) {
+          map[item.styleID] = item;
+        }
         return map;
       }, {});
 
@@ -123,18 +110,18 @@ export default function GaasLineItemsUpload({ open, onOpenChange, onSuccess }) {
       
       // Enrich with inventory data
       const enrichedItems = lineItems.map(item => {
-        const inventoryItem = inventoryMap[item.itemCode];
+        const inventoryItem = inventoryMapByStyleId[item.styleId];
         return {
-          itemCode: item.itemCode,
-          styleID: item.styleId || inventoryItem?.styleID || '',
-          articleNo: item.articleId || inventoryItem?.articleNo || '',
-          itemCategory: item.itemCategory || inventoryItem?.itemCategory || '',
-          itemName: item.articleName || inventoryItem?.name || '',
-          description: item.description || '',
-          composition: item.composition || inventoryItem?.composition || '',
-          size: item.size || inventoryItem?.size || '',
-          color: item.color || inventoryItem?.color || '',
-          hsnCode: item.hsn || inventoryItem?.hsnCode || '',
+          itemCode: inventoryItem?.itemCode || inventoryItem?.sku || '',
+          styleID: item.styleId || '',
+          articleNo: inventoryItem?.articleNo || '',
+          itemCategory: inventoryItem?.itemCategory || '',
+          itemName: inventoryItem?.name || '',
+          description: inventoryItem?.description || '',
+          composition: inventoryItem?.composition || '',
+          size: inventoryItem?.size || '',
+          color: inventoryItem?.color || '',
+          hsnCode: inventoryItem?.hsnCode || '',
           quantity: item.quantity || 0,
           rate: item.rate || 0,
           expectedDeliveryDate: item.expectedDeliveryDate || ''
@@ -173,7 +160,7 @@ export default function GaasLineItemsUpload({ open, onOpenChange, onSuccess }) {
           <Alert>
             <FileSpreadsheet className="h-4 w-4" />
             <AlertDescription>
-              Upload CSV or Excel file with GaaS line items. Item codes will be mapped to inventory.
+              Upload CSV or Excel with styleId, quantity, rate, expectedDeliveryDate. Details auto-fetched from inventory.
             </AlertDescription>
           </Alert>
 
