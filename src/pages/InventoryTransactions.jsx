@@ -216,12 +216,13 @@ export default function InventoryTransactions() {
           <SyncDropdown
             onBulkDelete={() => setShowBulkDelete(true)}
             onExportExcel={() => {
-              const headers = ['Transaction Number', 'Transaction Date', 'Type', 'PO Number', 'Style ID', 'Name', 'Color', 'Size', 'Quantity', 'From Location', 'To Location', 'Status'];
+              const headers = ['Transaction Number', 'Transaction Date', 'Type', 'PO Number', 'Item Code', 'Style ID', 'Article Name', 'Item Category', 'Article ID', 'Description', 'Composition', 'Size', 'Color', 'HSN', 'Quantity', 'From Location', 'To Location', 'Status'];
               const rows = filteredTransactions.flatMap(t => 
                 (t.items || []).map(item => [
                   t.transaction_number || '', t.transaction_date || '', t.type || '', t.po_number || '',
-                  item.styleID || '', item.name || '', item.color || '', item.size || '', item.quantity || 0,
-                  t.from_location || '', t.to_location || '', t.status || 'draft'
+                  item.item_sku || '', item.styleID || '', item.name || '', item.itemCategory || '', item.articleNo || '',
+                  item.description || '', item.composition || '', item.size || '', item.color || '', item.hsnCode || '',
+                  item.quantity || 0, t.from_location || '', t.to_location || '', t.status || 'draft'
                 ])
               );
               const csv = [headers, ...rows].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
