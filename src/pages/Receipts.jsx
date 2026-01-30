@@ -24,6 +24,7 @@ export default function Receipts() {
   const [viewingReceipt, setViewingReceipt] = useState(null);
   const [deleteReceipt, setDeleteReceipt] = useState(null);
   const [selectedRows, setSelectedRows] = useState([]);
+  const [showBulkDeleteConfirm, setShowBulkDeleteConfirm] = useState(false);
   const [search, setSearch] = useState('');
   const [clientFilter, setClientFilter] = useState('all');
   const [receiptMonthFilter, setReceiptMonthFilter] = useState('all');
@@ -105,6 +106,24 @@ export default function Receipts() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['receipts'] });
       setDeleteReceipt(null);
+    }
+  });
+
+  const bulkDeleteMutation = useMutation({
+    mutationFn: async (rows) => {
+      const user = await base44.auth.me();
+      await Promise.all(rows.map(row => 
+        base44.entities.Receipt.update(row.id, {
+          is_deleted: true,
+          deleted_by: user.email,
+          deleted_on: new Date().toISOString()
+        })
+      ));
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['receipts'] });
+      setSelectedRows([]);
+      setShowBulkDeleteConfirm(false);
     }
   });
 
@@ -190,6 +209,10 @@ export default function Receipts() {
     }
   };
 
+  const handleBulkDelete = () => {
+    bulkDeleteMutation.mutate(selectedRows);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 p-4 md:p-8">
       <div className="max-w-7xl mx-auto space-y-6">
@@ -221,6 +244,12 @@ export default function Receipts() {
               a.click();
             }}
           />
+          {selectedRows.length > 0 && (
+            <Button variant="destructive" onClick={() => setShowBulkDeleteConfirm(true)}>
+              <Trash2 className="w-4 h-4 mr-2" />
+              Delete Selected ({selectedRows.length})
+            </Button>
+          )}
         </PageHeader>
 
         <div className="space-y-4">
@@ -229,6 +258,12 @@ export default function Receipts() {
               <div><span className="font-semibold text-slate-900">{receipts.length}</span> Total</div>
               <div className="h-4 w-px bg-slate-200" />
               <div><span className="font-semibold text-slate-900">{filteredReceipts.length}</span> Filtered</div>
+              {selectedRows.length > 0 && (
+                <>
+                  <div className="h-4 w-px bg-slate-200" />
+                  <div><span className="font-semibold text-blue-600">{selectedRows.length}</span> Selected</div>
+                </>
+              )}
               <div className="h-4 w-px bg-slate-200" />
               <div><span className="font-semibold text-slate-900">{totalValue.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</span> Total Value</div>
             </div>
@@ -313,6 +348,16 @@ export default function Receipts() {
           description={`Are you sure you want to delete receipt for invoice "${deleteReceipt?.invoiceNo}"?`}
           confirmLabel="Delete"
           onConfirm={() => deleteMutation.mutate(deleteReceipt.id)}
+          variant="destructive"
+        />
+
+        <ConfirmDialog
+          open={showBulkDeleteConfirm}
+          onOpenChange={setShowBulkDeleteConfirm}
+          title="Delete Selected Receipts"
+          description={`Are you sure you want to delete ${selectedRows.length} selected receipt(s)? This action cannot be undone.`}
+          confirmLabel="Delete All"
+          onConfirm={handleBulkDelete}
           variant="destructive"
         />
 
