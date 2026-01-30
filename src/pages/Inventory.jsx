@@ -64,7 +64,9 @@ export default function Inventory() {
     const matchesSearch = 
       item.sku?.toLowerCase().includes(search.toLowerCase()) ||
       item.name?.toLowerCase().includes(search.toLowerCase()) ||
-      item.supplier?.toLowerCase().includes(search.toLowerCase());
+      item.supplier?.toLowerCase().includes(search.toLowerCase()) ||
+      item.articleNo?.toLowerCase().includes(search.toLowerCase()) ||
+      item.ean?.toLowerCase().includes(search.toLowerCase());
     const matchesCategory = categoryFilter === 'all' || item.category === categoryFilter;
     return matchesSearch && matchesCategory;
   });
@@ -74,6 +76,16 @@ export default function Inventory() {
       id: "sku",
       header: "SKU", 
       render: (row) => <span className="font-mono font-medium text-slate-900">{row.sku}</span>
+    },
+    { 
+      id: "articleNo",
+      header: "Article No", 
+      render: (row) => <span className="text-slate-700">{row.articleNo || '-'}</span>
+    },
+    { 
+      id: "ean",
+      header: "EAN", 
+      render: (row) => <span className="text-slate-700">{row.ean || '-'}</span>
     },
     { id: "name", header: "Name", accessor: "name", render: (row) => <span className="font-medium">{row.name}</span> },
     { 
@@ -101,11 +113,11 @@ export default function Inventory() {
       }
     },
     { 
-      id: "unit_cost",
-      header: "Unit Cost", 
+      id: "mrp",
+      header: "MRP", 
       render: (row) => (
         <span className="text-slate-600">
-          {row.currency} {(row.unit_cost || 0).toFixed(2)}
+          ₹{(row.mrp || 0).toFixed(2)}
         </span>
       )
     },
@@ -114,16 +126,11 @@ export default function Inventory() {
       header: "Total Value", 
       render: (row) => (
         <span className="font-medium text-slate-900">
-          {row.currency} {((row.quantity_on_hand || 0) * (row.unit_cost || 0)).toFixed(2)}
+          ₹{((row.quantity_on_hand || 0) * (row.mrp || 0)).toFixed(2)}
         </span>
       )
     },
     { id: "location", header: "Location", accessor: "warehouse_location", render: (row) => <span className="text-slate-500">{row.warehouse_location || '-'}</span> },
-    { 
-      id: "status",
-      header: "Status", 
-      render: (row) => <StatusBadge status={row.is_active ? 'active' : 'inactive'} />
-    },
     {
       id: "actions",
       header: "",
@@ -190,12 +197,12 @@ export default function Inventory() {
             onBulkUpload={() => setShowBulkUpload(true)}
             onBulkDelete={() => setShowBulkDelete(true)}
             onExportExcel={() => {
-              const headers = ['SKU', 'Name', 'Category', 'Sub Category', 'Unit', 'Quantity', 'Reorder Level', 'Unit Cost', 'Currency', 'Total Value', 'Warehouse Location', 'Supplier', 'Color', 'Size', 'GSM', 'Composition', 'Is Active', 'Notes'];
+              const headers = ['SKU', 'Article No', 'EAN', 'Name', 'Category', 'Sub Category', 'Unit', 'Quantity', 'Reorder Level', 'MRP', 'Total Value', 'Warehouse Location', 'Supplier', 'Color', 'Size', 'GSM', 'Composition', 'Notes'];
               const rows = filteredItems.map(i => [
-                i.sku, i.name, i.category, i.sub_category || '', i.unit, i.quantity_on_hand || 0, 
-                i.reorder_level || 0, i.unit_cost || 0, i.currency || 'USD', i.total_value || 0, 
+                i.sku, i.articleNo || '', i.ean || '', i.name, i.category, i.sub_category || '', i.unit, i.quantity_on_hand || 0, 
+                i.reorder_level || 0, i.mrp || 0, i.total_value || 0, 
                 i.warehouse_location || '', i.supplier || '', i.color || '', i.size || '', i.gsm || '', 
-                i.composition || '', i.is_active ? 'Yes' : 'No', i.notes || ''
+                i.composition || '', i.notes || ''
               ]);
               const csv = [headers, ...rows].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
               const blob = new Blob([csv], { type: 'text/csv' });
@@ -211,7 +218,7 @@ export default function Inventory() {
         <SearchFilter
           searchValue={search}
           onSearchChange={setSearch}
-          searchPlaceholder="Search by SKU, name, supplier..."
+          searchPlaceholder="Search by SKU, name, article no, EAN, supplier..."
           filters={[
             {
               key: 'category',
@@ -223,8 +230,8 @@ export default function Inventory() {
                 { value: 'trims', label: 'Trims' },
                 { value: 'accessories', label: 'Accessories' },
                 { value: 'packaging', label: 'Packaging' },
-                { value: 'finished_goods', label: 'Finished Goods' },
-                { value: 'work_in_progress', label: 'Work in Progress' },
+                { value: 'garments', label: 'Garments' },
+                { value: 'samples', label: 'Samples' },
               ]
             }
           ]}
@@ -276,24 +283,24 @@ export default function Inventory() {
               type: "object",
               properties: {
                 sku: { type: "string" },
+                articleNo: { type: "string" },
+                ean: { type: "string" },
                 name: { type: "string" },
-                category: { type: "string", enum: ["fabric", "trims", "accessories", "packaging", "finished_goods", "work_in_progress"] },
+                category: { type: "string", enum: ["fabric", "trims", "accessories", "packaging", "garments", "samples"] },
                 sub_category: { type: "string" },
                 unit: { type: "string" },
                 quantity_on_hand: { type: "number" },
                 reorder_level: { type: "number" },
-                unit_cost: { type: "number" },
-                currency: { type: "string" },
-                warehouse_location: { type: "string" },
-                is_active: { type: "boolean" }
+                mrp: { type: "number" },
+                warehouse_location: { type: "string" }
               },
               required: ["sku", "name", "category", "unit"]
             }
           }}
           templateData={[
-            'sku,name,category,sub_category,unit,quantity_on_hand,reorder_level,unit_cost,currency,warehouse_location,supplier,color,size,gsm,composition,is_active,notes',
-            'FAB-001,Cotton Fabric,fabric,Cotton,meters,1000,200,5.50,USD,A-1-1,ABC Fabrics,White,150cm,180,100% Cotton,true,',
-            'TRM-001,Buttons,trims,Buttons,pieces,5000,1000,0.10,USD,B-1-1,XYZ Trims,Black,1cm,,,true,'
+            'sku,articleNo,ean,name,category,sub_category,unit,quantity_on_hand,reorder_level,mrp,warehouse_location,supplier,color,size,gsm,composition,notes',
+            'FAB-001,ART-001,1234567890123,Cotton Fabric,fabric,Cotton,meters,1000,200,550.00,A-1-1,ABC Fabrics,White,150cm,180,100% Cotton,',
+            'GAR-001,ART-002,9876543210987,T-Shirt,garments,,pieces,500,100,499.00,B-1-1,XYZ Garments,Blue,M,,100% Cotton,'
           ]}
           onSuccess={() => queryClient.invalidateQueries({ queryKey: ['inventory-items'] })}
         />

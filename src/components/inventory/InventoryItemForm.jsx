@@ -5,16 +5,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
-import CurrencySelect from "../shared/CurrencySelect";
 
 const categories = [
   { value: "fabric", label: "Fabric" },
   { value: "trims", label: "Trims & Accessories" },
   { value: "accessories", label: "Accessories" },
   { value: "packaging", label: "Packaging" },
-  { value: "finished_goods", label: "Finished Goods" },
-  { value: "work_in_progress", label: "Work in Progress" },
+  { value: "garments", label: "Garments" },
+  { value: "samples", label: "Samples" },
 ];
 
 const units = [
@@ -30,21 +28,21 @@ const units = [
 export default function InventoryItemForm({ open, onOpenChange, item, onSave, isLoading }) {
   const [form, setForm] = useState({
     sku: '',
+    articleNo: '',
+    ean: '',
     name: '',
     category: 'fabric',
     sub_category: '',
     unit: 'meters',
     quantity_on_hand: 0,
     reorder_level: 0,
-    unit_cost: 0,
-    currency: 'USD',
+    mrp: 0,
     warehouse_location: '',
     supplier: '',
     color: '',
     size: '',
     gsm: '',
     composition: '',
-    is_active: true,
     notes: ''
   });
 
@@ -54,21 +52,21 @@ export default function InventoryItemForm({ open, onOpenChange, item, onSave, is
     } else {
       setForm({
         sku: '',
+        articleNo: '',
+        ean: '',
         name: '',
         category: 'fabric',
         sub_category: '',
         unit: 'meters',
         quantity_on_hand: 0,
         reorder_level: 0,
-        unit_cost: 0,
-        currency: 'USD',
+        mrp: 0,
         warehouse_location: '',
         supplier: '',
         color: '',
         size: '',
         gsm: '',
         composition: '',
-        is_active: true,
         notes: ''
       });
     }
@@ -78,7 +76,7 @@ export default function InventoryItemForm({ open, onOpenChange, item, onSave, is
     e.preventDefault();
     onSave({
       ...form,
-      total_value: form.quantity_on_hand * form.unit_cost
+      total_value: form.quantity_on_hand * form.mrp
     });
   };
 
@@ -108,6 +106,27 @@ export default function InventoryItemForm({ open, onOpenChange, item, onSave, is
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
                 placeholder="e.g., Cotton Twill Fabric"
                 required
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="articleNo">Article No</Label>
+              <Input
+                id="articleNo"
+                value={form.articleNo || ''}
+                onChange={(e) => setForm({ ...form, articleNo: e.target.value })}
+                placeholder="Article number"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="ean">EAN</Label>
+              <Input
+                id="ean"
+                value={form.ean || ''}
+                onChange={(e) => setForm({ ...form, ean: e.target.value })}
+                placeholder="EAN / Barcode"
               />
             </div>
           </div>
@@ -170,26 +189,18 @@ export default function InventoryItemForm({ open, onOpenChange, item, onSave, is
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="unit_cost">Unit Cost</Label>
+              <Label htmlFor="mrp">MRP</Label>
               <Input
-                id="unit_cost"
+                id="mrp"
                 type="number"
                 step="0.01"
-                value={form.unit_cost}
-                onChange={(e) => setForm({ ...form, unit_cost: parseFloat(e.target.value) || 0 })}
+                value={form.mrp}
+                onChange={(e) => setForm({ ...form, mrp: parseFloat(e.target.value) || 0 })}
               />
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>Currency</Label>
-              <CurrencySelect 
-                value={form.currency} 
-                onChange={(v) => setForm({ ...form, currency: v })}
-                className="w-full"
-              />
-            </div>
             <div className="space-y-2">
               <Label htmlFor="warehouse_location">Warehouse Location</Label>
               <Input
@@ -199,16 +210,15 @@ export default function InventoryItemForm({ open, onOpenChange, item, onSave, is
                 placeholder="e.g., A-1-2"
               />
             </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="supplier">Supplier</Label>
-            <Input
-              id="supplier"
-              value={form.supplier || ''}
-              onChange={(e) => setForm({ ...form, supplier: e.target.value })}
-              placeholder="Supplier name"
-            />
+            <div className="space-y-2">
+              <Label htmlFor="supplier">Supplier</Label>
+              <Input
+                id="supplier"
+                value={form.supplier || ''}
+                onChange={(e) => setForm({ ...form, supplier: e.target.value })}
+                placeholder="Supplier name"
+              />
+            </div>
           </div>
 
           {form.category === 'fabric' && (
@@ -259,15 +269,6 @@ export default function InventoryItemForm({ open, onOpenChange, item, onSave, is
               value={form.notes || ''}
               onChange={(e) => setForm({ ...form, notes: e.target.value })}
               rows={2}
-            />
-          </div>
-
-          <div className="flex items-center justify-between">
-            <Label htmlFor="is_active">Active Item</Label>
-            <Switch
-              id="is_active"
-              checked={form.is_active}
-              onCheckedChange={(v) => setForm({ ...form, is_active: v })}
             />
           </div>
 
