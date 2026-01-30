@@ -52,6 +52,7 @@ import AuditLogs from './pages/AuditLogs';
 import ChartOfAccounts from './pages/ChartOfAccounts';
 import CreditNotes from './pages/CreditNotes';
 import Currencies from './pages/Currencies';
+import CustomRoles from './pages/CustomRoles';
 import Dashboard from './pages/Dashboard';
 import DebitNotes from './pages/DebitNotes';
 import Documents from './pages/Documents';
@@ -71,7 +72,6 @@ import SalesOrders from './pages/SalesOrders';
 import Suppliers from './pages/Suppliers';
 import Users from './pages/Users';
 import VendorBills from './pages/VendorBills';
-import CustomRoles from './pages/CustomRoles';
 import __Layout from './Layout.jsx';
 
 
@@ -81,6 +81,7 @@ export const PAGES = {
     "ChartOfAccounts": ChartOfAccounts,
     "CreditNotes": CreditNotes,
     "Currencies": Currencies,
+    "CustomRoles": CustomRoles,
     "Dashboard": Dashboard,
     "DebitNotes": DebitNotes,
     "Documents": Documents,
@@ -100,7 +101,6 @@ export const PAGES = {
     "Suppliers": Suppliers,
     "Users": Users,
     "VendorBills": VendorBills,
-    "CustomRoles": CustomRoles,
 }
 
 export const pagesConfig = {
