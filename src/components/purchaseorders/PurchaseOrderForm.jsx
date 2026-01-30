@@ -323,9 +323,14 @@ export default function PurchaseOrderForm({ open, onOpenChange, po, onSave, isLo
           <Card className="p-4 border-slate-200">
             <div className="flex justify-between items-center mb-3">
               <h4 className="font-semibold text-slate-900">Order Items</h4>
-              <Button type="button" variant="outline" size="sm" onClick={addItem}>
-                <Plus className="w-4 h-4 mr-1" /> Add Item
-              </Button>
+              <div className="flex gap-2">
+                <Button type="button" variant="outline" size="sm" onClick={() => setShowBulkUpload(true)}>
+                  <Upload className="w-4 h-4 mr-1" /> Bulk Upload Items
+                </Button>
+                <Button type="button" variant="outline" size="sm" onClick={addItem}>
+                  <Plus className="w-4 h-4 mr-1" /> Add Item
+                </Button>
+              </div>
             </div>
 
             <div className="overflow-x-auto">
