@@ -8,7 +8,7 @@ import { Progress } from "@/components/ui/progress";
 import { Upload, FileSpreadsheet, CheckCircle, AlertCircle, Download } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 
-export default function GaasLineItemsUpload({ open, onOpenChange, onSuccess }) {
+export default function PurchaseOrderLineItemsUpload({ open, onOpenChange, onSuccess }) {
   const [file, setFile] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -24,7 +24,7 @@ export default function GaasLineItemsUpload({ open, onOpenChange, onSuccess }) {
 
   const downloadTemplate = () => {
     const csvContent = [
-      'itemCode,styleId,articleName,itemCategory,articleId,description,composition,size,color,hsn,quantity,rate,expectedDeliveryDate',
+      'itemCode,styleId,articleName,itemCategory,articleId,description,composition,size,color,hsnCode,quantity,rate_per_unit,item_expected_delivery',
       'SKU001,STY001,Fabric Item,Menswear,AR12401,Cotton Fabric,100% Cotton,Large,Blue,520100,100,150,2026-03-25'
     ].join('\n');
     
@@ -32,7 +32,7 @@ export default function GaasLineItemsUpload({ open, onOpenChange, onSuccess }) {
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'gaas_lineitems_template.csv';
+    a.download = 'po_lineitems_template.csv';
     a.click();
     window.URL.revokeObjectURL(url);
   };
@@ -60,16 +60,19 @@ export default function GaasLineItemsUpload({ open, onOpenChange, onSuccess }) {
             items: {
               type: "object",
               properties: {
-                styleId: { type: "string" },
                 itemCode: { type: "string" },
-                itemName: { type: "string" },
+                styleId: { type: "string" },
+                articleName: { type: "string" },
+                itemCategory: { type: "string" },
+                articleId: { type: "string" },
                 description: { type: "string" },
                 composition: { type: "string" },
                 size: { type: "string" },
                 color: { type: "string" },
-                hsn: { type: "string" },
+                hsnCode: { type: "string" },
                 quantity: { type: "number" },
-                rate: { type: "number" }
+                rate_per_unit: { type: "number" },
+                item_expected_delivery: { type: "string" }
               }
             }
           }
@@ -92,10 +95,10 @@ export default function GaasLineItemsUpload({ open, onOpenChange, onSuccess }) {
                 composition: { type: "string" },
                 size: { type: "string" },
                 color: { type: "string" },
-                hsn: { type: "string" },
+                hsnCode: { type: "string" },
                 quantity: { type: "number" },
-                rate: { type: "number" },
-                expectedDeliveryDate: { type: "string" }
+                rate_per_unit: { type: "number" },
+                item_expected_delivery: { type: "string" }
               }
             }
           }
@@ -110,7 +113,7 @@ export default function GaasLineItemsUpload({ open, onOpenChange, onSuccess }) {
         return;
       }
 
-      // Fetch inventory items to validate item codes
+      // Fetch inventory items to validate and enrich
       const inventoryItems = await base44.entities.InventoryItem.list();
       const inventoryMap = inventoryItems.reduce((map, item) => {
         map[item.itemCode || item.sku] = item;
@@ -121,23 +124,31 @@ export default function GaasLineItemsUpload({ open, onOpenChange, onSuccess }) {
 
       const lineItems = Array.isArray(extractResult.output) ? extractResult.output : [extractResult.output];
       
-      // Enrich with inventory data
+      // Enrich with inventory data and calculate values
       const enrichedItems = lineItems.map(item => {
         const inventoryItem = inventoryMap[item.itemCode];
+        const quantity = item.quantity || 0;
+        const rate = item.rate_per_unit || 0;
+        const net_before_gst = quantity * rate;
+        const gst_percentage = 0; // Default, can be updated later
+        const gross_value = net_before_gst;
+
         return {
           itemCode: item.itemCode,
           styleID: item.styleId || inventoryItem?.styleID || '',
           articleNo: item.articleId || inventoryItem?.articleNo || '',
           itemCategory: item.itemCategory || inventoryItem?.itemCategory || '',
-          itemName: item.articleName || inventoryItem?.name || '',
-          description: item.description || '',
+          description: item.description || item.articleName || inventoryItem?.name || '',
           composition: item.composition || inventoryItem?.composition || '',
           size: item.size || inventoryItem?.size || '',
           color: item.color || inventoryItem?.color || '',
-          hsnCode: item.hsn || inventoryItem?.hsnCode || '',
-          quantity: item.quantity || 0,
-          rate: item.rate || 0,
-          expectedDeliveryDate: item.expectedDeliveryDate || ''
+          hsnCode: item.hsnCode || inventoryItem?.hsnCode || '',
+          quantity,
+          rate_per_unit: rate,
+          net_before_gst,
+          gst_percentage,
+          gross_value,
+          item_expected_delivery: item.item_expected_delivery || ''
         };
       });
 
@@ -165,7 +176,7 @@ export default function GaasLineItemsUpload({ open, onOpenChange, onSuccess }) {
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Upload className="w-5 h-5" />
-            Upload GaaS Line Items
+            Upload PO Line Items
           </DialogTitle>
         </DialogHeader>
 
@@ -173,7 +184,7 @@ export default function GaasLineItemsUpload({ open, onOpenChange, onSuccess }) {
           <Alert>
             <FileSpreadsheet className="h-4 w-4" />
             <AlertDescription>
-              Upload CSV or Excel file with GaaS line items. Item codes will be mapped to inventory.
+              Upload CSV or Excel file with PO line items. Item codes will be mapped to inventory.
             </AlertDescription>
           </Alert>
 

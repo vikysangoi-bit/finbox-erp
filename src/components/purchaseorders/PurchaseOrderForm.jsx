@@ -7,12 +7,14 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card } from "@/components/ui/card";
-import { Plus, Trash2, Eye } from "lucide-react";
+import { Plus, Trash2, Eye, Upload } from "lucide-react";
+import PurchaseOrderLineItemsUpload from "./PurchaseOrderLineItemsUpload";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 
 export default function PurchaseOrderForm({ open, onOpenChange, po, onSave, isLoading }) {
   const [showPreview, setShowPreview] = React.useState(false);
+  const [showBulkUpload, setShowBulkUpload] = React.useState(false);
   const [form, setForm] = useState({
     po_number: '',
     po_date: new Date().toISOString().split('T')[0],
@@ -520,6 +522,24 @@ export default function PurchaseOrderForm({ open, onOpenChange, po, onSave, isLo
         open={showPreview}
         onOpenChange={setShowPreview}
         poData={form}
+      />
+
+      <PurchaseOrderLineItemsUpload
+        open={showBulkUpload}
+        onOpenChange={setShowBulkUpload}
+        onSuccess={(items) => {
+          const newItems = [...form.items, ...items];
+          const subtotal = newItems.reduce((sum, item) => sum + (item.net_before_gst || 0), 0);
+          const taxAmount = newItems.reduce((sum, item) => sum + ((item.net_before_gst || 0) * (item.gst_percentage || 0) / 100), 0);
+          const totalAmount = subtotal + taxAmount + (form.shipping_cost || 0);
+          setForm({
+            ...form,
+            items: newItems,
+            subtotal,
+            tax_amount: taxAmount,
+            total_amount: totalAmount
+          });
+        }}
       />
     </Dialog>
   );
