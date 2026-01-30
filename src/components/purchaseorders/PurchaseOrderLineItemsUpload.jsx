@@ -24,7 +24,7 @@ export default function PurchaseOrderLineItemsUpload({ open, onOpenChange, onSuc
 
   const downloadTemplate = () => {
     const csvContent = [
-      'itemCode,styleId,articleName,itemCategory,articleId,description,composition,size,color,hsnCode,quantity,rate_per_unit,item_expected_delivery',
+      'itemCode,styleId,articleName,itemCategory,articleId,description,composition,size,color,hsn,quantity,rate,expectedDeliveryDate',
       'SKU001,STY001,Fabric Item,Menswear,AR12401,Cotton Fabric,100% Cotton,Large,Blue,520100,100,150,2026-03-25'
     ].join('\n');
     
