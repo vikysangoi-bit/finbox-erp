@@ -49,6 +49,11 @@ export default function SalesOrders() {
     queryFn: () => base44.entities.Account.list()
   });
 
+  const { data: currencies = [] } = useQuery({
+    queryKey: ['currencies'],
+    queryFn: () => base44.entities.Currency.list()
+  });
+
   const createMutation = useMutation({
     mutationFn: async (data) => {
       // Fetch customer details from Account
@@ -280,6 +285,22 @@ export default function SalesOrders() {
 
   const totalValue = filteredOrders.reduce((sum, order) => sum + (order.orderFormValue || 0), 0);
 
+  // Calculate total in INR (converting USD at exchange rate)
+  const getUSDtoINRRate = () => {
+    const inrCurrency = currencies.find(c => c.code === 'INR');
+    return inrCurrency?.exchange_rate || 83; // Default to 83 if not found
+  };
+
+  const totalValueInINR = filteredOrders.reduce((sum, order) => {
+    const amount = order.orderFormValue || 0;
+    if (order.currency === 'INR') {
+      return sum + amount;
+    } else if (order.currency === 'USD') {
+      return sum + (amount * getUSDtoINRRate());
+    }
+    return sum + amount;
+  }, 0);
+
   const handleSave = (data) => {
     if (editingOrder) {
       updateMutation.mutate({ id: editingOrder.id, data });
@@ -376,6 +397,20 @@ export default function SalesOrders() {
           )}
         </PageHeader>
 
+        {/* Total Value Card */}
+        <div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl p-6 text-white shadow-lg">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-slate-300 mb-1">Total Sales Value (INR)</p>
+              <p className="text-3xl font-bold">₹ {totalValueInINR.toLocaleString('en-IN', { maximumFractionDigits: 2 })}</p>
+            </div>
+            <div className="text-right">
+              <p className="text-xs text-slate-400">Exchange Rate: USD 1 = ₹ {getUSDtoINRRate()}</p>
+              <p className="text-sm text-slate-300 mt-1">{filteredOrders.length} Orders</p>
+            </div>
+          </div>
+        </div>
+
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4 text-sm text-slate-600">
@@ -388,8 +423,6 @@ export default function SalesOrders() {
                   <div><span className="font-semibold text-blue-600">{selectedRows.length}</span> Selected</div>
                 </>
               )}
-              <div className="h-4 w-px bg-slate-200" />
-              <div><span className="font-semibold text-slate-900">{totalValue.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</span> Total Value</div>
             </div>
           </div>
 

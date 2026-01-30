@@ -13,9 +13,11 @@ import TransactionForm from "@/components/inventory/TransactionForm";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, Pencil, Trash2, ArrowRightLeft, Send, ArrowDownLeft, ArrowUpRight, RefreshCw } from "lucide-react";
+import { MoreHorizontal, Pencil, Trash2, ArrowRightLeft, Send, ArrowDownLeft, ArrowUpRight, RefreshCw, Eye } from "lucide-react";
 import ConfirmDialog from "@/components/shared/ConfirmDialog";
 import { format } from "date-fns";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Card } from "@/components/ui/card";
 
 const typeConfig = {
   receipt: { label: "Receipt", color: "bg-emerald-100 text-emerald-700", icon: ArrowDownLeft },
@@ -119,6 +121,8 @@ export default function InventoryTransactions() {
     return `TXN-${new Date().getFullYear()}-${String(count).padStart(5, '0')}`;
   };
 
+  const [viewTransaction, setViewTransaction] = useState(null);
+
   const allColumns = [
     { 
       id: "transaction_number",
@@ -158,6 +162,7 @@ export default function InventoryTransactions() {
       render: (row) => <StatusBadge status={row.status || 'draft'} />
     },
     {
+      id: "actions",
       header: "",
       cellClassName: "text-right",
       render: (row) => (
@@ -168,6 +173,10 @@ export default function InventoryTransactions() {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={() => setViewTransaction(row)}>
+              <Eye className="w-4 h-4 mr-2" />
+              View
+            </DropdownMenuItem>
             {row.status === 'draft' && (
               <>
                 <DropdownMenuItem onClick={() => { setEditingTransaction(row); setShowForm(true); }}>
@@ -342,6 +351,67 @@ export default function InventoryTransactions() {
           entityName="InventoryTransaction"
           onSuccess={() => queryClient.invalidateQueries({ queryKey: ['inventory-transactions'] })}
         />
+
+        {/* View Transaction Dialog */}
+        <Dialog open={!!viewTransaction} onOpenChange={() => setViewTransaction(null)}>
+          <DialogContent className="max-w-3xl">
+            <DialogHeader>
+              <DialogTitle>Transaction Details - {viewTransaction?.transaction_number}</DialogTitle>
+            </DialogHeader>
+            {viewTransaction && (
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm text-slate-500">Type</p>
+                    <Badge className={`${typeConfig[viewTransaction.type]?.color || 'bg-slate-100 text-slate-700'} border-0`}>
+                      {typeConfig[viewTransaction.type]?.label || viewTransaction.type}
+                    </Badge>
+                  </div>
+                  <div>
+                    <p className="text-sm text-slate-500">Date</p>
+                    <p className="font-medium">{viewTransaction.transaction_date ? format(new Date(viewTransaction.transaction_date), 'MMM d, yyyy') : '-'}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-slate-500">PO Number</p>
+                    <p className="font-medium font-mono">{viewTransaction.po_number || '-'}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-slate-500">Status</p>
+                    <StatusBadge status={viewTransaction.status} />
+                  </div>
+                  {viewTransaction.from_location && (
+                    <div>
+                      <p className="text-sm text-slate-500">From Location</p>
+                      <p className="font-medium">{viewTransaction.from_location}</p>
+                    </div>
+                  )}
+                  {viewTransaction.to_location && (
+                    <div>
+                      <p className="text-sm text-slate-500">To Location</p>
+                      <p className="font-medium">{viewTransaction.to_location}</p>
+                    </div>
+                  )}
+                </div>
+
+                <Card className="p-4">
+                  <h4 className="font-semibold mb-3">Items</h4>
+                  <div className="space-y-2">
+                    {viewTransaction.items?.map((item, i) => (
+                      <div key={i} className="grid grid-cols-4 gap-2 text-sm py-2 border-b last:border-0">
+                        <div className="col-span-2">
+                          <p className="font-medium">{item.name}</p>
+                          <p className="text-xs text-slate-500">{item.styleID} • {item.color} • {item.size}</p>
+                        </div>
+                        <span className="text-right font-medium">{item.quantity}</span>
+                        <span className="text-right text-slate-500">{item.item_sku}</span>
+                      </div>
+                    ))}
+                  </div>
+                </Card>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );

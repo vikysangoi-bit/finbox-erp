@@ -48,6 +48,11 @@ export default function PurchaseOrders() {
     queryFn: () => base44.auth.me()
   });
 
+  const { data: currencies = [] } = useQuery({
+    queryKey: ['currencies'],
+    queryFn: () => base44.entities.Currency.list()
+  });
+
   const createMutation = useMutation({
     mutationFn: (data) => base44.entities.PurchaseOrder.create(data),
     onSuccess: () => {
@@ -275,6 +280,22 @@ export default function PurchaseOrders() {
 
   const totalValue = filteredPOs.reduce((sum, po) => sum + (po.total_amount || 0), 0);
 
+  // Calculate total in INR (converting USD at exchange rate)
+  const getUSDtoINRRate = () => {
+    const inrCurrency = currencies.find(c => c.code === 'INR');
+    return inrCurrency?.exchange_rate || 83; // Default to 83 if not found
+  };
+
+  const totalValueInINR = filteredPOs.reduce((sum, po) => {
+    const amount = po.total_amount || 0;
+    if (po.currency === 'INR') {
+      return sum + amount;
+    } else if (po.currency === 'USD') {
+      return sum + (amount * getUSDtoINRRate());
+    }
+    return sum + amount;
+  }, 0);
+
   const handleSave = (data) => {
     if (editingPO) {
       updateMutation.mutate({ id: editingPO.id, data });
@@ -408,6 +429,20 @@ export default function PurchaseOrders() {
             </Button>
           )}
         </PageHeader>
+
+        {/* Total Value Card */}
+        <div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl p-6 text-white shadow-lg">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-slate-300 mb-1">Total Purchase Value (INR)</p>
+              <p className="text-3xl font-bold">₹ {totalValueInINR.toLocaleString('en-IN', { maximumFractionDigits: 2 })}</p>
+            </div>
+            <div className="text-right">
+              <p className="text-xs text-slate-400">Exchange Rate: USD 1 = ₹ {getUSDtoINRRate()}</p>
+              <p className="text-sm text-slate-300 mt-1">{filteredPOs.length} Orders</p>
+            </div>
+          </div>
+        </div>
 
         <div className="space-y-4">
           <div className="flex items-center justify-between">
