@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import PageHeader from "@/components/shared/PageHeader";
@@ -10,6 +10,7 @@ import InventoryItemForm from "@/components/inventory/InventoryItemForm";
 import BulkUploadDialog from "@/components/shared/BulkUploadDialog";
 import BulkDeleteDialog from "@/components/shared/BulkDeleteDialog";
 import SyncDropdown from "@/components/shared/SyncDropdown";
+import ColumnSelector from "@/components/shared/ColumnSelector";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -70,11 +71,13 @@ export default function Inventory() {
 
   const allColumns = [
     { 
+      id: "sku",
       header: "SKU", 
       render: (row) => <span className="font-mono font-medium text-slate-900">{row.sku}</span>
     },
-    { header: "Name", accessor: "name", render: (row) => <span className="font-medium">{row.name}</span> },
+    { id: "name", header: "Name", accessor: "name", render: (row) => <span className="font-medium">{row.name}</span> },
     { 
+      id: "category",
       header: "Category", 
       render: (row) => (
         <Badge variant="outline" className="capitalize">
@@ -83,6 +86,7 @@ export default function Inventory() {
       )
     },
     { 
+      id: "quantity",
       header: "Quantity", 
       render: (row) => {
         const isLowStock = row.quantity_on_hand <= row.reorder_level;
@@ -97,6 +101,7 @@ export default function Inventory() {
       }
     },
     { 
+      id: "unit_cost",
       header: "Unit Cost", 
       render: (row) => (
         <span className="text-slate-600">
@@ -105,6 +110,7 @@ export default function Inventory() {
       )
     },
     { 
+      id: "total_value",
       header: "Total Value", 
       render: (row) => (
         <span className="font-medium text-slate-900">
@@ -112,12 +118,14 @@ export default function Inventory() {
         </span>
       )
     },
-    { header: "Location", accessor: "warehouse_location", render: (row) => <span className="text-slate-500">{row.warehouse_location || '-'}</span> },
+    { id: "location", header: "Location", accessor: "warehouse_location", render: (row) => <span className="text-slate-500">{row.warehouse_location || '-'}</span> },
     { 
+      id: "status",
       header: "Status", 
       render: (row) => <StatusBadge status={row.is_active ? 'active' : 'inactive'} />
     },
     {
+      id: "actions",
       header: "",
       cellClassName: "text-right",
       render: (row) => (
