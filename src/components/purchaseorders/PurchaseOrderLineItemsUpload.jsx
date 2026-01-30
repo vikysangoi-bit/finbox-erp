@@ -24,8 +24,8 @@ export default function PurchaseOrderLineItemsUpload({ open, onOpenChange, onSuc
 
   const downloadTemplate = () => {
     const csvContent = [
-      'itemCode,styleId,articleNo,itemCategory,description,composition,size,color,hsnCode,quantity,rate_per_unit,item_expected_delivery',
-      'SKU001,STY001,AR124,Menswear,Cotton Fabric,100% Cotton,Large,Blue,520100,100,150,2026-03-25'
+      'styleId,quantity,rate_per_unit,item_expected_delivery',
+      'STY001,100,150,2026-03-25'
     ].join('\n');
     
     const blob = new Blob([csvContent], { type: 'text/csv' });
@@ -60,15 +60,7 @@ export default function PurchaseOrderLineItemsUpload({ open, onOpenChange, onSuc
             items: {
               type: "object",
               properties: {
-                itemCode: { type: "string" },
                 styleId: { type: "string" },
-                articleNo: { type: "string" },
-                itemCategory: { type: "string" },
-                description: { type: "string" },
-                composition: { type: "string" },
-                size: { type: "string" },
-                color: { type: "string" },
-                hsnCode: { type: "string" },
                 quantity: { type: "number" },
                 rate_per_unit: { type: "number" },
                 item_expected_delivery: { type: "string" }
@@ -85,15 +77,7 @@ export default function PurchaseOrderLineItemsUpload({ open, onOpenChange, onSuc
             items: {
               type: "object",
               properties: {
-                itemCode: { type: "string" },
                 styleId: { type: "string" },
-                articleNo: { type: "string" },
-                itemCategory: { type: "string" },
-                description: { type: "string" },
-                composition: { type: "string" },
-                size: { type: "string" },
-                color: { type: "string" },
-                hsnCode: { type: "string" },
                 quantity: { type: "number" },
                 rate_per_unit: { type: "number" },
                 item_expected_delivery: { type: "string" }
@@ -113,8 +97,10 @@ export default function PurchaseOrderLineItemsUpload({ open, onOpenChange, onSuc
 
       // Fetch inventory items to validate and enrich
       const inventoryItems = await base44.entities.InventoryItem.list();
-      const inventoryMap = inventoryItems.reduce((map, item) => {
-        map[item.itemCode || item.sku] = item;
+      const inventoryMapByStyleId = inventoryItems.reduce((map, item) => {
+        if (item.styleID) {
+          map[item.styleID] = item;
+        }
         return map;
       }, {});
 
@@ -124,23 +110,24 @@ export default function PurchaseOrderLineItemsUpload({ open, onOpenChange, onSuc
       
       // Enrich with inventory data and calculate values
       const enrichedItems = lineItems.map(item => {
-        const inventoryItem = inventoryMap[item.itemCode];
+        const inventoryItem = inventoryMapByStyleId[item.styleId];
         const quantity = parseFloat(item.quantity) || 0;
         const rate = parseFloat(item.rate_per_unit) || 0;
         const net_before_gst = quantity * rate;
-        const gst_percentage = 0; // Default, can be updated later
-        const gross_value = net_before_gst;
+        const gst_percentage = rate < 2500 ? 5 : 18;
+        const gst_amount = (net_before_gst * gst_percentage) / 100;
+        const gross_value = net_before_gst + gst_amount;
 
         return {
-          itemCode: item.itemCode || '',
-          styleID: item.styleId || inventoryItem?.styleID || '',
-          articleNo: item.articleNo || inventoryItem?.articleNo || '',
-          itemCategory: item.itemCategory || inventoryItem?.itemCategory || '',
-          description: item.description || inventoryItem?.name || '',
-          composition: item.composition || inventoryItem?.composition || '',
-          size: item.size || inventoryItem?.size || '',
-          color: item.color || inventoryItem?.color || '',
-          hsnCode: item.hsnCode || inventoryItem?.hsnCode || '',
+          itemCode: inventoryItem?.itemCode || inventoryItem?.sku || '',
+          styleID: item.styleId || '',
+          articleNo: inventoryItem?.articleNo || '',
+          itemCategory: inventoryItem?.itemCategory || '',
+          description: inventoryItem?.name || inventoryItem?.description || '',
+          composition: inventoryItem?.composition || '',
+          size: inventoryItem?.size || '',
+          color: inventoryItem?.color || '',
+          hsnCode: inventoryItem?.hsnCode || '',
           quantity,
           rate_per_unit: rate,
           net_before_gst,
@@ -182,7 +169,7 @@ export default function PurchaseOrderLineItemsUpload({ open, onOpenChange, onSuc
           <Alert>
             <FileSpreadsheet className="h-4 w-4" />
             <AlertDescription>
-              Upload CSV or Excel file with PO line items. Item codes will be mapped to inventory.
+              Upload CSV or Excel with styleId, quantity, rate_per_unit, item_expected_delivery. Details auto-fetched from inventory.
             </AlertDescription>
           </Alert>
 
