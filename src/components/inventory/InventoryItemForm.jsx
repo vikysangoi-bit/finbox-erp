@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 
 const categories = [
   { value: "fabric", label: "Fabric" },
-  { value: "trims", label: "Trims & Accessories" },
+  { value: "trims", label: "Trims" },
   { value: "accessories", label: "Accessories" },
   { value: "packaging", label: "Packaging" },
   { value: "garments", label: "Garments" },
