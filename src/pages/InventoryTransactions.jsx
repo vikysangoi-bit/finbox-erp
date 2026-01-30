@@ -13,7 +13,7 @@ import TransactionForm from "@/components/inventory/TransactionForm";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, Pencil, Trash2, ArrowRightLeft, Send, ArrowDownLeft, ArrowUpRight, RefreshCw } from "lucide-react";
+import { MoreHorizontal, Pencil, Trash2, ArrowRightLeft, ArrowDownLeft, ArrowUpRight, RefreshCw } from "lucide-react";
 import ConfirmDialog from "@/components/shared/ConfirmDialog";
 import { format } from "date-fns";
 
@@ -85,26 +85,7 @@ export default function InventoryTransactions() {
     }
   });
 
-  const submitForApproval = async (transaction) => {
-    await base44.entities.InventoryTransaction.update(transaction.id, {
-      status: 'pending_approval',
-      submitted_by: user?.email
-    });
-    
-    await base44.entities.ApprovalRequest.create({
-      entity_type: 'inventory_transaction',
-      entity_id: transaction.id,
-      title: `${typeConfig[transaction.type]?.label || transaction.type}: PO ${transaction.po_number}`,
-      description: `${transaction.items?.length || 0} items`,
-      status: 'pending',
-      submitted_by: user?.email,
-      submitted_by_name: user?.full_name,
-      submitted_at: new Date().toISOString()
-    });
-    
-    queryClient.invalidateQueries({ queryKey: ['inventory-transactions'] });
-    queryClient.invalidateQueries({ queryKey: ['approval-requests'] });
-  };
+
 
   const filteredTransactions = transactions.filter(t => {
     const matchesSearch = 
@@ -152,12 +133,8 @@ export default function InventoryTransactions() {
       header: "Items", 
       render: (row) => <span className="font-medium">{row.items?.length || 0} items</span>
     },
-    { 
-      id: "status",
-      header: "Status", 
-      render: (row) => <StatusBadge status={row.status || 'draft'} />
-    },
     {
+      id: "actions",
       header: "",
       cellClassName: "text-right",
       render: (row) => (
@@ -168,23 +145,14 @@ export default function InventoryTransactions() {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            {row.status === 'draft' && (
-              <>
-                <DropdownMenuItem onClick={() => { setEditingTransaction(row); setShowForm(true); }}>
-                  <Pencil className="w-4 h-4 mr-2" />
-                  Edit
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => submitForApproval(row)}>
-                  <Send className="w-4 h-4 mr-2" />
-                  Submit for Approval
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => setDeleteTransaction(row)} className="text-rose-600">
-                  <Trash2 className="w-4 h-4 mr-2" />
-                  Delete
-                </DropdownMenuItem>
-              </>
-            )}
+            <DropdownMenuItem onClick={() => { setEditingTransaction(row); setShowForm(true); }}>
+              <Pencil className="w-4 h-4 mr-2" />
+              Edit
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setDeleteTransaction(row)} className="text-rose-600">
+              <Trash2 className="w-4 h-4 mr-2" />
+              Delete
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       )
@@ -193,9 +161,7 @@ export default function InventoryTransactions() {
 
   const [visibleColumns, setVisibleColumns] = useState(() => {
     const saved = localStorage.getItem(STORAGE_KEY);
-    const savedColumns = saved ? JSON.parse(saved) : allColumns.map(c => c.id);
-    if (!savedColumns.includes('actions')) savedColumns.push('actions');
-    return savedColumns;
+    return saved ? JSON.parse(saved) : allColumns.map(c => c.id).filter(id => id);
   });
 
   useEffect(() => {
@@ -206,7 +172,7 @@ export default function InventoryTransactions() {
     if (editingTransaction) {
       updateMutation.mutate({ id: editingTransaction.id, data });
     } else {
-      createMutation.mutate({ ...data, transaction_number: generateTxNumber(), status: 'draft' });
+      createMutation.mutate({ ...data, transaction_number: generateTxNumber() });
     }
   };
 

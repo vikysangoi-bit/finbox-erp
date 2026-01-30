@@ -66,6 +66,23 @@ export default function TransactionForm({ open, onOpenChange, transaction, onSav
     }
   };
 
+  const handleSelectAll = (checked) => {
+    if (checked && selectedPO?.items) {
+      const allItems = selectedPO.items.map(poItem => ({
+        item_id: poItem.itemCode,
+        item_sku: poItem.itemCode,
+        styleID: poItem.styleID || '',
+        name: poItem.description || '',
+        color: poItem.color || '',
+        size: poItem.size || '',
+        quantity: poItem.quantity || 0
+      }));
+      setForm({ ...form, items: allItems });
+    } else {
+      setForm({ ...form, items: [] });
+    }
+  };
+
   const handleItemToggle = (poItem) => {
     const exists = form.items.find(i => i.item_id === poItem.itemCode);
     if (exists) {
@@ -157,7 +174,19 @@ export default function TransactionForm({ open, onOpenChange, transaction, onSav
 
           {selectedPO && selectedPO.items?.length > 0 && (
             <div className="space-y-2">
-              <Label>Select Items *</Label>
+              <div className="flex items-center justify-between">
+                <Label>Select Items *</Label>
+                <div className="flex items-center gap-2">
+                  <Checkbox
+                    checked={form.items.length === selectedPO.items.length && form.items.length > 0}
+                    onCheckedChange={handleSelectAll}
+                    id="select-all"
+                  />
+                  <label htmlFor="select-all" className="text-sm text-slate-600 cursor-pointer">
+                    Select All
+                  </label>
+                </div>
+              </div>
               <div className="border rounded-lg p-4 max-h-64 overflow-y-auto space-y-3">
                 {selectedPO.items.map((poItem, idx) => {
                   const isSelected = form.items.find(i => i.item_id === poItem.itemCode);
