@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import PageHeader from "@/components/shared/PageHeader";
 import SearchFilter from "@/components/shared/SearchFilter";
@@ -13,8 +13,9 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Package, Eye } from "lucide-react";
+import { Package, Eye, Trash2 } from "lucide-react";
 import { format } from "date-fns";
+import ConfirmDialog from "@/components/shared/ConfirmDialog";
 
 const STORAGE_KEY = 'goodsReceipts_visibleColumns';
 
@@ -24,10 +25,25 @@ export default function GoodsReceipts() {
   const [viewReceipt, setViewReceipt] = useState(null);
   const [showBulkDelete, setShowBulkDelete] = useState(false);
   const [selectedRows, setSelectedRows] = useState([]);
+  const [showBulkDeleteConfirm, setShowBulkDeleteConfirm] = useState(false);
+
+  const queryClient = useQueryClient();
 
   const { data: receipts = [], isLoading } = useQuery({
     queryKey: ['goods-receipts'],
     queryFn: () => base44.entities.GoodsReceipt.list('-created_date')
+  });
+
+  const bulkDeleteMutation = useMutation({
+    mutationFn: async (rows) => {
+      const user = await base44.auth.me();
+      await Promise.all(rows.map(row => base44.entities.GoodsReceipt.delete(row.id)));
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['goods-receipts'] });
+      setSelectedRows([]);
+      setShowBulkDeleteConfirm(false);
+    }
   });
 
   const filteredReceipts = receipts.filter(receipt => {
@@ -126,6 +142,10 @@ export default function GoodsReceipts() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(visibleColumns));
   }, [visibleColumns]);
 
+  const handleBulkDelete = () => {
+    bulkDeleteMutation.mutate(selectedRows);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 p-4 md:p-8">
       <div className="max-w-7xl mx-auto space-y-6">
@@ -140,7 +160,7 @@ export default function GoodsReceipts() {
           />
           <SyncDropdown
             onBulkDelete={() => setShowBulkDelete(true)}
-            onExportExcel={() => {
+            onExportToExcel={() => {
               const headers = ['Receipt Number', 'Receipt Date', 'PO Number', 'Supplier Name', 'Items Count', 'Total Amount', 'Currency', 'Invoice Number', 'Quality Check Status', 'Received By', 'Status'];
               const rows = filteredReceipts.map(r => [
                 r.receipt_number || '', r.receipt_date || '', r.po_number || '', r.supplier_name || '', 
@@ -156,6 +176,12 @@ export default function GoodsReceipts() {
               a.click();
             }}
           />
+          {selectedRows.length > 0 && (
+            <Button variant="destructive" onClick={() => setShowBulkDeleteConfirm(true)}>
+              <Trash2 className="w-4 h-4 mr-2" />
+              Delete Selected ({selectedRows.length})
+            </Button>
+          )}
         </PageHeader>
 
         <SearchFilter
@@ -196,11 +222,21 @@ export default function GoodsReceipts() {
           />
         )}
 
+        <ConfirmDialog
+          open={showBulkDeleteConfirm}
+          onOpenChange={setShowBulkDeleteConfirm}
+          title="Delete Selected Goods Receipts"
+          description={`Are you sure you want to delete ${selectedRows.length} selected goods receipt(s)? This action cannot be undone.`}
+          confirmLabel="Delete All"
+          onConfirm={handleBulkDelete}
+          variant="destructive"
+        />
+
         <BulkDeleteDialog
           open={showBulkDelete}
           onOpenChange={setShowBulkDelete}
           entityName="GoodsReceipt"
-          onSuccess={() => {}}
+          onSuccess={() => queryClient.invalidateQueries({ queryKey: ['goods-receipts'] })}
         />
 
         {/* View Receipt Dialog */}

@@ -24,6 +24,7 @@ export default function Payments() {
   const [viewingPayment, setViewingPayment] = useState(null);
   const [deletePayment, setDeletePayment] = useState(null);
   const [selectedRows, setSelectedRows] = useState([]);
+  const [showBulkDeleteConfirm, setShowBulkDeleteConfirm] = useState(false);
   const [search, setSearch] = useState('');
   const [supplierFilter, setSupplierFilter] = useState('all');
 
@@ -102,6 +103,24 @@ export default function Payments() {
     }
   });
 
+  const bulkDeleteMutation = useMutation({
+    mutationFn: async (rows) => {
+      const user = await base44.auth.me();
+      await Promise.all(rows.map(row => 
+        base44.entities.Payment.update(row.id, {
+          is_deleted: true,
+          deleted_by: user.email,
+          deleted_on: new Date().toISOString()
+        })
+      ));
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['payments'] });
+      setSelectedRows([]);
+      setShowBulkDeleteConfirm(false);
+    }
+  });
+
   const filteredPayments = payments.filter(payment => {
     if (payment.is_deleted) return false;
     
@@ -173,6 +192,10 @@ export default function Payments() {
     }
   };
 
+  const handleBulkDelete = () => {
+    bulkDeleteMutation.mutate(selectedRows);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 p-4 md:p-8">
       <div className="max-w-7xl mx-auto space-y-6">
@@ -204,6 +227,12 @@ export default function Payments() {
               a.click();
             }}
           />
+          {selectedRows.length > 0 && (
+            <Button variant="destructive" onClick={() => setShowBulkDeleteConfirm(true)}>
+              <Trash2 className="w-4 h-4 mr-2" />
+              Delete Selected ({selectedRows.length})
+            </Button>
+          )}
         </PageHeader>
 
         <div className="space-y-4">
@@ -212,6 +241,12 @@ export default function Payments() {
               <div><span className="font-semibold text-slate-900">{payments.length}</span> Total</div>
               <div className="h-4 w-px bg-slate-200" />
               <div><span className="font-semibold text-slate-900">{filteredPayments.length}</span> Filtered</div>
+              {selectedRows.length > 0 && (
+                <>
+                  <div className="h-4 w-px bg-slate-200" />
+                  <div><span className="font-semibold text-blue-600">{selectedRows.length}</span> Selected</div>
+                </>
+              )}
               <div className="h-4 w-px bg-slate-200" />
               <div><span className="font-semibold text-slate-900">{totalValue.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</span> Total Value</div>
             </div>
@@ -280,6 +315,16 @@ export default function Payments() {
           description={`Are you sure you want to delete this payment?`}
           confirmLabel="Delete"
           onConfirm={() => deleteMutation.mutate(deletePayment.id)}
+          variant="destructive"
+        />
+
+        <ConfirmDialog
+          open={showBulkDeleteConfirm}
+          onOpenChange={setShowBulkDeleteConfirm}
+          title="Delete Selected Payments"
+          description={`Are you sure you want to delete ${selectedRows.length} selected payment(s)? This action cannot be undone.`}
+          confirmLabel="Delete All"
+          onConfirm={handleBulkDelete}
           variant="destructive"
         />
 
