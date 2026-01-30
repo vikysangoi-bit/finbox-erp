@@ -1,16 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import PurchaseOrderPrintView from "./PurchaseOrderPrintView";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card } from "@/components/ui/card";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, Eye } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 
 export default function PurchaseOrderForm({ open, onOpenChange, po, onSave, isLoading }) {
+  const [showPreview, setShowPreview] = React.useState(false);
   const [form, setForm] = useState({
     po_number: '',
     po_date: new Date().toISOString().split('T')[0],
@@ -122,7 +124,12 @@ export default function PurchaseOrderForm({ open, onOpenChange, po, onSave, isLo
         supplier_id: supplierId,
         supplier_code: supplier.code || '',
         supplier_name: supplier.name || '',
-        payment_terms: supplier.payment_terms || 'net_30'
+        supplier_address: supplier.address || '',
+        supplier_city: supplier.city || '',
+        supplier_country: supplier.country || '',
+        supplier_gstid: supplier.gstId || '',
+        payment_terms: supplier.paymentTerms || 'net_30',
+        currency: supplier.currency || 'INR'
       });
     }
   };
@@ -490,6 +497,15 @@ export default function PurchaseOrderForm({ open, onOpenChange, po, onSave, isLo
               Cancel
             </Button>
             <Button 
+              type="button" 
+              variant="outline"
+              onClick={() => setShowPreview(true)}
+              disabled={!form.supplier_id || form.items.length === 0}
+            >
+              <Eye className="w-4 h-4 mr-2" />
+              Preview
+            </Button>
+            <Button 
               type="submit" 
               disabled={isLoading || !form.supplier_id || form.items.length === 0}
               className="bg-[#0f172a] hover:bg-[#1e3a5f]"
@@ -499,6 +515,12 @@ export default function PurchaseOrderForm({ open, onOpenChange, po, onSave, isLo
           </DialogFooter>
         </form>
       </DialogContent>
+
+      <PurchaseOrderPrintView 
+        open={showPreview}
+        onOpenChange={setShowPreview}
+        poData={form}
+      />
     </Dialog>
   );
 }

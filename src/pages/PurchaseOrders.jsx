@@ -319,12 +319,12 @@ export default function PurchaseOrders() {
             onBulkUpload={() => setShowBulkUpload(true)}
             onBulkDelete={() => setShowBulkDelete(true)}
             onExportExcel={() => {
-              const headers = ['PO Number', 'PO Date', 'Supplier Code', 'Supplier Name', 'Delivery Date', 'Currency', 'Items Count', 'Subtotal', 'Tax', 'Shipping', 'Total Amount', 'Status', 'Notes'];
+              const headers = ['PO Number', 'PO Date', 'Supplier Code', 'Supplier Name', 'Delivery Date', 'Order Form No', 'Ship To', 'Shipping Address', 'Items Count', 'Subtotal', 'Tax', 'Shipping', 'Total Amount', 'Status', 'Notes'];
               const rows = filteredPOs.map(p => [
                 p.po_number || '', p.po_date || '', p.supplier_code || '', p.supplier_name || '', 
-                p.delivery_date || '', p.currency || 'USD', p.items?.length || 0, 
-                p.subtotal || 0, p.tax_amount || 0, p.shipping_cost || 0, p.total_amount || 0, 
-                p.status || 'draft', p.notes || ''
+                p.delivery_date || '', p.order_form_no || '', p.ship_to || '', p.shipping_address || '',
+                p.items?.length || 0, p.subtotal || 0, p.tax_amount || 0, p.shipping_cost || 0, 
+                p.total_amount || 0, p.status || 'draft', p.notes || ''
               ]);
               const csv = [headers, ...rows].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
               const blob = new Blob([csv], { type: 'text/csv' });
