@@ -31,6 +31,7 @@ export default function PurchaseOrders() {
   const [deletePO, setDeletePO] = useState(null);
   const [viewPO, setViewPO] = useState(null);
   const [receivingPO, setReceivingPO] = useState(null);
+  const [selectedRows, setSelectedRows] = useState([]);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
 
@@ -374,6 +375,9 @@ export default function PurchaseOrders() {
             data={filteredPOs} 
             isLoading={isLoading}
             emptyMessage="No purchase orders match your search"
+            enableRowSelection={true}
+            selectedRows={selectedRows}
+            onSelectionChange={setSelectedRows}
           />
         )}
 

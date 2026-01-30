@@ -27,6 +27,7 @@ export default function SalesOrders() {
   const [viewingOrder, setViewingOrder] = useState(null);
   const [printingOrder, setPrintingOrder] = useState(null);
   const [deleteOrder, setDeleteOrder] = useState(null);
+  const [selectedRows, setSelectedRows] = useState([]);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [serviceFilter, setServiceFilter] = useState('all');
@@ -407,6 +408,9 @@ export default function SalesOrders() {
             isLoading={isLoading}
             emptyMessage="No sales orders match your search"
             visibleColumns={visibleColumns}
+            enableRowSelection={true}
+            selectedRows={selectedRows}
+            onSelectionChange={setSelectedRows}
           />
         )}
 
