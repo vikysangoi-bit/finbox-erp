@@ -199,7 +199,11 @@ export default function Receipts() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(visibleColumns));
   }, [visibleColumns]);
 
-  const totalValue = filteredReceipts.reduce((sum, r) => sum + (r.receiptValue || 0), 0);
+  const totalValue = filteredReceipts.reduce((sum, r) => {
+    const value = r.receiptValue || 0;
+    const inr = r.receiptCurrency === 'USD' ? value * 90 : value;
+    return sum + inr;
+  }, 0);
 
   const handleSave = (data) => {
     if (editingReceipt) {
@@ -265,7 +269,7 @@ export default function Receipts() {
                 </>
               )}
               <div className="h-4 w-px bg-slate-200" />
-              <div><span className="font-semibold text-slate-900">{totalValue.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</span> Total Value</div>
+              <div><span className="font-semibold text-slate-900">₹{totalValue.toFixed(2)}</span> Total Value</div>
             </div>
           </div>
 

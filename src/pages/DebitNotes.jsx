@@ -190,7 +190,11 @@ export default function DebitNotes() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(visibleColumns));
   }, [visibleColumns]);
 
-  const totalValue = filteredNotes.reduce((sum, dn) => sum + (dn.dnValue || 0), 0);
+  const totalValue = filteredNotes.reduce((sum, dn) => {
+    const value = dn.dnValue || 0;
+    const inr = dn.dnCurrency === 'USD' ? value * 90 : value;
+    return sum + inr;
+  }, 0);
 
   const handleSave = (data) => {
     if (editingNote) {
@@ -256,7 +260,7 @@ export default function DebitNotes() {
                 </>
               )}
               <div className="h-4 w-px bg-slate-200" />
-              <div><span className="font-semibold text-slate-900">{totalValue.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</span> Total Value</div>
+              <div><span className="font-semibold text-slate-900">₹{totalValue.toFixed(2)}</span> Total Value</div>
             </div>
           </div>
 

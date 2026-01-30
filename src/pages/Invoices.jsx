@@ -212,9 +212,21 @@ export default function Invoices() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(visibleColumns));
   }, [visibleColumns]);
 
-  const totalNetValue = filteredInvoices.reduce((sum, inv) => sum + (inv.invoiceNetValue || 0), 0);
-  const totalTaxValue = filteredInvoices.reduce((sum, inv) => sum + (inv.invoiceTaxValue || 0), 0);
-  const totalValue = filteredInvoices.reduce((sum, inv) => sum + (inv.invoiceValue || 0), 0);
+  const totalNetValue = filteredInvoices.reduce((sum, inv) => {
+    const value = inv.invoiceNetValue || 0;
+    const inr = inv.invoiceCurrency === 'USD' ? value * 90 : value;
+    return sum + inr;
+  }, 0);
+  const totalTaxValue = filteredInvoices.reduce((sum, inv) => {
+    const value = inv.invoiceTaxValue || 0;
+    const inr = inv.invoiceCurrency === 'USD' ? value * 90 : value;
+    return sum + inr;
+  }, 0);
+  const totalValue = filteredInvoices.reduce((sum, inv) => {
+    const value = inv.invoiceValue || 0;
+    const inr = inv.invoiceCurrency === 'USD' ? value * 90 : value;
+    return sum + inr;
+  }, 0);
 
   const handleSave = (data) => {
     if (editingInvoice) {
@@ -280,7 +292,7 @@ export default function Invoices() {
                 </>
               )}
               <div className="h-4 w-px bg-slate-200" />
-              <div><span className="font-semibold text-slate-900">{totalValue.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</span> Total Value</div>
+              <div><span className="font-semibold text-slate-900">₹{totalValue.toFixed(2)}</span> Total Value</div>
             </div>
           </div>
 

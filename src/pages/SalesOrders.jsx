@@ -278,7 +278,11 @@ export default function SalesOrders() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(visibleColumns));
   }, [visibleColumns]);
 
-  const totalValue = filteredOrders.reduce((sum, order) => sum + (order.orderFormValue || 0), 0);
+  const totalValue = filteredOrders.reduce((sum, order) => {
+    const value = order.orderFormValue || 0;
+    const inr = order.currency === 'USD' ? value * 90 : value;
+    return sum + inr;
+  }, 0);
 
   const handleSave = (data) => {
     if (editingOrder) {
@@ -389,7 +393,7 @@ export default function SalesOrders() {
                 </>
               )}
               <div className="h-4 w-px bg-slate-200" />
-              <div><span className="font-semibold text-slate-900">{totalValue.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</span> Total Value</div>
+              <div><span className="font-semibold text-slate-900">₹{totalValue.toFixed(2)}</span> Total Value</div>
             </div>
           </div>
 

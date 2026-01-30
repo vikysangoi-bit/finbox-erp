@@ -200,7 +200,11 @@ export default function CreditNotes() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(visibleColumns));
   }, [visibleColumns]);
 
-  const totalValue = filteredCreditNotes.reduce((sum, cn) => sum + (cn.cnValue || 0), 0);
+  const totalValue = filteredCreditNotes.reduce((sum, cn) => {
+    const value = cn.cnValue || 0;
+    const inr = cn.cnCurrency === 'USD' ? value * 90 : value;
+    return sum + inr;
+  }, 0);
 
   const handleSave = (data) => {
     if (editingCreditNote) {
@@ -266,7 +270,7 @@ export default function CreditNotes() {
                 </>
               )}
               <div className="h-4 w-px bg-slate-200" />
-              <div><span className="font-semibold text-slate-900">{totalValue.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</span> Total Value</div>
+              <div><span className="font-semibold text-slate-900">₹{totalValue.toFixed(2)}</span> Total Value</div>
             </div>
           </div>
 

@@ -193,7 +193,11 @@ export default function VendorBills() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(visibleColumns));
   }, [visibleColumns]);
 
-  const totalValue = filteredBills.reduce((sum, bill) => sum + (bill.billValue || 0), 0);
+  const totalValue = filteredBills.reduce((sum, bill) => {
+    const value = bill.billValue || 0;
+    const inr = bill.billingCurrency === 'USD' ? value * 90 : value;
+    return sum + inr;
+  }, 0);
 
   const handleSave = (data) => {
     if (editingBill) {

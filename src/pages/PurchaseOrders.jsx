@@ -273,7 +273,11 @@ export default function PurchaseOrders() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(visibleColumns));
   }, [visibleColumns]);
 
-  const totalValue = filteredPOs.reduce((sum, po) => sum + (po.total_amount || 0), 0);
+  const totalValue = filteredPOs.reduce((sum, po) => {
+    const value = po.total_amount || 0;
+    const inr = po.currency === 'USD' ? value * 90 : value;
+    return sum + inr;
+  }, 0);
 
   const handleSave = (data) => {
     if (editingPO) {

@@ -182,7 +182,11 @@ export default function Payments() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(visibleColumns));
   }, [visibleColumns]);
 
-  const totalValue = filteredPayments.reduce((sum, p) => sum + (p.paymentValue || 0), 0);
+  const totalValue = filteredPayments.reduce((sum, p) => {
+    const value = p.paymentValue || 0;
+    const inr = p.paymentCurrency === 'USD' ? value * 90 : value;
+    return sum + inr;
+  }, 0);
 
   const handleSave = (data) => {
     if (editingPayment) {
@@ -248,7 +252,7 @@ export default function Payments() {
                 </>
               )}
               <div className="h-4 w-px bg-slate-200" />
-              <div><span className="font-semibold text-slate-900">{totalValue.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</span> Total Value</div>
+              <div><span className="font-semibold text-slate-900">₹{totalValue.toFixed(2)}</span> Total Value</div>
             </div>
           </div>
 
