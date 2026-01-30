@@ -360,27 +360,43 @@ export default function PurchaseOrders() {
           )}
         </PageHeader>
 
-        <SearchFilter
-          searchValue={search}
-          onSearchChange={setSearch}
-          searchPlaceholder="Search by PO number, supplier..."
-          filters={[
-            {
-              key: 'status',
-              value: statusFilter,
-              onChange: setStatusFilter,
-              placeholder: 'Status',
-              options: [
-                { value: 'draft', label: 'Draft' },
-                { value: 'pending_approval', label: 'Pending Approval' },
-                { value: 'approved', label: 'Approved' },
-                { value: 'partially_received', label: 'Partially Received' },
-                { value: 'fully_received', label: 'Fully Received' },
-                { value: 'cancelled', label: 'Cancelled' },
-              ]
-            }
-          ]}
-        />
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4 text-sm text-slate-600">
+              <div><span className="font-semibold text-slate-900">{pos.length}</span> Total</div>
+              <div className="h-4 w-px bg-slate-200" />
+              <div><span className="font-semibold text-slate-900">{filteredPOs.length}</span> Filtered</div>
+              {selectedRows.length > 0 && (
+                <>
+                  <div className="h-4 w-px bg-slate-200" />
+                  <div><span className="font-semibold text-blue-600">{selectedRows.length}</span> Selected</div>
+                </>
+              )}
+            </div>
+          </div>
+
+          <SearchFilter
+            searchValue={search}
+            onSearchChange={setSearch}
+            searchPlaceholder="Search by PO number, supplier..."
+            filters={[
+              {
+                key: 'status',
+                value: statusFilter,
+                onChange: setStatusFilter,
+                placeholder: 'Status',
+                options: [
+                  { value: 'draft', label: 'Draft' },
+                  { value: 'pending_approval', label: 'Pending Approval' },
+                  { value: 'approved', label: 'Approved' },
+                  { value: 'partially_received', label: 'Partially Received' },
+                  { value: 'fully_received', label: 'Fully Received' },
+                  { value: 'cancelled', label: 'Cancelled' },
+                ]
+              }
+            ]}
+          />
+        </div>
 
         {!isLoading && pos.length === 0 ? (
           <EmptyState

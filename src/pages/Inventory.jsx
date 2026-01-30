@@ -249,27 +249,43 @@ export default function Inventory() {
           )}
         </PageHeader>
 
-        <SearchFilter
-          searchValue={search}
-          onSearchChange={setSearch}
-          searchPlaceholder="Search by SKU, style ID, name, article no, EAN, supplier..."
-          filters={[
-            {
-              key: 'category',
-              value: categoryFilter,
-              onChange: setCategoryFilter,
-              placeholder: 'Category',
-              options: [
-                { value: 'fabric', label: 'Fabric' },
-                { value: 'trims', label: 'Trims' },
-                { value: 'accessories', label: 'Accessories' },
-                { value: 'packaging', label: 'Packaging' },
-                { value: 'garments', label: 'Garments' },
-                { value: 'samples', label: 'Samples' },
-              ]
-            }
-          ]}
-        />
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4 text-sm text-slate-600">
+              <div><span className="font-semibold text-slate-900">{items.length}</span> Total</div>
+              <div className="h-4 w-px bg-slate-200" />
+              <div><span className="font-semibold text-slate-900">{filteredItems.length}</span> Filtered</div>
+              {selectedRows.length > 0 && (
+                <>
+                  <div className="h-4 w-px bg-slate-200" />
+                  <div><span className="font-semibold text-blue-600">{selectedRows.length}</span> Selected</div>
+                </>
+              )}
+            </div>
+          </div>
+
+          <SearchFilter
+            searchValue={search}
+            onSearchChange={setSearch}
+            searchPlaceholder="Search by SKU, style ID, name, article no, EAN, supplier..."
+            filters={[
+              {
+                key: 'category',
+                value: categoryFilter,
+                onChange: setCategoryFilter,
+                placeholder: 'Category',
+                options: [
+                  { value: 'fabric', label: 'Fabric' },
+                  { value: 'trims', label: 'Trims' },
+                  { value: 'accessories', label: 'Accessories' },
+                  { value: 'packaging', label: 'Packaging' },
+                  { value: 'garments', label: 'Garments' },
+                  { value: 'samples', label: 'Samples' },
+                ]
+              }
+            ]}
+          />
+        </div>
 
         {!isLoading && items.length === 0 ? (
           <EmptyState

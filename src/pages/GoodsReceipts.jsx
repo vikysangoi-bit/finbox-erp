@@ -36,7 +36,6 @@ export default function GoodsReceipts() {
 
   const bulkDeleteMutation = useMutation({
     mutationFn: async (rows) => {
-      const user = await base44.auth.me();
       await Promise.all(rows.map(row => base44.entities.GoodsReceipt.delete(row.id)));
     },
     onSuccess: () => {
@@ -184,24 +183,40 @@ export default function GoodsReceipts() {
           )}
         </PageHeader>
 
-        <SearchFilter
-          searchValue={search}
-          onSearchChange={setSearch}
-          searchPlaceholder="Search by receipt #, PO #, supplier..."
-          filters={[
-            {
-              key: 'status',
-              value: statusFilter,
-              onChange: setStatusFilter,
-              placeholder: 'Status',
-              options: [
-                { value: 'draft', label: 'Draft' },
-                { value: 'completed', label: 'Completed' },
-                { value: 'cancelled', label: 'Cancelled' },
-              ]
-            }
-          ]}
-        />
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4 text-sm text-slate-600">
+              <div><span className="font-semibold text-slate-900">{receipts.length}</span> Total</div>
+              <div className="h-4 w-px bg-slate-200" />
+              <div><span className="font-semibold text-slate-900">{filteredReceipts.length}</span> Filtered</div>
+              {selectedRows.length > 0 && (
+                <>
+                  <div className="h-4 w-px bg-slate-200" />
+                  <div><span className="font-semibold text-blue-600">{selectedRows.length}</span> Selected</div>
+                </>
+              )}
+            </div>
+          </div>
+
+          <SearchFilter
+            searchValue={search}
+            onSearchChange={setSearch}
+            searchPlaceholder="Search by receipt #, PO #, supplier..."
+            filters={[
+              {
+                key: 'status',
+                value: statusFilter,
+                onChange: setStatusFilter,
+                placeholder: 'Status',
+                options: [
+                  { value: 'draft', label: 'Draft' },
+                  { value: 'completed', label: 'Completed' },
+                  { value: 'cancelled', label: 'Cancelled' },
+                ]
+              }
+            ]}
+          />
+        </div>
 
         {!isLoading && receipts.length === 0 ? (
           <EmptyState

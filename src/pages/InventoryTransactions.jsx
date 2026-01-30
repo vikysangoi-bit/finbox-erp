@@ -158,7 +158,6 @@ export default function InventoryTransactions() {
       render: (row) => <StatusBadge status={row.status || 'draft'} />
     },
     {
-      id: "actions",
       header: "",
       cellClassName: "text-right",
       render: (row) => (
@@ -202,8 +201,6 @@ export default function InventoryTransactions() {
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(visibleColumns));
   }, [visibleColumns]);
-
-
 
   const handleSave = (data) => {
     if (editingTransaction) {
@@ -259,20 +256,36 @@ export default function InventoryTransactions() {
           )}
         </PageHeader>
 
-        <SearchFilter
-          searchValue={search}
-          onSearchChange={setSearch}
-          searchPlaceholder="Search by transaction #, PO number..."
-          filters={[
-            {
-              key: 'type',
-              value: typeFilter,
-              onChange: setTypeFilter,
-              placeholder: 'Type',
-              options: Object.entries(typeConfig).map(([value, { label }]) => ({ value, label }))
-            }
-          ]}
-        />
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4 text-sm text-slate-600">
+              <div><span className="font-semibold text-slate-900">{transactions.length}</span> Total</div>
+              <div className="h-4 w-px bg-slate-200" />
+              <div><span className="font-semibold text-slate-900">{filteredTransactions.length}</span> Filtered</div>
+              {selectedRows.length > 0 && (
+                <>
+                  <div className="h-4 w-px bg-slate-200" />
+                  <div><span className="font-semibold text-blue-600">{selectedRows.length}</span> Selected</div>
+                </>
+              )}
+            </div>
+          </div>
+
+          <SearchFilter
+            searchValue={search}
+            onSearchChange={setSearch}
+            searchPlaceholder="Search by transaction #, PO number..."
+            filters={[
+              {
+                key: 'type',
+                value: typeFilter,
+                onChange: setTypeFilter,
+                placeholder: 'Type',
+                options: Object.entries(typeConfig).map(([value, { label }]) => ({ value, label }))
+              }
+            ]}
+          />
+        </div>
 
         {!isLoading && transactions.length === 0 ? (
           <EmptyState
