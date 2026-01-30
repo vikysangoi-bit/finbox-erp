@@ -81,10 +81,8 @@ export default function InventoryTransactions() {
     await base44.entities.ApprovalRequest.create({
       entity_type: 'inventory_transaction',
       entity_id: transaction.id,
-      title: `${typeConfig[transaction.type]?.label || transaction.type}: ${transaction.item_name}`,
-      description: `${transaction.quantity} units @ ${transaction.currency} ${transaction.unit_cost}`,
-      amount: transaction.total_cost,
-      currency: transaction.currency,
+      title: `${typeConfig[transaction.type]?.label || transaction.type}: PO ${transaction.po_number}`,
+      description: `${transaction.items?.length || 0} items`,
       status: 'pending',
       submitted_by: user?.email,
       submitted_by_name: user?.full_name,
@@ -98,8 +96,7 @@ export default function InventoryTransactions() {
   const filteredTransactions = transactions.filter(t => {
     const matchesSearch = 
       t.transaction_number?.toLowerCase().includes(search.toLowerCase()) ||
-      t.item_name?.toLowerCase().includes(search.toLowerCase()) ||
-      t.reference?.toLowerCase().includes(search.toLowerCase());
+      t.po_number?.toLowerCase().includes(search.toLowerCase());
     const matchesType = typeFilter === 'all' || t.type === typeFilter;
     return matchesSearch && matchesType;
   });
@@ -133,34 +130,14 @@ export default function InventoryTransactions() {
       }
     },
     { 
-      id: "item",
-      header: "Item", 
-      render: (row) => (
-        <div>
-          <span className="font-medium">{row.item_name}</span>
-          <p className="text-xs text-slate-500">{row.item_sku}</p>
-        </div>
-      )
+      id: "po_number",
+      header: "PO Number", 
+      render: (row) => <span className="font-mono text-slate-900">{row.po_number || '-'}</span>
     },
     { 
-      id: "quantity",
-      header: "Quantity", 
-      render: (row) => <span className="font-medium">{row.quantity}</span>
-    },
-    { 
-      id: "total_cost",
-      header: "Total Cost", 
-      render: (row) => (
-        <span className="font-medium">
-          {row.currency} {(row.total_cost || 0).toFixed(2)}
-        </span>
-      )
-    },
-    { 
-      id: "reference",
-      header: "Reference", 
-      accessor: "reference", 
-      render: (row) => <span className="text-slate-500">{row.reference || '-'}</span> 
+      id: "items_count",
+      header: "Items", 
+      render: (row) => <span className="font-medium">{row.items?.length || 0} items</span>
     },
     { 
       id: "status",
@@ -212,8 +189,7 @@ export default function InventoryTransactions() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(visibleColumns));
   }, [visibleColumns]);
 
-  const totalQty = filteredTransactions.reduce((sum, txn) => sum + (txn.quantity || 0), 0);
-  const totalCost = filteredTransactions.reduce((sum, txn) => sum + (txn.total_cost || 0), 0);
+
 
   const handleSave = (data) => {
     if (editingTransaction) {
@@ -240,12 +216,14 @@ export default function InventoryTransactions() {
           <SyncDropdown
             onBulkDelete={() => setShowBulkDelete(true)}
             onExportExcel={() => {
-              const headers = ['Transaction Number', 'Transaction Date', 'Type', 'Item SKU', 'Item Name', 'Quantity', 'Unit Cost', 'Total Cost', 'Currency', 'Reference', 'From Location', 'To Location', 'Reason', 'Status'];
-              const rows = filteredTransactions.map(t => [
-                t.transaction_number || '', t.transaction_date || '', t.type || '', t.item_sku || '', 
-                t.item_name || '', t.quantity || 0, t.unit_cost || 0, t.total_cost || 0, t.currency || 'USD', 
-                t.reference || '', t.from_location || '', t.to_location || '', t.reason || '', t.status || 'draft'
-              ]);
+              const headers = ['Transaction Number', 'Transaction Date', 'Type', 'PO Number', 'Style ID', 'Name', 'Color', 'Size', 'Quantity', 'From Location', 'To Location', 'Status'];
+              const rows = filteredTransactions.flatMap(t => 
+                (t.items || []).map(item => [
+                  t.transaction_number || '', t.transaction_date || '', t.type || '', t.po_number || '',
+                  item.styleID || '', item.name || '', item.color || '', item.size || '', item.quantity || 0,
+                  t.from_location || '', t.to_location || '', t.status || 'draft'
+                ])
+              );
               const csv = [headers, ...rows].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
               const blob = new Blob([csv], { type: 'text/csv' });
               const url = window.URL.createObjectURL(blob);
@@ -260,7 +238,7 @@ export default function InventoryTransactions() {
         <SearchFilter
           searchValue={search}
           onSearchChange={setSearch}
-          searchPlaceholder="Search by transaction #, item, reference..."
+          searchPlaceholder="Search by transaction #, PO number..."
           filters={[
             {
               key: 'type',

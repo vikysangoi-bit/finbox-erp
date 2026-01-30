@@ -3,9 +3,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import CurrencySelect from "../shared/CurrencySelect";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 
@@ -21,69 +20,96 @@ export default function TransactionForm({ open, onOpenChange, transaction, onSav
   const [form, setForm] = useState({
     transaction_date: new Date().toISOString().split('T')[0],
     type: 'receipt',
-    item_id: '',
-    item_sku: '',
-    item_name: '',
-    quantity: 0,
-    unit_cost: 0,
-    currency: 'USD',
-    reference: '',
+    po_number: '',
+    po_id: '',
+    items: [],
     from_location: '',
-    to_location: '',
-    reason: ''
+    to_location: ''
   });
 
-  const { data: items = [] } = useQuery({
-    queryKey: ['inventory-items'],
-    queryFn: () => base44.entities.InventoryItem.filter({ is_active: true })
+  const [selectedPO, setSelectedPO] = useState(null);
+
+  const { data: purchaseOrders = [] } = useQuery({
+    queryKey: ['purchase-orders'],
+    queryFn: () => base44.entities.PurchaseOrder.filter({ status: 'approved' })
   });
 
   useEffect(() => {
     if (transaction) {
       setForm(transaction);
+      const po = purchaseOrders.find(p => p.id === transaction.po_id);
+      setSelectedPO(po);
     } else {
       setForm({
         transaction_date: new Date().toISOString().split('T')[0],
         type: 'receipt',
-        item_id: '',
-        item_sku: '',
-        item_name: '',
-        quantity: 0,
-        unit_cost: 0,
-        currency: 'USD',
-        reference: '',
+        po_number: '',
+        po_id: '',
+        items: [],
         from_location: '',
-        to_location: '',
-        reason: ''
+        to_location: ''
       });
+      setSelectedPO(null);
     }
-  }, [transaction, open]);
+  }, [transaction, open, purchaseOrders]);
 
-  const handleItemChange = (itemId) => {
-    const item = items.find(i => i.id === itemId);
-    if (item) {
+  const handlePOChange = (poId) => {
+    const po = purchaseOrders.find(p => p.id === poId);
+    if (po) {
+      setSelectedPO(po);
       setForm({
         ...form,
-        item_id: itemId,
-        item_sku: item.sku,
-        item_name: item.name,
-        unit_cost: item.unit_cost,
-        currency: item.currency
+        po_id: poId,
+        po_number: po.po_number,
+        items: []
       });
     }
+  };
+
+  const handleItemToggle = (poItem) => {
+    const exists = form.items.find(i => i.item_id === poItem.itemCode);
+    if (exists) {
+      setForm({
+        ...form,
+        items: form.items.filter(i => i.item_id !== poItem.itemCode)
+      });
+    } else {
+      setForm({
+        ...form,
+        items: [...form.items, {
+          item_id: poItem.itemCode,
+          item_sku: poItem.itemCode,
+          styleID: poItem.styleID || '',
+          name: poItem.description || '',
+          color: poItem.color || '',
+          size: poItem.size || '',
+          quantity: poItem.quantity || 0
+        }]
+      });
+    }
+  };
+
+  const handleQuantityChange = (itemId, quantity) => {
+    setForm({
+      ...form,
+      items: form.items.map(i => 
+        i.item_id === itemId ? { ...i, quantity: parseFloat(quantity) || 0 } : i
+      )
+    });
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSave({
-      ...form,
-      total_cost: form.quantity * form.unit_cost
-    });
+    if (!form.po_number || form.items.length === 0) {
+      alert('Please select a PO and at least one item');
+      return;
+    }
+    onSave(form);
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg">
+      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{transaction ? 'Edit Transaction' : 'New Inventory Transaction'}</DialogTitle>
         </DialogHeader>
@@ -114,57 +140,70 @@ export default function TransactionForm({ open, onOpenChange, transaction, onSav
           </div>
 
           <div className="space-y-2">
-            <Label>Item *</Label>
-            <Select value={form.item_id} onValueChange={handleItemChange}>
+            <Label>PO Number *</Label>
+            <Select value={form.po_id} onValueChange={handlePOChange}>
               <SelectTrigger>
-                <SelectValue placeholder="Select item" />
+                <SelectValue placeholder="Select purchase order" />
               </SelectTrigger>
               <SelectContent>
-                {items.map((item) => (
-                  <SelectItem key={item.id} value={item.id}>
-                    {item.sku} - {item.name}
+                {purchaseOrders.map((po) => (
+                  <SelectItem key={po.id} value={po.id}>
+                    {po.po_number} - {po.supplier_name}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
 
-          <div className="grid grid-cols-3 gap-4">
+          {selectedPO && selectedPO.items?.length > 0 && (
             <div className="space-y-2">
-              <Label>Quantity *</Label>
-              <Input
-                type="number"
-                value={form.quantity}
-                onChange={(e) => setForm({ ...form, quantity: parseFloat(e.target.value) || 0 })}
-                required
-              />
+              <Label>Select Items *</Label>
+              <div className="border rounded-lg p-4 max-h-64 overflow-y-auto space-y-3">
+                {selectedPO.items.map((poItem, idx) => {
+                  const isSelected = form.items.find(i => i.item_id === poItem.itemCode);
+                  return (
+                    <div key={idx} className="flex items-start gap-3 p-3 bg-slate-50 rounded-lg">
+                      <Checkbox
+                        checked={!!isSelected}
+                        onCheckedChange={() => handleItemToggle(poItem)}
+                      />
+                      <div className="flex-1 grid grid-cols-5 gap-2 text-sm">
+                        <div>
+                          <span className="text-slate-500">Style ID:</span>
+                          <p className="font-medium">{poItem.styleID || '-'}</p>
+                        </div>
+                        <div>
+                          <span className="text-slate-500">Name:</span>
+                          <p className="font-medium">{poItem.description || '-'}</p>
+                        </div>
+                        <div>
+                          <span className="text-slate-500">Color:</span>
+                          <p className="font-medium">{poItem.color || '-'}</p>
+                        </div>
+                        <div>
+                          <span className="text-slate-500">Size:</span>
+                          <p className="font-medium">{poItem.size || '-'}</p>
+                        </div>
+                        <div>
+                          <span className="text-slate-500">Qty:</span>
+                          {isSelected ? (
+                            <Input
+                              type="number"
+                              value={isSelected.quantity}
+                              onChange={(e) => handleQuantityChange(poItem.itemCode, e.target.value)}
+                              className="h-8"
+                            />
+                          ) : (
+                            <p className="font-medium">{poItem.quantity || 0}</p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
-            <div className="space-y-2">
-              <Label>Unit Cost</Label>
-              <Input
-                type="number"
-                step="0.01"
-                value={form.unit_cost}
-                onChange={(e) => setForm({ ...form, unit_cost: parseFloat(e.target.value) || 0 })}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>Currency</Label>
-              <CurrencySelect 
-                value={form.currency} 
-                onChange={(v) => setForm({ ...form, currency: v })}
-              />
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label>Reference</Label>
-            <Input
-              value={form.reference || ''}
-              onChange={(e) => setForm({ ...form, reference: e.target.value })}
-              placeholder="PO number, invoice, etc."
-            />
-          </div>
+          )}
 
           {form.type === 'transfer' && (
             <div className="grid grid-cols-2 gap-4">
@@ -184,22 +223,6 @@ export default function TransactionForm({ open, onOpenChange, transaction, onSav
               </div>
             </div>
           )}
-
-          <div className="space-y-2">
-            <Label>Reason / Notes</Label>
-            <Textarea
-              value={form.reason || ''}
-              onChange={(e) => setForm({ ...form, reason: e.target.value })}
-              rows={2}
-            />
-          </div>
-
-          <div className="p-3 bg-slate-50 rounded-lg">
-            <div className="flex justify-between text-sm">
-              <span className="text-slate-600">Total Cost:</span>
-              <span className="font-semibold">{form.currency} {(form.quantity * form.unit_cost).toFixed(2)}</span>
-            </div>
-          </div>
 
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
