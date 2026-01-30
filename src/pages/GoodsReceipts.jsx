@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import PageHeader from "@/components/shared/PageHeader";
@@ -8,6 +8,7 @@ import StatusBadge from "@/components/shared/StatusBadge";
 import EmptyState from "@/components/shared/EmptyState";
 import BulkDeleteDialog from "@/components/shared/BulkDeleteDialog";
 import SyncDropdown from "@/components/shared/SyncDropdown";
+import ColumnSelector from "@/components/shared/ColumnSelector";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Card } from "@/components/ui/card";
@@ -39,28 +40,34 @@ export default function GoodsReceipts() {
 
   const allColumns = [
     { 
+      id: "receipt_number",
       header: "Receipt #", 
       render: (row) => <span className="font-mono font-medium text-slate-900">{row.receipt_number || '-'}</span>
     },
     { 
+      id: "receipt_date",
       header: "Date", 
       render: (row) => row.receipt_date ? format(new Date(row.receipt_date), 'MMM d, yyyy') : '-'
     },
     { 
+      id: "po_number",
       header: "PO Number", 
       render: (row) => <span className="font-medium text-slate-700">{row.po_number}</span>
     },
     { 
+      id: "supplier_name",
       header: "Supplier", 
       render: (row) => <span className="text-slate-900">{row.supplier_name}</span>
     },
     { 
+      id: "items",
       header: "Items", 
       render: (row) => (
         <Badge variant="outline">{row.items?.length || 0} items</Badge>
       )
     },
     { 
+      id: "total_amount",
       header: "Total Received", 
       render: (row) => (
         <span className="font-medium">
@@ -69,10 +76,12 @@ export default function GoodsReceipts() {
       )
     },
     { 
+      id: "invoice_number",
       header: "Invoice #", 
       render: (row) => <span className="text-slate-500">{row.invoice_number || '-'}</span>
     },
     { 
+      id: "quality_check",
       header: "Quality Check", 
       render: (row) => {
         const colors = {
@@ -89,10 +98,12 @@ export default function GoodsReceipts() {
       }
     },
     { 
+      id: "status",
       header: "Status", 
       render: (row) => <StatusBadge status={row.status || 'draft'} />
     },
     {
+      id: "actions",
       header: "",
       cellClassName: "text-right",
       render: (row) => (
@@ -103,6 +114,17 @@ export default function GoodsReceipts() {
     }
   ];
 
+  const [visibleColumns, setVisibleColumns] = useState(() => {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    const savedColumns = saved ? JSON.parse(saved) : allColumns.map(c => c.id);
+    if (!savedColumns.includes('actions')) savedColumns.push('actions');
+    return savedColumns;
+  });
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(visibleColumns));
+  }, [visibleColumns]);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 p-4 md:p-8">
       <div className="max-w-7xl mx-auto space-y-6">
@@ -110,6 +132,11 @@ export default function GoodsReceipts() {
           title="Goods Receipts" 
           subtitle="Track all received goods and inventory updates"
         >
+          <ColumnSelector
+            columns={allColumns.filter(c => c.id !== 'actions')}
+            visibleColumns={visibleColumns}
+            onVisibilityChange={setVisibleColumns}
+          />
           <SyncDropdown
             onBulkDelete={() => setShowBulkDelete(true)}
             onExportExcel={() => {

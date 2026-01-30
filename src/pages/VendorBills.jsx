@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import PageHeader from "@/components/shared/PageHeader";
@@ -14,7 +14,6 @@ import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal, FileText, Eye, Edit, Trash2 } from "lucide-react";
 import ConfirmDialog from "@/components/shared/ConfirmDialog";
-import { useEffect } from 'react';
 
 const STORAGE_KEY = 'vendorBills_visibleColumns';
 
@@ -174,7 +173,7 @@ export default function VendorBills() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(visibleColumns));
   }, [visibleColumns]);
 
-  const totalValue = filteredVendorBills.reduce((sum, bill) => sum + (bill.billValue || 0), 0);
+  const totalValue = filteredBills.reduce((sum, bill) => sum + (bill.billValue || 0), 0);
 
   const handleSave = (data) => {
     if (editingBill) {

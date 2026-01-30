@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import PageHeader from "@/components/shared/PageHeader";
@@ -11,6 +11,7 @@ import GoodsReceiptForm from "@/components/purchaseorders/GoodsReceiptForm";
 import BulkUploadDialog from "@/components/shared/BulkUploadDialog";
 import BulkDeleteDialog from "@/components/shared/BulkDeleteDialog";
 import SyncDropdown from "@/components/shared/SyncDropdown";
+import ColumnSelector from "@/components/shared/ColumnSelector";
 import ConfirmDialog from "@/components/shared/ConfirmDialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -109,14 +110,17 @@ export default function PurchaseOrders() {
 
   const allColumns = [
     { 
+      id: "po_number",
       header: "PO Number", 
       render: (row) => <span className="font-mono font-medium text-slate-900">{row.po_number || '-'}</span>
     },
     { 
+      id: "po_date",
       header: "Date", 
       render: (row) => row.po_date ? format(new Date(row.po_date), 'MMM d, yyyy') : '-'
     },
     { 
+      id: "supplier",
       header: "Supplier", 
       render: (row) => (
         <div>
@@ -126,12 +130,14 @@ export default function PurchaseOrders() {
       )
     },
     { 
+      id: "items",
       header: "Items", 
       render: (row) => (
         <Badge variant="outline">{row.items?.length || 0} items</Badge>
       )
     },
     { 
+      id: "total_amount",
       header: "Total Amount", 
       render: (row) => (
         <span className="font-medium">
@@ -140,14 +146,17 @@ export default function PurchaseOrders() {
       )
     },
     { 
+      id: "delivery_date",
       header: "Delivery Date", 
       render: (row) => row.delivery_date ? format(new Date(row.delivery_date), 'MMM d, yyyy') : '-'
     },
     { 
+      id: "status",
       header: "Status", 
       render: (row) => <StatusBadge status={row.status || 'draft'} />
     },
     {
+      id: "actions",
       header: "",
       cellClassName: "text-right",
       render: (row) => (
@@ -202,7 +211,7 @@ export default function PurchaseOrders() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(visibleColumns));
   }, [visibleColumns]);
 
-  const totalValue = filteredOrders.reduce((sum, po) => sum + (po.total_amount || 0), 0);
+  const totalValue = filteredPOs.reduce((sum, po) => sum + (po.total_amount || 0), 0);
 
   const handleSave = (data) => {
     if (editingPO) {
