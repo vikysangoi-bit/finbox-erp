@@ -37,9 +37,13 @@ export default function VendorBillForm({ open, onOpenChange, vendorBill, account
 
   useEffect(() => {
     if (open) {
-      // Fetch inventory transactions for Txn no dropdown
+      // Fetch inventory transactions for Txn no dropdown - only Unapplied or Partial Applied
       base44.entities.InventoryTransaction.filter({ type: 'receipt' }).then(txns => {
-        setInventoryTransactions(txns.filter(t => !t.is_deleted));
+        setInventoryTransactions(txns.filter(t => 
+          !t.is_deleted && 
+          t.status === 'completed' && 
+          (t.application_status === 'Unapplied' || t.application_status === 'Partial Applied')
+        ));
       });
     }
 
