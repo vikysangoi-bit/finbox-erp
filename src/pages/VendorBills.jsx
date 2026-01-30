@@ -50,7 +50,22 @@ export default function VendorBills() {
   const createMutation = useMutation({
     mutationFn: async (data) => {
       const user = await base44.auth.me();
-      await base44.entities.VendorBill.create(data);
+      const bill = await base44.entities.VendorBill.create(data);
+      
+      // Update inventory quantities if line items exist
+      if (data.lineItems && data.lineItems.length > 0) {
+        for (const item of data.lineItems) {
+          if (item.itemCode) {
+            const invItems = await base44.entities.InventoryItem.filter({ itemCode: item.itemCode });
+            if (invItems.length > 0) {
+              const invItem = invItems[0];
+              await base44.entities.InventoryItem.update(invItem.id, {
+                quantity_on_hand: (invItem.quantity_on_hand || 0) + (item.quantity || 0)
+              });
+            }
+          }
+        }
+      }
       
       await base44.functions.invoke('logAuditEntry', {
         action: 'create',
@@ -61,6 +76,7 @@ export default function VendorBills() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['vendor-bills'] });
+      queryClient.invalidateQueries({ queryKey: ['inventory-items'] });
       setShowForm(false);
     }
   });

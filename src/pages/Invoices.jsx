@@ -54,7 +54,22 @@ export default function Invoices() {
   const createMutation = useMutation({
     mutationFn: async (data) => {
       const user = await base44.auth.me();
-      await base44.entities.Invoice.create(data);
+      const invoice = await base44.entities.Invoice.create(data);
+      
+      // Reduce inventory quantities if line items exist
+      if (data.lineItems && data.lineItems.length > 0) {
+        for (const item of data.lineItems) {
+          if (item.itemCode) {
+            const invItems = await base44.entities.InventoryItem.filter({ itemCode: item.itemCode });
+            if (invItems.length > 0) {
+              const invItem = invItems[0];
+              await base44.entities.InventoryItem.update(invItem.id, {
+                quantity_on_hand: (invItem.quantity_on_hand || 0) - (item.quantity || 0)
+              });
+            }
+          }
+        }
+      }
       
       await base44.functions.invoke('logAuditEntry', {
         action: 'create',
@@ -65,6 +80,7 @@ export default function Invoices() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['invoices'] });
+      queryClient.invalidateQueries({ queryKey: ['inventory-items'] });
       setShowForm(false);
     }
   });
