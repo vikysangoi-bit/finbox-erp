@@ -79,6 +79,7 @@ export default function AccountForm({ open, onOpenChange, account, accounts = []
 
   useEffect(() => {
     if (account) {
+      console.log('Account loaded:', account);
       setForm(account);
       setAccountLevel(account.parentAccount ? 'sub' : 'main');
     } else {
@@ -194,6 +195,7 @@ export default function AccountForm({ open, onOpenChange, account, accounts = []
                   const newCategory = form.category && categoryOptions[v]?.some(opt => opt.value === form.category) 
                     ? form.category 
                     : categoryOptions[v][0].value;
+                  console.log('Account type changed to:', v, 'new category:', newCategory);
                   setForm({ ...form, type: v, category: newCategory });
                 }}
                 disabled={viewMode}
@@ -210,7 +212,10 @@ export default function AccountForm({ open, onOpenChange, account, accounts = []
             </div>
             <div className="space-y-2">
               <Label>Category *</Label>
-              <Select value={form.category} onValueChange={(v) => setForm({ ...form, category: v })} disabled={viewMode}>
+              <Select value={form.category} onValueChange={(v) => {
+                console.log('Category changed to:', v);
+                setForm({ ...form, category: v });
+              }} disabled={viewMode}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select category" />
                 </SelectTrigger>
