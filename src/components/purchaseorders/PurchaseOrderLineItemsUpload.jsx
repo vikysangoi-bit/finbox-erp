@@ -24,8 +24,8 @@ export default function PurchaseOrderLineItemsUpload({ open, onOpenChange, onSuc
 
   const downloadTemplate = () => {
     const csvContent = [
-      'itemCode,styleId,articleName,itemCategory,articleId,description,composition,size,color,hsn,quantity,rate,expectedDeliveryDate',
-      'SKU001,STY001,Fabric Item,Menswear,AR12401,Cotton Fabric,100% Cotton,Large,Blue,520100,100,150,2026-03-25'
+      'itemCode,styleId,articleNo,itemCategory,description,composition,size,color,hsnCode,quantity,rate_per_unit,item_expected_delivery',
+      'SKU001,STY001,AR124,Menswear,Cotton Fabric,100% Cotton,Large,Blue,520100,100,150,2026-03-25'
     ].join('\n');
     
     const blob = new Blob([csvContent], { type: 'text/csv' });
@@ -62,9 +62,8 @@ export default function PurchaseOrderLineItemsUpload({ open, onOpenChange, onSuc
               properties: {
                 itemCode: { type: "string" },
                 styleId: { type: "string" },
-                articleName: { type: "string" },
+                articleNo: { type: "string" },
                 itemCategory: { type: "string" },
-                articleId: { type: "string" },
                 description: { type: "string" },
                 composition: { type: "string" },
                 size: { type: "string" },
@@ -88,9 +87,8 @@ export default function PurchaseOrderLineItemsUpload({ open, onOpenChange, onSuc
               properties: {
                 itemCode: { type: "string" },
                 styleId: { type: "string" },
-                articleName: { type: "string" },
+                articleNo: { type: "string" },
                 itemCategory: { type: "string" },
-                articleId: { type: "string" },
                 description: { type: "string" },
                 composition: { type: "string" },
                 size: { type: "string" },
@@ -127,18 +125,18 @@ export default function PurchaseOrderLineItemsUpload({ open, onOpenChange, onSuc
       // Enrich with inventory data and calculate values
       const enrichedItems = lineItems.map(item => {
         const inventoryItem = inventoryMap[item.itemCode];
-        const quantity = item.quantity || 0;
-        const rate = item.rate_per_unit || 0;
+        const quantity = parseFloat(item.quantity) || 0;
+        const rate = parseFloat(item.rate_per_unit) || 0;
         const net_before_gst = quantity * rate;
         const gst_percentage = 0; // Default, can be updated later
         const gross_value = net_before_gst;
 
         return {
-          itemCode: item.itemCode,
+          itemCode: item.itemCode || '',
           styleID: item.styleId || inventoryItem?.styleID || '',
-          articleNo: item.articleId || inventoryItem?.articleNo || '',
+          articleNo: item.articleNo || inventoryItem?.articleNo || '',
           itemCategory: item.itemCategory || inventoryItem?.itemCategory || '',
-          description: item.description || item.articleName || inventoryItem?.name || '',
+          description: item.description || inventoryItem?.name || '',
           composition: item.composition || inventoryItem?.composition || '',
           size: item.size || inventoryItem?.size || '',
           color: item.color || inventoryItem?.color || '',
