@@ -45,10 +45,20 @@ export default function PurchaseOrderForm({ open, onOpenChange, po, onSave, isLo
     notes: ''
   });
 
-  const { data: suppliers = [] } = useQuery({
-    queryKey: ['supplier-accounts'],
-    queryFn: () => base44.entities.Account.filter({ type: 'expense', is_active: true })
+  const { data: allAccounts = [] } = useQuery({
+    queryKey: ['accounts'],
+    queryFn: () => base44.entities.Account.list()
   });
+
+  // Find Trade Payable account
+  const tradePayableAccount = allAccounts.find(acc => 
+    acc.name === 'Trade Payable' && acc.type === 'liability'
+  );
+
+  // Filter suppliers with Trade Payable as parent
+  const suppliers = allAccounts.filter(acc => 
+    acc.parentAccount === tradePayableAccount?.id && acc.active && !acc.is_deleted
+  );
 
   useEffect(() => {
     if (po) {
@@ -264,20 +274,11 @@ export default function PurchaseOrderForm({ open, onOpenChange, po, onSave, isLo
             </div>
           </div>
 
-          {/* Billing & Shipping Details */}
-          <div className="grid grid-cols-2 gap-6 pt-4 border-t">
-            <div className="space-y-3">
-              <h3 className="font-bold text-sm underline">Billing details</h3>
-              <div className="text-sm">
-                <p className="font-semibold">Bill to: Shopsense Retail Technologies Limited</p>
-                <p className="text-slate-600">Billing address: 1st Floor, Wework Vijay Diamond, Opp. SBI Branch, Cross Road B,</p>
-                <p className="text-slate-600">Ajit Nagar, Kondivita, Andheri East, Mumbai - 400093, Maharashtra, India</p>
-              </div>
-            </div>
-
+          {/* Shipping Details */}
+          <div className="pt-4 border-t">
             <div className="space-y-3">
               <h3 className="font-bold text-sm underline">Shipping details</h3>
-              <div className="space-y-2">
+              <div className="grid grid-cols-3 gap-4">
                 <div>
                   <Label className="text-xs">Ship to</Label>
                   <Input

@@ -7,9 +7,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Trash2 } from "lucide-react";
 
 export default function VendorBillForm({ open, onOpenChange, vendorBill, accounts = [], purchaseOrders = [], onSave, isLoading, viewMode = false }) {
-  // Filter accounts to get only Trade Payable suppliers (parent: 10002)
+  // Find Trade Payable account
+  const tradePayableAccount = accounts.find(acc => 
+    acc.name === 'Trade Payable' && acc.type === 'liability'
+  );
+  
+  // Filter accounts to get only Trade Payable suppliers
   const tradePayableSuppliers = accounts.filter(acc => 
-    acc.parentAccount === '10002' && acc.active && !acc.is_deleted
+    acc.parentAccount === tradePayableAccount?.id && acc.active && !acc.is_deleted
   );
   const [form, setForm] = useState({
     accountCode: '',
