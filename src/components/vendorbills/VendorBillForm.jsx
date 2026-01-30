@@ -376,24 +376,24 @@ export default function VendorBillForm({ open, onOpenChange, vendorBill, account
           <div className="space-y-3">
             <Label className="text-base font-semibold">Line Items</Label>
             <div className="border border-slate-300 rounded-lg overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
+              <div className="overflow-x-auto max-w-full">
+                <table className="text-sm" style={{ minWidth: '2000px' }}>
                   <thead className="bg-slate-100 border-b border-slate-300">
                     <tr>
-                      <th className="p-2 text-left font-bold border-r border-slate-300">Item Code</th>
-                      <th className="p-2 text-left font-bold border-r border-slate-300">Article No</th>
-                      <th className="p-2 text-left font-bold border-r border-slate-300">Style ID</th>
-                      <th className="p-2 text-left font-bold border-r border-slate-300">Category</th>
-                      <th className="p-2 text-left font-bold border-r border-slate-300">Description</th>
-                      <th className="p-2 text-left font-bold border-r border-slate-300">Composition</th>
-                      <th className="p-2 text-left font-bold border-r border-slate-300">Size</th>
-                      <th className="p-2 text-left font-bold border-r border-slate-300">Color</th>
-                      <th className="p-2 text-left font-bold border-r border-slate-300">HSN</th>
-                      <th className="p-2 text-left font-bold border-r border-slate-300">Qty</th>
-                      <th className="p-2 text-left font-bold border-r border-slate-300">Rate</th>
-                      <th className="p-2 text-left font-bold border-r border-slate-300">Net Amount</th>
-                      <th className="p-2 text-left font-bold border-r border-slate-300">Tax</th>
-                      <th className="p-2 text-left font-bold border-r border-slate-300">Gross</th>
+                      <th className="p-2 text-left font-bold border-r border-slate-300" style={{ minWidth: '120px' }}>Item Code</th>
+                      <th className="p-2 text-left font-bold border-r border-slate-300" style={{ minWidth: '120px' }}>Article No</th>
+                      <th className="p-2 text-left font-bold border-r border-slate-300" style={{ minWidth: '100px' }}>Style ID</th>
+                      <th className="p-2 text-left font-bold border-r border-slate-300" style={{ minWidth: '120px' }}>Category</th>
+                      <th className="p-2 text-left font-bold border-r border-slate-300" style={{ minWidth: '180px' }}>Description</th>
+                      <th className="p-2 text-left font-bold border-r border-slate-300" style={{ minWidth: '150px' }}>Composition</th>
+                      <th className="p-2 text-left font-bold border-r border-slate-300" style={{ minWidth: '80px' }}>Size</th>
+                      <th className="p-2 text-left font-bold border-r border-slate-300" style={{ minWidth: '100px' }}>Color</th>
+                      <th className="p-2 text-left font-bold border-r border-slate-300" style={{ minWidth: '100px' }}>HSN</th>
+                      <th className="p-2 text-left font-bold border-r border-slate-300" style={{ minWidth: '80px' }}>Qty</th>
+                      <th className="p-2 text-left font-bold border-r border-slate-300" style={{ minWidth: '100px' }}>Rate</th>
+                      <th className="p-2 text-left font-bold border-r border-slate-300" style={{ minWidth: '120px' }}>Net Amount</th>
+                      <th className="p-2 text-left font-bold border-r border-slate-300" style={{ minWidth: '100px' }}>Tax</th>
+                      <th className="p-2 text-left font-bold border-r border-slate-300" style={{ minWidth: '100px' }}>Gross</th>
                       {!viewMode && <th className="p-2 text-left font-bold w-12"></th>}
                     </tr>
                   </thead>
@@ -410,7 +410,7 @@ export default function VendorBillForm({ open, onOpenChange, vendorBill, account
                                 setForm({ ...form, lineItems: newItems });
                               }}
                               disabled={viewMode}
-                              className="h-8 text-xs"
+                              className="h-8 text-xs w-full"
                             />
                           </td>
                           <td className="p-1 border-r border-slate-200">
@@ -422,7 +422,7 @@ export default function VendorBillForm({ open, onOpenChange, vendorBill, account
                                 setForm({ ...form, lineItems: newItems });
                               }}
                               disabled={viewMode}
-                              className="h-8 text-xs"
+                              className="h-8 text-xs w-full"
                             />
                           </td>
                           <td className="p-1 border-r border-slate-200">
@@ -434,7 +434,7 @@ export default function VendorBillForm({ open, onOpenChange, vendorBill, account
                                 setForm({ ...form, lineItems: newItems });
                               }}
                               disabled={viewMode}
-                              className="h-8 text-xs"
+                              className="h-8 text-xs w-full"
                             />
                           </td>
                           <td className="p-1 border-r border-slate-200">
@@ -446,7 +446,7 @@ export default function VendorBillForm({ open, onOpenChange, vendorBill, account
                                 setForm({ ...form, lineItems: newItems });
                               }}
                               disabled={viewMode}
-                              className="h-8 text-xs"
+                              className="h-8 text-xs w-full"
                             />
                           </td>
                           <td className="p-1 border-r border-slate-200">
@@ -458,7 +458,7 @@ export default function VendorBillForm({ open, onOpenChange, vendorBill, account
                                 setForm({ ...form, lineItems: newItems });
                               }}
                               disabled={viewMode}
-                              className="h-8 text-xs"
+                              className="h-8 text-xs w-full"
                             />
                           </td>
                           <td className="p-1 border-r border-slate-200">
@@ -470,7 +470,7 @@ export default function VendorBillForm({ open, onOpenChange, vendorBill, account
                                 setForm({ ...form, lineItems: newItems });
                               }}
                               disabled={viewMode}
-                              className="h-8 text-xs"
+                              className="h-8 text-xs w-full"
                             />
                           </td>
                           <td className="p-1 border-r border-slate-200">
@@ -482,7 +482,7 @@ export default function VendorBillForm({ open, onOpenChange, vendorBill, account
                                 setForm({ ...form, lineItems: newItems });
                               }}
                               disabled={viewMode}
-                              className="h-8 text-xs"
+                              className="h-8 text-xs w-full"
                             />
                           </td>
                           <td className="p-1 border-r border-slate-200">
@@ -494,7 +494,7 @@ export default function VendorBillForm({ open, onOpenChange, vendorBill, account
                                 setForm({ ...form, lineItems: newItems });
                               }}
                               disabled={viewMode}
-                              className="h-8 text-xs"
+                              className="h-8 text-xs w-full"
                             />
                           </td>
                           <td className="p-1 border-r border-slate-200">
@@ -506,7 +506,7 @@ export default function VendorBillForm({ open, onOpenChange, vendorBill, account
                                 setForm({ ...form, lineItems: newItems });
                               }}
                               disabled={viewMode}
-                              className="h-8 text-xs"
+                              className="h-8 text-xs w-full"
                             />
                           </td>
                           <td className="p-1 border-r border-slate-200">
@@ -519,7 +519,7 @@ export default function VendorBillForm({ open, onOpenChange, vendorBill, account
                                 setForm({ ...form, lineItems: newItems });
                               }}
                               disabled={viewMode}
-                              className="h-8 text-xs"
+                              className="h-8 text-xs w-full"
                             />
                           </td>
                           <td className="p-1 border-r border-slate-200">
@@ -533,7 +533,7 @@ export default function VendorBillForm({ open, onOpenChange, vendorBill, account
                                 setForm({ ...form, lineItems: newItems });
                               }}
                               disabled={viewMode}
-                              className="h-8 text-xs"
+                              className="h-8 text-xs w-full"
                             />
                           </td>
                           <td className="p-1 border-r border-slate-200">
@@ -547,7 +547,7 @@ export default function VendorBillForm({ open, onOpenChange, vendorBill, account
                                 setForm({ ...form, lineItems: newItems });
                               }}
                               disabled={viewMode}
-                              className="h-8 text-xs"
+                              className="h-8 text-xs w-full"
                             />
                           </td>
                           <td className="p-1 border-r border-slate-200">
@@ -561,7 +561,7 @@ export default function VendorBillForm({ open, onOpenChange, vendorBill, account
                                 setForm({ ...form, lineItems: newItems });
                               }}
                               disabled={viewMode}
-                              className="h-8 text-xs"
+                              className="h-8 text-xs w-full"
                             />
                           </td>
                           <td className="p-1 border-r border-slate-200">
@@ -575,7 +575,7 @@ export default function VendorBillForm({ open, onOpenChange, vendorBill, account
                                 setForm({ ...form, lineItems: newItems });
                               }}
                               disabled={viewMode}
-                              className="h-8 text-xs"
+                              className="h-8 text-xs w-full"
                             />
                           </td>
                           {!viewMode && (
