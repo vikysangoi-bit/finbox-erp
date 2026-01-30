@@ -134,6 +134,23 @@ export default function InventoryTransactions() {
       render: (row) => <span className="font-medium">{row.items?.length || 0} items</span>
     },
     {
+      id: "application_status",
+      header: "Status",
+      render: (row) => {
+        const statusColors = {
+          'Unapplied': 'bg-slate-100 text-slate-700',
+          'Partial Applied': 'bg-amber-100 text-amber-700',
+          'Applied': 'bg-emerald-100 text-emerald-700'
+        };
+        const status = row.application_status || 'Unapplied';
+        return (
+          <Badge className={`${statusColors[status]} border-0`}>
+            {status}
+          </Badge>
+        );
+      }
+    },
+    {
       id: "actions",
       header: "",
       cellClassName: "text-right",
