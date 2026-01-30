@@ -7,9 +7,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Trash2 } from "lucide-react";
 
 export default function DebitNoteForm({ open, onOpenChange, debitNote, vendorBills = [], accounts = [], onSave, isLoading, viewMode = false }) {
-  // Filter accounts to get only Trade Payable suppliers (parent: 10002)
+  // Filter accounts to get only Trade Payable suppliers (ID: 697babaff819e89ea60692b6)
   const tradePayableSuppliers = accounts.filter(acc => 
-    acc.parentAccount === '10002' && acc.active && !acc.is_deleted
+    acc.parentAccount === '697babaff819e89ea60692b6' && acc.active && !acc.is_deleted
   );
   const [form, setForm] = useState({
     accountCode: '',
