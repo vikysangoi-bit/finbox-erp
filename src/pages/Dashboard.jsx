@@ -33,7 +33,7 @@ export default function Dashboard() {
 
   // Calculate stats
   const totalAssets = accounts.filter(a => a.type === 'asset').reduce((sum, a) => sum + (a.current_balance || 0), 0);
-  const totalInventoryValue = inventory.reduce((sum, i) => sum + (i.total_value || i.quantity_on_hand * i.unit_cost || 0), 0);
+  const totalInventoryValue = inventory.reduce((sum, i) => sum + (i.total_value || 0), 0);
   const lowStockItems = inventory.filter(i => i.quantity_on_hand <= i.reorder_level).length;
   const pendingApprovals = approvalRequests.filter(r => r.status === 'pending').length;
 
@@ -57,7 +57,7 @@ export default function Dashboard() {
     inventory.forEach(item => {
       const cat = item.category || 'other';
       if (!categories[cat]) categories[cat] = { name: cat, value: 0 };
-      categories[cat].value += item.total_value || item.quantity_on_hand * item.unit_cost || 0;
+      categories[cat].value += item.total_value || 0;
     });
     return Object.values(categories);
   }, [inventory]);
