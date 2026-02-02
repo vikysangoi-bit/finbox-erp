@@ -39,10 +39,12 @@ export default function SalesOrders() {
 
   const queryClient = useQueryClient();
 
-  const { data: orders = [], isLoading } = useQuery({
+  const { data: allOrders = [], isLoading } = useQuery({
     queryKey: ['sales-orders'],
     queryFn: () => base44.entities.SalesOrder.list('-created_date')
   });
+
+  const orders = allOrders.filter(order => !order.is_deleted);
 
   const { data: accounts = [] } = useQuery({
     queryKey: ['accounts'],
@@ -180,8 +182,6 @@ export default function SalesOrders() {
   });
 
   const filteredOrders = orders.filter(order => {
-    if (order.is_deleted) return false;
-    
     // Auto-mark as expired if past end date
     const now = new Date();
     const endDate = order.endDate ? new Date(order.endDate) : null;
@@ -278,7 +278,7 @@ export default function SalesOrders() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(visibleColumns));
   }, [visibleColumns]);
 
-  const totalValue = filteredOrders.reduce((sum, order) => {
+  const totalValue = orders.reduce((sum, order) => {
     const value = order.orderFormValue || 0;
     const inr = order.currency === 'USD' ? value * 90 : value;
     return sum + inr;
@@ -361,8 +361,10 @@ export default function SalesOrders() {
             onGoogleSheetsImport={() => {}}
             onGoogleSheetsExport={() => {}}
             onExportToExcel={() => {
-              const headers = ['orderFormNo', 'customerCode', 'customerName', 'orderFormValue', 'status'];
-              const rows = filteredOrders.map(o => [o.orderFormNo, o.customerCode, o.customerName, o.orderFormValue, o.status]);
+              const headers = ['RFQID', 'orderFormNo', 'customerCode', 'customerName', 'customerBrand', 'customerAddress', 'customerCountry', 'customerGstId', 'orderFormValue', 'currency', 'paymentTerm', 'paymentTermFrom', 'expectedDelivery', 'orderTerm', 'startDate', 'endDate', 'autoRenewal', 'leadSource', 'partnerName', 'salesPersonName', 'contactPersonName', 'contactPersonEmail', 'contactPersonPhone', 'serviceName', 'uom', 'inclusions', 'unitPrice', 'billingFrequency', 'specialTerms', 'status', 'created_date', 'updated_date'];
+              const rows = filteredOrders.map(o => [
+                o.RFQID || '', o.orderFormNo || '', o.customerCode || '', o.customerName || '', o.customerBrand || '', o.customerAddress || '', o.customerCountry || '', o.customerGstId || '', o.orderFormValue || '', o.currency || '', o.paymentTerm || '', o.paymentTermFrom || '', o.expectedDelivery || '', o.orderTerm || '', o.startDate || '', o.endDate || '', o.autoRenewal || '', o.leadSource || '', o.partnerName || '', o.salesPersonName || '', o.contactPersonName || '', o.contactPersonEmail || '', o.contactPersonPhone || '', o.serviceName || '', o.uom || '', o.inclusions || '', o.unitPrice || '', o.billingFrequency || '', o.specialTerms || '', o.status || '', o.created_date || '', o.updated_date || ''
+              ]);
               const csv = [headers, ...rows].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
               const blob = new Blob([csv], { type: 'text/csv' });
               const url = window.URL.createObjectURL(blob);
