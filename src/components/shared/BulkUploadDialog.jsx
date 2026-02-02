@@ -116,8 +116,10 @@ export default function BulkUploadDialog({ open, onOpenChange, entityName, schem
       // For Account entity, fetch existing accounts to check for duplicates and map parent codes
       let existingCodes = [];
       let accountsMap = {};
+      let existingAccounts = [];
+      
       if (entityName === 'Account') {
-        const existingAccounts = await base44.entities.Account.list();
+        existingAccounts = await base44.entities.Account.list();
         // Filter out soft-deleted accounts
         const activeAccounts = existingAccounts.filter(acc => !acc.is_deleted);
         existingCodes = activeAccounts.map(acc => acc.code);
@@ -125,6 +127,11 @@ export default function BulkUploadDialog({ open, onOpenChange, entityName, schem
           map[acc.code] = acc.id;
           return map;
         }, {});
+      }
+      
+      // For SalesOrder entity, fetch accounts to auto-populate customer details
+      if (entityName === 'SalesOrder') {
+        existingAccounts = await base44.entities.Account.filter({ is_deleted: false });
       }
 
       for (let i = 0; i < data.length; i++) {
@@ -155,6 +162,23 @@ export default function BulkUploadDialog({ open, onOpenChange, entityName, schem
             }
             
             data[i].parentAccount = parentId;
+          }
+          
+          // Auto-populate customer details for SalesOrder entity
+          if (entityName === 'SalesOrder' && data[i].customerCode) {
+            const customer = existingAccounts.find(a => a.code === data[i].customerCode);
+            if (customer) {
+              data[i].customerName = data[i].customerName || customer.name || '';
+              data[i].customerBrand = data[i].customerBrand || customer.brand || '';
+              data[i].customerAddress = data[i].customerAddress || customer.address || '';
+              data[i].customerCountry = data[i].customerCountry || customer.country || '';
+              data[i].customerGstId = data[i].customerGstId || customer.gstId || '';
+              data[i].currency = data[i].currency || customer.currency || 'USD';
+              data[i].paymentTerm = data[i].paymentTerm || customer.paymentTerms || 'net_30';
+              data[i].contactPersonName = data[i].contactPersonName || customer.contactPerson || '';
+              data[i].contactPersonPhone = data[i].contactPersonPhone || customer.phone || '';
+              data[i].contactPersonEmail = data[i].contactPersonEmail || customer.email || '';
+            }
           }
           
           await base44.entities[entityName].create(data[i]);
