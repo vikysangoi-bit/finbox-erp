@@ -104,12 +104,11 @@ export default function RFQsPage() {
   };
 
   const filteredRFQs = rfqs.filter(rfq => {
-    const searchLower = searchTerm?.toLowerCase() || '';
     const matchesSearch = !searchTerm || 
-      (rfq.legalName && rfq.legalName.toLowerCase().includes(searchLower)) ||
-      (rfq.brandName && rfq.brandName.toLowerCase().includes(searchLower)) ||
-      (rfq.rfqId && rfq.rfqId.toLowerCase().includes(searchLower)) ||
-      (rfq.email && rfq.email.toLowerCase().includes(searchLower));
+      rfq.legalName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      rfq.brandName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      rfq.rfqId?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      rfq.email?.toLowerCase().includes(searchTerm.toLowerCase());
     
     const matchesStatus = filters.status === 'all' || rfq.status === filters.status;
     const matchesCurrency = filters.currency === 'all' || rfq.currency === filters.currency;

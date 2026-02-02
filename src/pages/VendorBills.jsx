@@ -289,10 +289,8 @@ export default function VendorBills() {
             onGoogleSheetsImport={() => {}}
             onGoogleSheetsExport={() => {}}
             onExportToExcel={() => {
-              const headers = ['accountCode', 'supplier', 'serviceName', 'poNo', 'grn_number', 'billNo', 'billDate', 'billingCurrency', 'billNetValue', 'billTaxValue', 'billValue', 'billSharedOn', 'paymentTerms', 'paymentDueDate', 'currentStatus', 'po_id', 'supplier_id', 'notes', 'status', 'submitted_by', 'submitted_at', 'approved_by', 'approved_at', 'created_date', 'updated_date'];
-              const rows = filteredBills.map(b => [
-                b.accountCode || '', b.supplier || '', b.serviceName || '', b.poNo || '', b.grn_number || '', b.billNo || '', b.billDate || '', b.billingCurrency || '', b.billNetValue || '', b.billTaxValue || '', b.billValue || '', b.billSharedOn || '', b.paymentTerms || '', b.paymentDueDate || '', b.currentStatus || '', b.po_id || '', b.supplier_id || '', b.notes || '', b.status || '', b.submitted_by || '', b.submitted_at || '', b.approved_by || '', b.approved_at || '', b.created_date || '', b.updated_date || ''
-              ]);
+              const headers = ['billNo', 'billDate', 'accountCode', 'supplier', 'poNo', 'serviceName', 'billValue', 'currentStatus'];
+              const rows = filteredBills.map(b => [b.billNo, b.billDate, b.accountCode, b.supplier, b.poNo, b.serviceName, b.billValue, b.currentStatus]);
               const csv = [headers, ...rows].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
               const blob = new Blob([csv], { type: 'text/csv' });
               const url = window.URL.createObjectURL(blob);

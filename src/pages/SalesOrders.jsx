@@ -39,12 +39,10 @@ export default function SalesOrders() {
 
   const queryClient = useQueryClient();
 
-  const { data: allOrders = [], isLoading } = useQuery({
+  const { data: orders = [], isLoading } = useQuery({
     queryKey: ['sales-orders'],
     queryFn: () => base44.entities.SalesOrder.list('-created_date')
   });
-
-  const orders = allOrders.filter(order => !order.is_deleted);
 
   const { data: accounts = [] } = useQuery({
     queryKey: ['accounts'],
@@ -182,6 +180,8 @@ export default function SalesOrders() {
   });
 
   const filteredOrders = orders.filter(order => {
+    if (order.is_deleted) return false;
+    
     // Auto-mark as expired if past end date
     const now = new Date();
     const endDate = order.endDate ? new Date(order.endDate) : null;
@@ -361,10 +361,8 @@ export default function SalesOrders() {
             onGoogleSheetsImport={() => {}}
             onGoogleSheetsExport={() => {}}
             onExportToExcel={() => {
-              const headers = ['RFQID', 'orderFormNo', 'customerCode', 'customerName', 'customerBrand', 'customerAddress', 'customerCountry', 'customerGstId', 'orderFormValue', 'currency', 'paymentTerm', 'paymentTermFrom', 'expectedDelivery', 'orderTerm', 'startDate', 'endDate', 'autoRenewal', 'leadSource', 'partnerName', 'salesPersonName', 'contactPersonName', 'contactPersonEmail', 'contactPersonPhone', 'serviceName', 'uom', 'inclusions', 'unitPrice', 'billingFrequency', 'specialTerms', 'status', 'created_date', 'updated_date'];
-              const rows = filteredOrders.map(o => [
-                o.RFQID || '', o.orderFormNo || '', o.customerCode || '', o.customerName || '', o.customerBrand || '', o.customerAddress || '', o.customerCountry || '', o.customerGstId || '', o.orderFormValue || '', o.currency || '', o.paymentTerm || '', o.paymentTermFrom || '', o.expectedDelivery || '', o.orderTerm || '', o.startDate || '', o.endDate || '', o.autoRenewal || '', o.leadSource || '', o.partnerName || '', o.salesPersonName || '', o.contactPersonName || '', o.contactPersonEmail || '', o.contactPersonPhone || '', o.serviceName || '', o.uom || '', o.inclusions || '', o.unitPrice || '', o.billingFrequency || '', o.specialTerms || '', o.status || '', o.created_date || '', o.updated_date || ''
-              ]);
+              const headers = ['orderFormNo', 'customerCode', 'customerName', 'orderFormValue', 'status'];
+              const rows = filteredOrders.map(o => [o.orderFormNo, o.customerCode, o.customerName, o.orderFormValue, o.status]);
               const csv = [headers, ...rows].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
               const blob = new Blob([csv], { type: 'text/csv' });
               const url = window.URL.createObjectURL(blob);
@@ -586,8 +584,8 @@ export default function SalesOrders() {
             }
           }}
           templateData={[
-            'RFQID,orderFormNo,customerCode,orderFormValue,paymentTerm,expectedDelivery,orderTerm,startDate,endDate,autoRenewal,leadSource,salesPersonName,contactPersonName,contactPersonEmail,contactPersonPhone,serviceName,uom,inclusions,unitPrice,billingFrequency',
-            'RFQ001,SO-2024-001,1000,50000,net_30,2024-03-01,1_year,2024-01-01,2024-12-31,No,Direct,John Sales,Jane Contact,jane@example.com,+1234567890,DaaS,SKU,1 Lifestyle Shoot + 6 Studio Shoot,100,ARR'
+            'RFQID,orderFormNo,customerCode,orderFormValue,paymentTerm,expectedDelivery,orderTerm,startDate,endDate,autoRenewal,leadSource,salesPersonName,contactPersonName,contactPersonEmail,contactPersonPhone,serviceName,uom,unitPrice,billingFrequency',
+            'RFQ001,SO-2024-001,1000,50000,net_30,2024-03-01,1_year,2024-01-01,2024-12-31,No,Direct,John Sales,Jane Contact,jane@example.com,+1234567890,DaaS,SKU,100,ARR'
           ]}
           onSuccess={() => queryClient.invalidateQueries({ queryKey: ['sales-orders'] })}
         />

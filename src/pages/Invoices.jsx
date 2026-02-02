@@ -318,10 +318,8 @@ export default function Invoices() {
             onGoogleSheetsImport={() => {}}
             onGoogleSheetsExport={() => {}}
             onExportToExcel={() => {
-              const headers = ['invoiceNo', 'invoiceDate', 'customerCode', 'customerName', 'orderFormNo', 'gon_number', 'serviceName', 'invoiceType', 'invoiceCurrency', 'invoiceNetValue', 'invoiceTaxValue', 'invoiceValue', 'invoiceSharedOn', 'paymentTerms', 'paymentDueDate', 'invoiceStatus', 'salesOrderId', 'customerBrand', 'customerRegion', 'salesPersonName', 'created_date', 'updated_date'];
-              const rows = filteredInvoices.map(i => [
-                i.invoiceNo || '', i.invoiceDate || '', i.customerCode || '', i.customerName || '', i.orderFormNo || '', i.gon_number || '', i.serviceName || '', i.invoiceType || '', i.invoiceCurrency || '', i.invoiceNetValue || '', i.invoiceTaxValue || '', i.invoiceValue || '', i.invoiceSharedOn || '', i.paymentTerms || '', i.paymentDueDate || '', i.invoiceStatus || '', i.salesOrderId || '', i.customerBrand || '', i.customerRegion || '', i.salesPersonName || '', i.created_date || '', i.updated_date || ''
-              ]);
+              const headers = ['invoiceNo', 'invoiceDate', 'customerCode', 'customerName', 'orderFormNo', 'serviceName', 'invoiceValue', 'invoiceStatus'];
+              const rows = filteredInvoices.map(i => [i.invoiceNo, i.invoiceDate, i.customerCode, i.customerName, i.orderFormNo, i.serviceName, i.invoiceValue, i.invoiceStatus]);
               const csv = [headers, ...rows].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
               const blob = new Blob([csv], { type: 'text/csv' });
               const url = window.URL.createObjectURL(blob);
