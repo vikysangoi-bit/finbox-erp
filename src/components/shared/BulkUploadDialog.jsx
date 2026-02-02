@@ -166,7 +166,9 @@ export default function BulkUploadDialog({ open, onOpenChange, entityName, schem
           
           // Auto-populate customer details for SalesOrder entity
           if (entityName === 'SalesOrder' && data[i].customerCode) {
-            const customer = existingAccounts.find(a => a.code === data[i].customerCode);
+            const customer = existingAccounts.find(a => 
+              a.code?.toLowerCase() === data[i].customerCode?.toLowerCase()
+            );
             if (customer) {
               data[i].customerName = data[i].customerName || customer.name || '';
               data[i].customerBrand = data[i].customerBrand || customer.brand || '';
