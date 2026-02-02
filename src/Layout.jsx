@@ -38,9 +38,8 @@ const navigation = [
     icon: ArrowRightLeft, 
     children: [
       { name: 'RFQs', page: 'RFQs' },
-      { name: 'Proforma Invoices', page: 'ProformaInvoices' },
       { name: 'Sales Orders', page: 'SalesOrders' },
-      { name: 'Tax Invoices', page: 'Invoices' },
+      { name: 'Invoices', page: 'Invoices' },
       { name: 'Credit Notes', page: 'CreditNotes' },
       { name: 'Receipts', page: 'Receipts' },
     ]
