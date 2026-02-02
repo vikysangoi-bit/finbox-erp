@@ -556,7 +556,6 @@ export default function SalesOrders() {
             items: {
               type: "object",
               properties: {
-                RFQID: { type: "string" },
                 orderFormNo: { type: "string" },
                 customerCode: { type: "string" },
                 orderFormValue: { type: "number" },
@@ -584,8 +583,8 @@ export default function SalesOrders() {
             }
           }}
           templateData={[
-            'RFQID,orderFormNo,customerCode,orderFormValue,paymentTerm,expectedDelivery,orderTerm,startDate,endDate,autoRenewal,leadSource,salesPersonName,contactPersonName,contactPersonEmail,contactPersonPhone,serviceName,uom,unitPrice,billingFrequency',
-            'RFQ001,SO-2024-001,1000,50000,net_30,2024-03-01,1_year,2024-01-01,2024-12-31,No,Direct,John Sales,Jane Contact,jane@example.com,+1234567890,DaaS,SKU,100,ARR'
+            'orderFormNo,customerCode,orderFormValue,paymentTerm,expectedDelivery,orderTerm,startDate,endDate,autoRenewal,leadSource,salesPersonName,contactPersonName,contactPersonEmail,contactPersonPhone,serviceName,uom,unitPrice,billingFrequency',
+            'SO-2024-001,1000,50000,net_30,2024-03-01,1_year,2024-01-01,2024-12-31,No,Direct,John Sales,Jane Contact,jane@example.com,+1234567890,DaaS,SKU,100,ARR'
           ]}
           onSuccess={() => queryClient.invalidateQueries({ queryKey: ['sales-orders'] })}
         />
