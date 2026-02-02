@@ -13,7 +13,6 @@ import { Upload, Trash2, Eye } from "lucide-react";
 
 export default function SalesOrderForm({ open, onOpenChange, order, accounts = [], onSave, isLoading, viewMode = false }) {
   const [form, setForm] = useState({
-    RFQID: '',
     orderFormNo: '',
     customerCode: '',
     customerName: '',
@@ -56,7 +55,6 @@ export default function SalesOrderForm({ open, onOpenChange, order, accounts = [
       setForm({ ...order, gaasLineItems: order.gaasLineItems || [] });
     } else {
       setForm({
-        RFQID: '',
         orderFormNo: '',
         customerCode: '',
         customerName: '',
