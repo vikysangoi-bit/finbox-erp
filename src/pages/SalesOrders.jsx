@@ -278,7 +278,7 @@ export default function SalesOrders() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(visibleColumns));
   }, [visibleColumns]);
 
-  const totalValue = orders.reduce((sum, order) => {
+  const totalValue = filteredOrders.reduce((sum, order) => {
     const value = order.orderFormValue || 0;
     const inr = order.currency === 'USD' ? value * 90 : value;
     return sum + inr;
