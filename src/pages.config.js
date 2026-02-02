@@ -72,7 +72,6 @@ import SalesOrders from './pages/SalesOrders';
 import Suppliers from './pages/Suppliers';
 import Users from './pages/Users';
 import VendorBills from './pages/VendorBills';
-import RFQs from './pages/RFQs';
 import __Layout from './Layout.jsx';
 
 
@@ -102,7 +101,6 @@ export const PAGES = {
     "Suppliers": Suppliers,
     "Users": Users,
     "VendorBills": VendorBills,
-    "RFQs": RFQs,
 }
 
 export const pagesConfig = {

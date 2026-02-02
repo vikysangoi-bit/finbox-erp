@@ -37,7 +37,6 @@ const navigation = [
     name: 'Order to Cash', 
     icon: ArrowRightLeft, 
     children: [
-      { name: 'RFQs', page: 'RFQs' },
       { name: 'Sales Orders', page: 'SalesOrders' },
       { name: 'Invoices', page: 'Invoices' },
       { name: 'Credit Notes', page: 'CreditNotes' },
