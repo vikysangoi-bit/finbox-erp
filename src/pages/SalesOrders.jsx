@@ -584,8 +584,8 @@ export default function SalesOrders() {
             }
           }}
           templateData={[
-            'RFQID,orderFormNo,customerCode,orderFormValue,paymentTerm,expectedDelivery,orderTerm,startDate,endDate,autoRenewal,leadSource,salesPersonName,contactPersonName,contactPersonEmail,contactPersonPhone,serviceName,uom,unitPrice,billingFrequency',
-            'RFQ001,SO-2024-001,1000,50000,net_30,2024-03-01,1_year,2024-01-01,2024-12-31,No,Direct,John Sales,Jane Contact,jane@example.com,+1234567890,DaaS,SKU,100,ARR'
+            'RFQID,orderFormNo,customerCode,orderFormValue,paymentTerm,expectedDelivery,orderTerm,startDate,endDate,autoRenewal,leadSource,salesPersonName,contactPersonName,contactPersonEmail,contactPersonPhone,serviceName,uom,inclusions,unitPrice,billingFrequency',
+            'RFQ001,SO-2024-001,1000,50000,net_30,2024-03-01,1_year,2024-01-01,2024-12-31,No,Direct,John Sales,Jane Contact,jane@example.com,+1234567890,DaaS,SKU,1 Lifestyle Shoot + 6 Studio Shoot,100,ARR'
           ]}
           onSuccess={() => queryClient.invalidateQueries({ queryKey: ['sales-orders'] })}
         />
