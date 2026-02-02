@@ -65,15 +65,18 @@ export default function RFQForm({ open, onOpenChange, rfq, onSave }) {
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-2 gap-4">
-            {/* RFQ ID */}
-            <div>
-              <Label>RFQ ID</Label>
-              <Input
-                value={form.rfqId}
-                onChange={(e) => setForm({ ...form, rfqId: e.target.value })}
-                placeholder="Auto-generated"
-              />
-            </div>
+            {/* RFQ ID - Only show when editing */}
+            {rfq && (
+              <div>
+                <Label>RFQ ID</Label>
+                <Input
+                  value={form.rfqId}
+                  readOnly
+                  className="bg-slate-50"
+                  placeholder="Auto-generated"
+                />
+              </div>
+            )}
 
             {/* Currency */}
             <div>
