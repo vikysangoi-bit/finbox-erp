@@ -84,8 +84,22 @@ export default function AccountForm({ open, onOpenChange, account, accounts = []
       setAccountLevel(account.parentAccount ? 'sub' : 'main');
     } else {
       setAccountLevel('main');
+      
+      // Auto-generate next account code
+      const fcAccounts = accounts
+        .filter(a => a.code?.startsWith('FC'))
+        .map(a => {
+          const numPart = a.code.replace('FC', '');
+          return parseInt(numPart) || 0;
+        })
+        .filter(n => !isNaN(n));
+      
+      const maxNumber = fcAccounts.length > 0 ? Math.max(...fcAccounts) : 74;
+      const nextNumber = maxNumber + 1;
+      const nextCode = `FC${String(nextNumber).padStart(5, '0')}`;
+      
       setForm({
-        code: '',
+        code: nextCode,
         name: '',
         brand: '',
         alias: '',
@@ -120,7 +134,7 @@ export default function AccountForm({ open, onOpenChange, account, accounts = []
         msme: ''
       });
     }
-  }, [account, open]);
+  }, [account, open, accounts]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
