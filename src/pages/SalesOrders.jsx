@@ -409,7 +409,8 @@ export default function SalesOrders() {
                 placeholder: 'Service',
                 options: [
                   { value: 'DaaS', label: 'DaaS' },
-                  { value: 'GaaS', label: 'GaaS' }
+                  { value: 'GaaS', label: 'GaaS' },
+                  { value: 'AI Photoshoot', label: 'AI Photoshoot' }
                 ]
               },
               {
