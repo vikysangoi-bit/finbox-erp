@@ -16,6 +16,21 @@ export default function Dashboard() {
     queryFn: () => base44.entities.Account.list()
   });
 
+  const { data: salesOrders = [] } = useQuery({
+    queryKey: ['sales-orders'],
+    queryFn: () => base44.entities.SalesOrder.filter({ is_deleted: false })
+  });
+
+  const { data: invoices = [] } = useQuery({
+    queryKey: ['invoices'],
+    queryFn: () => base44.entities.Invoice.filter({ is_deleted: false })
+  });
+
+  const { data: receipts = [] } = useQuery({
+    queryKey: ['receipts'],
+    queryFn: () => base44.entities.Receipt.filter({ is_deleted: false })
+  });
+
   const { data: inventory = [] } = useQuery({
     queryKey: ['inventory'],
     queryFn: () => base44.entities.InventoryItem.list()
@@ -31,11 +46,54 @@ export default function Dashboard() {
     queryFn: () => base44.entities.ApprovalRequest.list('-created_date', 20)
   });
 
-  // Calculate stats
-  const totalAssets = accounts.filter(a => a.type === 'asset').reduce((sum, a) => sum + (a.current_balance || 0), 0);
-  const totalInventoryValue = inventory.reduce((sum, i) => sum + (i.total_value || 0), 0);
-  const lowStockItems = inventory.filter(i => i.quantity_on_hand <= i.reorder_level).length;
-  const pendingApprovals = approvalRequests.filter(r => r.status === 'pending').length;
+  // Calculate stats with month-over-month comparison
+  const stats = React.useMemo(() => {
+    const now = new Date();
+    const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+    const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    const lastMonthStr = `${lastMonth.getFullYear()}-${String(lastMonth.getMonth() + 1).padStart(2, '0')}`;
+
+    // Total Orders
+    const currentMonthOrders = salesOrders.filter(o => o.created_date?.startsWith(currentMonth));
+    const lastMonthOrders = salesOrders.filter(o => o.created_date?.startsWith(lastMonthStr));
+    const totalOrders = currentMonthOrders.reduce((sum, o) => sum + (o.orderFormValue || 0), 0);
+    const lastMonthOrdersValue = lastMonthOrders.reduce((sum, o) => sum + (o.orderFormValue || 0), 0);
+    const ordersChange = lastMonthOrdersValue > 0 ? (((totalOrders - lastMonthOrdersValue) / lastMonthOrdersValue) * 100).toFixed(1) : 0;
+
+    // Total Billed
+    const currentMonthInvoices = invoices.filter(i => i.created_date?.startsWith(currentMonth));
+    const lastMonthInvoices = invoices.filter(i => i.created_date?.startsWith(lastMonthStr));
+    const totalBilled = currentMonthInvoices.reduce((sum, i) => sum + (i.invoiceValue || 0), 0);
+    const lastMonthBilled = lastMonthInvoices.reduce((sum, i) => sum + (i.invoiceValue || 0), 0);
+    const billedChange = lastMonthBilled > 0 ? (((totalBilled - lastMonthBilled) / lastMonthBilled) * 100).toFixed(1) : 0;
+
+    // Total Collections
+    const currentMonthReceipts = receipts.filter(r => r.created_date?.startsWith(currentMonth));
+    const lastMonthReceipts = receipts.filter(r => r.created_date?.startsWith(lastMonthStr));
+    const totalCollections = currentMonthReceipts.reduce((sum, r) => sum + (r.receiptValue || 0), 0);
+    const lastMonthCollections = lastMonthReceipts.reduce((sum, r) => sum + (r.receiptValue || 0), 0);
+    const collectionsChange = lastMonthCollections > 0 ? (((totalCollections - lastMonthCollections) / lastMonthCollections) * 100).toFixed(1) : 0;
+
+    // Active Clients - accounts with category "current_asset" and type "asset" (Trade Receivables) and active
+    const activeClients = accounts.filter(a => 
+      a.category === 'current_asset' && 
+      a.type === 'asset' && 
+      a.active === true
+    ).length;
+
+    return {
+      totalOrders,
+      ordersChange,
+      ordersUp: parseFloat(ordersChange) > 0,
+      totalBilled,
+      billedChange,
+      billedUp: parseFloat(billedChange) > 0,
+      totalCollections,
+      collectionsChange,
+      collectionsUp: parseFloat(collectionsChange) > 0,
+      activeClients
+    };
+  }, [salesOrders, invoices, receipts, accounts]);
 
   // Chart data - entries by month
   const monthlyData = React.useMemo(() => {
@@ -76,29 +134,31 @@ export default function Dashboard() {
         {/* Stats Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <StatCard
-            title="Total Assets"
-            value={`$${totalAssets.toLocaleString('en-US', { minimumFractionDigits: 2 })}`}
-            icon={DollarSign}
-            trend="+12.5%"
-            trendUp={true}
-          />
-          <StatCard
-            title="Inventory Value"
-            value={`$${totalInventoryValue.toLocaleString('en-US', { minimumFractionDigits: 2 })}`}
-            icon={Package}
-            subtitle={`${inventory.length} items`}
-          />
-          <StatCard
-            title="Low Stock Alert"
-            value={lowStockItems}
-            icon={AlertTriangle}
-            className={lowStockItems > 0 ? "border-l-4 border-amber-500" : ""}
-          />
-          <StatCard
-            title="Pending Approvals"
-            value={pendingApprovals}
+            title="Total Orders"
+            value={`₹${stats.totalOrders.toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`}
             icon={FileText}
-            className={pendingApprovals > 0 ? "border-l-4 border-blue-500" : ""}
+            trend={`${stats.ordersChange}%`}
+            trendUp={stats.ordersUp}
+          />
+          <StatCard
+            title="Total Billed"
+            value={`₹${stats.totalBilled.toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`}
+            icon={DollarSign}
+            trend={`${stats.billedChange}%`}
+            trendUp={stats.billedUp}
+          />
+          <StatCard
+            title="Total Collections"
+            value={`₹${stats.totalCollections.toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`}
+            icon={TrendingUp}
+            trend={`${stats.collectionsChange}%`}
+            trendUp={stats.collectionsUp}
+          />
+          <StatCard
+            title="Active Clients"
+            value={stats.activeClients}
+            icon={Package}
+            subtitle="Trade Receivables"
           />
         </div>
 

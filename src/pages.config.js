@@ -49,6 +49,7 @@
  */
 import Approvals from './pages/Approvals';
 import AuditLogs from './pages/AuditLogs';
+import BoardReporting from './pages/BoardReporting';
 import ChartOfAccounts from './pages/ChartOfAccounts';
 import CreditNotes from './pages/CreditNotes';
 import Currencies from './pages/Currencies';
@@ -72,13 +73,13 @@ import SalesOrders from './pages/SalesOrders';
 import Suppliers from './pages/Suppliers';
 import Users from './pages/Users';
 import VendorBills from './pages/VendorBills';
-import BoardReporting from './pages/BoardReporting';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
     "Approvals": Approvals,
     "AuditLogs": AuditLogs,
+    "BoardReporting": BoardReporting,
     "ChartOfAccounts": ChartOfAccounts,
     "CreditNotes": CreditNotes,
     "Currencies": Currencies,
@@ -102,7 +103,6 @@ export const PAGES = {
     "Suppliers": Suppliers,
     "Users": Users,
     "VendorBills": VendorBills,
-    "BoardReporting": BoardReporting,
 }
 
 export const pagesConfig = {
