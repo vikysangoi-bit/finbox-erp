@@ -61,17 +61,18 @@ import GoodsReceipts from './pages/GoodsReceipts';
 import Inventory from './pages/Inventory';
 import InventoryReports from './pages/InventoryReports';
 import InventoryTransactions from './pages/InventoryTransactions';
+import Invoices from './pages/Invoices';
 import JournalEntries from './pages/JournalEntries';
 import Payments from './pages/Payments';
 import PurchaseOrders from './pages/PurchaseOrders';
 import PurchaseReports from './pages/PurchaseReports';
 import Receipts from './pages/Receipts';
 import Reports from './pages/Reports';
+import SalesOrders from './pages/SalesOrders';
 import Suppliers from './pages/Suppliers';
 import Users from './pages/Users';
-import Invoices from './pages/Invoices';
 import VendorBills from './pages/VendorBills';
-import SalesOrders from './pages/SalesOrders';
+import BoardReporting from './pages/BoardReporting';
 import __Layout from './Layout.jsx';
 
 
@@ -90,17 +91,18 @@ export const PAGES = {
     "Inventory": Inventory,
     "InventoryReports": InventoryReports,
     "InventoryTransactions": InventoryTransactions,
+    "Invoices": Invoices,
     "JournalEntries": JournalEntries,
     "Payments": Payments,
     "PurchaseOrders": PurchaseOrders,
     "PurchaseReports": PurchaseReports,
     "Receipts": Receipts,
     "Reports": Reports,
+    "SalesOrders": SalesOrders,
     "Suppliers": Suppliers,
     "Users": Users,
-    "Invoices": Invoices,
     "VendorBills": VendorBills,
-    "SalesOrders": SalesOrders,
+    "BoardReporting": BoardReporting,
 }
 
 export const pagesConfig = {

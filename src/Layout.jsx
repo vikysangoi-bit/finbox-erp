@@ -78,6 +78,7 @@ const navigation = [
       { name: 'Financial Reports', page: 'FinancialReports' },
       { name: 'Inventory Reports', page: 'InventoryReports' },
       { name: 'Purchase Reports', page: 'PurchaseReports' },
+      { name: 'Board Reporting', page: 'BoardReporting' },
     ]
   },
   { name: 'Approvals', icon: CheckSquare, page: 'Approvals' },
