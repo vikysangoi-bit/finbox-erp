@@ -25,6 +25,11 @@ export default function Approvals() {
     queryFn: () => base44.entities.ApprovalRequest.list('-created_date')
   });
 
+  const { data: salesOrders = [] } = useQuery({
+    queryKey: ['sales-orders-for-approval'],
+    queryFn: () => base44.entities.SalesOrder.filter({ status: 'draft' })
+  });
+
   const { data: user } = useQuery({
     queryKey: ['current-user'],
     queryFn: () => base44.auth.me()
@@ -58,6 +63,12 @@ export default function Approvals() {
           approved_by: user?.email,
           approved_at: new Date().toISOString()
         });
+      } else if (request.entity_type === 'sales_order') {
+        await base44.entities.SalesOrder.update(request.entity_id, {
+          status: 'approved',
+          approved_by: user?.email,
+          approved_at: new Date().toISOString()
+        });
       } else if (request.entity_type === 'account_delete') {
         await base44.entities.Account.update(request.entity_id, {
           is_deleted: true,
@@ -85,6 +96,8 @@ export default function Approvals() {
       queryClient.invalidateQueries({ queryKey: ['journal-entries'] });
       queryClient.invalidateQueries({ queryKey: ['inventory-transactions'] });
       queryClient.invalidateQueries({ queryKey: ['accounts'] });
+      queryClient.invalidateQueries({ queryKey: ['sales-orders'] });
+      queryClient.invalidateQueries({ queryKey: ['sales-orders-for-approval'] });
     }
   });
 
@@ -120,6 +133,13 @@ export default function Approvals() {
           approved_at: new Date().toISOString(),
           rejection_reason: reason
         });
+      } else if (request.entity_type === 'sales_order') {
+        await base44.entities.SalesOrder.update(request.entity_id, {
+          status: 'rejected',
+          approved_by: user?.email,
+          approved_at: new Date().toISOString(),
+          rejection_reason: reason
+        });
       }
 
       // Log audit
@@ -138,6 +158,8 @@ export default function Approvals() {
       queryClient.invalidateQueries({ queryKey: ['journal-entries'] });
       queryClient.invalidateQueries({ queryKey: ['inventory-transactions'] });
       queryClient.invalidateQueries({ queryKey: ['accounts'] });
+      queryClient.invalidateQueries({ queryKey: ['sales-orders'] });
+      queryClient.invalidateQueries({ queryKey: ['sales-orders-for-approval'] });
       setRejectDialog(null);
       setRejectReason('');
     }
