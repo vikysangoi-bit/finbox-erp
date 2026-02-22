@@ -49,6 +49,11 @@ export default function SalesOrders() {
     queryFn: () => base44.entities.Account.list()
   });
 
+  const { data: currencies = [] } = useQuery({
+    queryKey: ['currencies'],
+    queryFn: () => base44.entities.Currency.list()
+  });
+
   const createMutation = useMutation({
     mutationFn: async (data) => {
       // Fetch customer details from Account
@@ -280,8 +285,8 @@ export default function SalesOrders() {
 
   const totalValue = filteredOrders.reduce((sum, order) => {
     const value = order.orderFormValue || 0;
-    const inr = order.currency === 'USD' ? value * 90 : value;
-    return sum + inr;
+    const rate = currencies.find(c => c.code === (order.currency || 'INR'))?.exchange_rate || 1;
+    return sum + (value * rate);
   }, 0);
 
   const handleSave = (data) => {

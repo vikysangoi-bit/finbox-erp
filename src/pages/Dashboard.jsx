@@ -46,6 +46,11 @@ export default function Dashboard() {
     queryFn: () => base44.entities.ApprovalRequest.list('-created_date', 20)
   });
 
+  const { data: currencies = [] } = useQuery({
+    queryKey: ['currencies'],
+    queryFn: () => base44.entities.Currency.list()
+  });
+
   // Calculate stats with month-over-month comparison
   const stats = React.useMemo(() => {
     const now = new Date();
@@ -53,25 +58,47 @@ export default function Dashboard() {
     const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
     const lastMonthStr = `${lastMonth.getFullYear()}-${String(lastMonth.getMonth() + 1).padStart(2, '0')}`;
 
+    const getExchangeRate = (currencyCode) => {
+      return currencies.find(c => c.code === currencyCode)?.exchange_rate || 1;
+    };
+
     // Total Orders
     const currentMonthOrders = salesOrders.filter(o => o.created_date?.startsWith(currentMonth));
     const lastMonthOrders = salesOrders.filter(o => o.created_date?.startsWith(lastMonthStr));
-    const totalOrders = currentMonthOrders.reduce((sum, o) => sum + (o.orderFormValue || 0), 0);
-    const lastMonthOrdersValue = lastMonthOrders.reduce((sum, o) => sum + (o.orderFormValue || 0), 0);
+    const totalOrders = currentMonthOrders.reduce((sum, o) => {
+      const rate = getExchangeRate(o.currency || 'INR');
+      return sum + ((o.orderFormValue || 0) * rate);
+    }, 0);
+    const lastMonthOrdersValue = lastMonthOrders.reduce((sum, o) => {
+      const rate = getExchangeRate(o.currency || 'INR');
+      return sum + ((o.orderFormValue || 0) * rate);
+    }, 0);
     const ordersChange = lastMonthOrdersValue > 0 ? (((totalOrders - lastMonthOrdersValue) / lastMonthOrdersValue) * 100).toFixed(1) : 0;
 
     // Total Billed
     const currentMonthInvoices = invoices.filter(i => i.created_date?.startsWith(currentMonth));
     const lastMonthInvoices = invoices.filter(i => i.created_date?.startsWith(lastMonthStr));
-    const totalBilled = currentMonthInvoices.reduce((sum, i) => sum + (i.invoiceValue || 0), 0);
-    const lastMonthBilled = lastMonthInvoices.reduce((sum, i) => sum + (i.invoiceValue || 0), 0);
+    const totalBilled = currentMonthInvoices.reduce((sum, i) => {
+      const rate = getExchangeRate(i.invoiceCurrency || 'INR');
+      return sum + ((i.invoiceValue || 0) * rate);
+    }, 0);
+    const lastMonthBilled = lastMonthInvoices.reduce((sum, i) => {
+      const rate = getExchangeRate(i.invoiceCurrency || 'INR');
+      return sum + ((i.invoiceValue || 0) * rate);
+    }, 0);
     const billedChange = lastMonthBilled > 0 ? (((totalBilled - lastMonthBilled) / lastMonthBilled) * 100).toFixed(1) : 0;
 
     // Total Collections
     const currentMonthReceipts = receipts.filter(r => r.created_date?.startsWith(currentMonth));
     const lastMonthReceipts = receipts.filter(r => r.created_date?.startsWith(lastMonthStr));
-    const totalCollections = currentMonthReceipts.reduce((sum, r) => sum + (r.receiptValue || 0), 0);
-    const lastMonthCollections = lastMonthReceipts.reduce((sum, r) => sum + (r.receiptValue || 0), 0);
+    const totalCollections = currentMonthReceipts.reduce((sum, r) => {
+      const rate = getExchangeRate(r.receiptCurrency || 'INR');
+      return sum + ((r.receiptValue || 0) * rate);
+    }, 0);
+    const lastMonthCollections = lastMonthReceipts.reduce((sum, r) => {
+      const rate = getExchangeRate(r.receiptCurrency || 'INR');
+      return sum + ((r.receiptValue || 0) * rate);
+    }, 0);
     const collectionsChange = lastMonthCollections > 0 ? (((totalCollections - lastMonthCollections) / lastMonthCollections) * 100).toFixed(1) : 0;
 
     // Active Clients - accounts with category "current_asset" and type "asset" (Trade Receivables) and active
@@ -93,7 +120,7 @@ export default function Dashboard() {
       collectionsUp: parseFloat(collectionsChange) > 0,
       activeClients
     };
-  }, [salesOrders, invoices, receipts, accounts]);
+  }, [salesOrders, invoices, receipts, accounts, currencies]);
 
   // Chart data - entries by month
   const monthlyData = React.useMemo(() => {

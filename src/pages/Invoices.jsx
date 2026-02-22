@@ -51,6 +51,11 @@ export default function Invoices() {
     queryFn: () => base44.entities.SalesOrder.list()
   });
 
+  const { data: currencies = [] } = useQuery({
+    queryKey: ['currencies'],
+    queryFn: () => base44.entities.Currency.list()
+  });
+
   const createMutation = useMutation({
     mutationFn: async (data) => {
       const user = await base44.auth.me();
@@ -272,18 +277,18 @@ export default function Invoices() {
 
   const totalNetValue = filteredInvoices.reduce((sum, inv) => {
     const value = inv.invoiceNetValue || 0;
-    const inr = inv.invoiceCurrency === 'USD' ? value * 90 : value;
-    return sum + inr;
+    const rate = currencies.find(c => c.code === (inv.invoiceCurrency || 'INR'))?.exchange_rate || 1;
+    return sum + (value * rate);
   }, 0);
   const totalTaxValue = filteredInvoices.reduce((sum, inv) => {
     const value = inv.invoiceTaxValue || 0;
-    const inr = inv.invoiceCurrency === 'USD' ? value * 90 : value;
-    return sum + inr;
+    const rate = currencies.find(c => c.code === (inv.invoiceCurrency || 'INR'))?.exchange_rate || 1;
+    return sum + (value * rate);
   }, 0);
   const totalValue = filteredInvoices.reduce((sum, inv) => {
     const value = inv.invoiceValue || 0;
-    const inr = inv.invoiceCurrency === 'USD' ? value * 90 : value;
-    return sum + inr;
+    const rate = currencies.find(c => c.code === (inv.invoiceCurrency || 'INR'))?.exchange_rate || 1;
+    return sum + (value * rate);
   }, 0);
 
   const handleSave = (data) => {

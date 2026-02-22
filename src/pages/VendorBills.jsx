@@ -47,6 +47,11 @@ export default function VendorBills() {
     queryFn: () => base44.entities.PurchaseOrder.list()
   });
 
+  const { data: currencies = [] } = useQuery({
+    queryKey: ['currencies'],
+    queryFn: () => base44.entities.Currency.list()
+  });
+
   const createMutation = useMutation({
     mutationFn: async (data) => {
       const user = await base44.auth.me();
@@ -253,8 +258,8 @@ export default function VendorBills() {
 
   const totalValue = filteredBills.reduce((sum, bill) => {
     const value = bill.billValue || 0;
-    const inr = bill.billingCurrency === 'USD' ? value * 90 : value;
-    return sum + inr;
+    const rate = currencies.find(c => c.code === (bill.billingCurrency || 'INR'))?.exchange_rate || 1;
+    return sum + (value * rate);
   }, 0);
 
   const handleSave = (data) => {
