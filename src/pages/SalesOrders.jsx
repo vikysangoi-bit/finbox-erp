@@ -8,12 +8,13 @@ import EmptyState from "@/components/shared/EmptyState";
 import SalesOrderForm from "@/components/salesorders/SalesOrderForm";
 import SalesOrderPrintView from "@/components/salesorders/SalesOrderPrintView";
 import BulkUploadDialog from "@/components/shared/BulkUploadDialog";
+import UpdateStatusDialog from "@/components/salesorders/UpdateStatusDialog";
 import SyncDropdown from "@/components/shared/SyncDropdown";
 import StatusBadge from "@/components/shared/StatusBadge";
 import ColumnSelector from "@/components/shared/ColumnSelector";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, FileText, Eye, Edit, Trash2, Printer, Mail } from "lucide-react";
+import { MoreHorizontal, FileText, Eye, Edit, Trash2, Printer, Mail, RefreshCw } from "lucide-react";
 import ConfirmDialog from "@/components/shared/ConfirmDialog";
 import { useEffect } from 'react';
 
@@ -28,6 +29,7 @@ export default function SalesOrders() {
   const [printingOrder, setPrintingOrder] = useState(null);
   const [deleteOrder, setDeleteOrder] = useState(null);
   const [selectedRows, setSelectedRows] = useState([]);
+  const [showUpdateStatus, setShowUpdateStatus] = useState(null);
   const [showBulkDeleteConfirm, setShowBulkDeleteConfirm] = useState(false);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -67,7 +69,23 @@ export default function SalesOrders() {
       }
       
       const user = await base44.auth.me();
-      await base44.entities.SalesOrder.create(data);
+      const order = await base44.entities.SalesOrder.create(data);
+      
+      // Create approval request for draft orders
+      if (data.status === 'draft') {
+        await base44.entities.ApprovalRequest.create({
+          entity_type: 'sales_order',
+          entity_id: order.id,
+          title: `Sales Order: ${data.orderFormNo}`,
+          description: `Customer: ${data.customerName}, Value: ${data.orderFormValue} ${data.currency}`,
+          amount: data.orderFormValue,
+          currency: data.currency,
+          status: 'pending',
+          submitted_by: user?.email,
+          submitted_by_name: user?.full_name,
+          submitted_at: new Date().toISOString()
+        });
+      }
       
       await base44.functions.invoke('logAuditEntry', {
         action: 'create',
@@ -78,6 +96,7 @@ export default function SalesOrders() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['sales-orders'] });
+      queryClient.invalidateQueries({ queryKey: ['approval-requests'] });
       setShowForm(false);
     }
   });
@@ -184,6 +203,29 @@ export default function SalesOrders() {
     }
   });
 
+  const updateStatusMutation = useMutation({
+    mutationFn: async ({ id, status, reason }) => {
+      const user = await base44.auth.me();
+      await base44.entities.SalesOrder.update(id, { 
+        status,
+        rejection_reason: reason || null,
+        updated_by: user?.email
+      });
+      
+      await base44.functions.invoke('logAuditEntry', {
+        action: 'update',
+        entity_type: 'SalesOrder',
+        entity_id: id,
+        entity_name: showUpdateStatus?.orderFormNo,
+        details: `Updated status to ${status}${reason ? `: ${reason}` : ''}`
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['sales-orders'] });
+      setShowUpdateStatus(null);
+    },
+  });
+
   const filteredOrders = orders.filter(order => {
     if (order.is_deleted) return false;
     
@@ -256,13 +298,19 @@ export default function SalesOrders() {
               <Edit className="w-4 h-4 mr-2" />
               Edit
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setDeleteOrder(row)} className="text-rose-600">
-              <Trash2 className="w-4 h-4 mr-2" />
-              Delete
-            </DropdownMenuItem>
+            {(row.status === 'approved' || row.status === 'signed' || row.status === 'rejected') && (
+              <DropdownMenuItem onClick={() => setShowUpdateStatus(row)}>
+                <RefreshCw className="w-4 h-4 mr-2" />
+                Update Status
+              </DropdownMenuItem>
+            )}
             <DropdownMenuItem onClick={() => sendEmailDraft(row)}>
               <Mail className="w-4 h-4 mr-2" />
               Send Email Draft
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setDeleteOrder(row)} className="text-rose-600">
+              <Trash2 className="w-4 h-4 mr-2" />
+              Delete
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -593,6 +641,18 @@ export default function SalesOrders() {
             'SO-2024-001,1000,50000,net_30,2024-03-01,1_year,2024-01-01,2024-12-31,No,Direct,John Sales,Jane Contact,jane@example.com,+1234567890,DaaS,SKU,100,ARR'
           ]}
           onSuccess={() => queryClient.invalidateQueries({ queryKey: ['sales-orders'] })}
+        />
+
+        <UpdateStatusDialog
+          open={!!showUpdateStatus}
+          onOpenChange={() => setShowUpdateStatus(null)}
+          order={showUpdateStatus}
+          onUpdate={({ status, reason }) => updateStatusMutation.mutate({ 
+            id: showUpdateStatus.id, 
+            status, 
+            reason 
+          })}
+          isLoading={updateStatusMutation.isPending}
         />
       </div>
     </div>
