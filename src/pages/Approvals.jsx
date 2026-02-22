@@ -11,12 +11,16 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { CheckCircle, Clock, XCircle } from "lucide-react";
 import ConfirmDialog from "@/components/shared/ConfirmDialog";
+import SalesOrderForm from "@/components/salesorders/SalesOrderForm";
 
 export default function Approvals() {
   const [activeTab, setActiveTab] = useState('pending');
   const [rejectDialog, setRejectDialog] = useState(null);
   const [rejectReason, setRejectReason] = useState('');
   const [deleteRequest, setDeleteRequest] = useState(null);
+  const [showSalesOrderForm, setShowSalesOrderForm] = useState(false);
+  const [currentSalesOrder, setCurrentSalesOrder] = useState(null);
+  const [viewModeSalesOrder, setViewModeSalesOrder] = useState(false);
 
   const queryClient = useQueryClient();
 
@@ -28,6 +32,11 @@ export default function Approvals() {
   const { data: salesOrders = [] } = useQuery({
     queryKey: ['sales-orders-for-approval'],
     queryFn: () => base44.entities.SalesOrder.filter({ status: 'draft' })
+  });
+
+  const { data: accounts = [] } = useQuery({
+    queryKey: ['accounts'],
+    queryFn: () => base44.entities.Account.list()
   });
 
   const { data: user } = useQuery({
@@ -187,14 +196,39 @@ export default function Approvals() {
     }
   };
 
-  const handleView = (request) => {
-    // Navigate to the entity's detail page based on entity_type
-    alert(`View functionality for ${request.entity_type} with ID: ${request.entity_id}`);
+  const handleView = async (request) => {
+    if (request.entity_type === 'sales_order') {
+      const so = await base44.entities.SalesOrder.get(request.entity_id);
+      setCurrentSalesOrder(so);
+      setViewModeSalesOrder(true);
+      setShowSalesOrderForm(true);
+    } else {
+      alert(`View functionality for ${request.entity_type} with ID: ${request.entity_id}`);
+    }
   };
 
-  const handleEdit = (request) => {
-    // Navigate to the entity's edit page based on entity_type
-    alert(`Edit functionality for ${request.entity_type} with ID: ${request.entity_id}`);
+  const handleEdit = async (request) => {
+    if (request.entity_type === 'sales_order') {
+      const so = await base44.entities.SalesOrder.get(request.entity_id);
+      setCurrentSalesOrder(so);
+      setViewModeSalesOrder(false);
+      setShowSalesOrderForm(true);
+    } else {
+      alert(`Edit functionality for ${request.entity_type} with ID: ${request.entity_id}`);
+    }
+  };
+
+  const handleSaveSalesOrder = async (data) => {
+    try {
+      await base44.entities.SalesOrder.update(currentSalesOrder.id, data);
+      queryClient.invalidateQueries({ queryKey: ['sales-orders'] });
+      queryClient.invalidateQueries({ queryKey: ['sales-orders-for-approval'] });
+      setShowSalesOrderForm(false);
+      setCurrentSalesOrder(null);
+    } catch (error) {
+      console.error("Error saving sales order:", error);
+      alert("Error saving sales order.");
+    }
   };
 
   return (
@@ -326,6 +360,23 @@ export default function Approvals() {
           confirmLabel="Delete"
           onConfirm={() => deleteMutation.mutate(deleteRequest.id)}
           variant="destructive"
+        />
+
+        {/* Sales Order Form */}
+        <SalesOrderForm
+          open={showSalesOrderForm}
+          onOpenChange={(open) => {
+            setShowSalesOrderForm(open);
+            if (!open) {
+              setCurrentSalesOrder(null);
+              setViewModeSalesOrder(false);
+            }
+          }}
+          order={currentSalesOrder}
+          accounts={accounts}
+          onSave={handleSaveSalesOrder}
+          isLoading={false}
+          viewMode={viewModeSalesOrder}
         />
       </div>
     </div>
