@@ -17,4 +17,7 @@ export default defineConfig({
     }),
     react(),
   ]
-});
+})
+
+VITE_BASE44_APP_ID=696d1c12e7412aa1bb6e6ab01
+VITE_BASE44_APP_BASE_URL=https://finbox-erp-b6e6ab01.base44.app
