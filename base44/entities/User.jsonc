@@ -1,0 +1,18 @@
+{
+  "name": "User",
+  "type": "object",
+  "properties": {
+    "custom_role_id": {
+      "type": "string",
+      "description": "Custom role ID if assigned"
+    },
+    "custom_role_name": {
+      "type": "string",
+      "description": "Custom role name"
+    }
+  },
+  "required": [
+    "custom_role_id",
+    "custom_role_name"
+  ]
+}

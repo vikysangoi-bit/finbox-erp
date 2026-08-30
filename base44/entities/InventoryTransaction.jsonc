@@ -1,0 +1,114 @@
+{
+  "name": "InventoryTransaction",
+  "type": "object",
+  "properties": {
+    "transaction_number": {
+      "type": "string"
+    },
+    "transaction_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "receipt",
+        "issue",
+        "adjustment",
+        "transfer",
+        "return"
+      ],
+      "description": "Transaction type"
+    },
+    "po_number": {
+      "type": "string",
+      "description": "Purchase order number (for receipts)"
+    },
+    "po_id": {
+      "type": "string",
+      "description": "Purchase order ID reference"
+    },
+    "so_number": {
+      "type": "string",
+      "description": "Sales order number (for issues/goods out)"
+    },
+    "so_id": {
+      "type": "string",
+      "description": "Sales order ID reference"
+    },
+    "items": {
+      "type": "array",
+      "description": "Transaction items",
+      "items": {
+        "type": "object",
+        "properties": {
+          "item_id": {
+            "type": "string"
+          },
+          "item_sku": {
+            "type": "string"
+          },
+          "styleID": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "color": {
+            "type": "string"
+          },
+          "size": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          }
+        }
+      }
+    },
+    "from_location": {
+      "type": "string"
+    },
+    "to_location": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "pending_approval",
+        "approved",
+        "rejected",
+        "completed"
+      ],
+      "default": "draft"
+    },
+    "application_status": {
+      "type": "string",
+      "enum": [
+        "Unapplied",
+        "Partial Applied",
+        "Applied"
+      ],
+      "default": "Unapplied",
+      "description": "Tracks if transaction items are used in bills/invoices"
+    },
+    "submitted_by": {
+      "type": "string"
+    },
+    "approved_by": {
+      "type": "string"
+    },
+    "approved_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "rejection_reason": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "transaction_date",
+    "type"
+  ]
+}

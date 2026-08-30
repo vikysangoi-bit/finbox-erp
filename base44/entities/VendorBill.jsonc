@@ -1,0 +1,206 @@
+{
+  "name": "VendorBill",
+  "type": "object",
+  "properties": {
+    "accountCode": {
+      "type": "string",
+      "description": "Account code"
+    },
+    "supplier": {
+      "type": "string",
+      "description": "Supplier name"
+    },
+    "serviceName": {
+      "type": "string",
+      "enum": [
+        "DaaS",
+        "GaaS",
+        "AI Photoshoot"
+      ],
+      "description": "Service name"
+    },
+    "poNo": {
+      "type": "string",
+      "description": "Purchase order number"
+    },
+    "grn_number": {
+      "type": "string",
+      "description": "Goods Receipt Note number (optional for 3-way match)"
+    },
+    "billNo": {
+      "type": "string",
+      "description": "Vendor bill number"
+    },
+    "billDate": {
+      "type": "string",
+      "format": "date",
+      "description": "Bill date"
+    },
+    "billingCurrency": {
+      "type": "string",
+      "enum": [
+        "USD",
+        "INR"
+      ],
+      "default": "USD",
+      "description": "Billing currency"
+    },
+    "billNetValue": {
+      "type": "number",
+      "default": 0,
+      "description": "Net value before tax"
+    },
+    "billTaxValue": {
+      "type": "number",
+      "default": 0,
+      "description": "Tax amount"
+    },
+    "billValue": {
+      "type": "number",
+      "default": 0,
+      "description": "Total bill value"
+    },
+    "billSharedOn": {
+      "type": "string",
+      "format": "date",
+      "description": "Date bill was shared"
+    },
+    "paymentTerms": {
+      "type": "string",
+      "enum": [
+        "net_30",
+        "net_45",
+        "net_60",
+        "net_90"
+      ],
+      "default": "net_30",
+      "description": "Payment terms"
+    },
+    "paymentDueDate": {
+      "type": "string",
+      "format": "date",
+      "description": "Payment due date"
+    },
+    "currentStatus": {
+      "type": "string",
+      "enum": [
+        "Open",
+        "Paid",
+        "Partially paid"
+      ],
+      "default": "Open",
+      "description": "Current bill status"
+    },
+    "lineItems": {
+      "type": "array",
+      "description": "Bill line items",
+      "items": {
+        "type": "object",
+        "properties": {
+          "itemCode": {
+            "type": "string",
+            "description": "Item code for mapping"
+          },
+          "articleNo": {
+            "type": "string",
+            "description": "Article number / EAN"
+          },
+          "styleID": {
+            "type": "string",
+            "description": "Style ID"
+          },
+          "itemCategory": {
+            "type": "string",
+            "description": "Item category"
+          },
+          "description": {
+            "type": "string"
+          },
+          "composition": {
+            "type": "string"
+          },
+          "size": {
+            "type": "string"
+          },
+          "color": {
+            "type": "string"
+          },
+          "hsnCode": {
+            "type": "string",
+            "description": "HSN code"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "rate": {
+            "type": "number"
+          },
+          "net_amount": {
+            "type": "number"
+          },
+          "tax_amount": {
+            "type": "number"
+          },
+          "gross_amount": {
+            "type": "number"
+          }
+        }
+      }
+    },
+    "po_id": {
+      "type": "string",
+      "description": "Purchase order ID reference"
+    },
+    "supplier_id": {
+      "type": "string",
+      "description": "Supplier ID reference"
+    },
+    "notes": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "pending_approval",
+        "approved",
+        "paid",
+        "cancelled"
+      ],
+      "default": "draft"
+    },
+    "submitted_by": {
+      "type": "string"
+    },
+    "submitted_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "approved_by": {
+      "type": "string"
+    },
+    "approved_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updated_by": {
+      "type": "string"
+    },
+    "deleted_by": {
+      "type": "string"
+    },
+    "deleted_on": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "is_deleted": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "required": [
+    "billNo",
+    "billDate",
+    "supplier"
+  ]
+}

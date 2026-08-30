@@ -1,0 +1,117 @@
+{
+  "name": "InventoryItem",
+  "type": "object",
+  "properties": {
+    "sku": {
+      "type": "string",
+      "description": "Stock Keeping Unit"
+    },
+    "itemCode": {
+      "type": "string",
+      "description": "Item code for mapping across modules"
+    },
+    "articleNo": {
+      "type": "string",
+      "description": "Article number"
+    },
+    "ean": {
+      "type": "string",
+      "description": "EAN / Barcode"
+    },
+    "styleID": {
+      "type": "string",
+      "description": "Style ID"
+    },
+    "name": {
+      "type": "string"
+    },
+    "itemCategory": {
+      "type": "string",
+      "description": "Item category"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "fabric",
+        "trims",
+        "accessories",
+        "packaging",
+        "garments",
+        "samples"
+      ],
+      "description": "Item category type"
+    },
+    "sub_category": {
+      "type": "string",
+      "description": "Sub-category (e.g., Cotton, Polyester for fabric)"
+    },
+    "description": {
+      "type": "string",
+      "description": "Item description"
+    },
+    "composition": {
+      "type": "string",
+      "description": "Material composition"
+    },
+    "size": {
+      "type": "string",
+      "description": "Size"
+    },
+    "color": {
+      "type": "string",
+      "description": "Color"
+    },
+    "hsnCode": {
+      "type": "string",
+      "description": "HSN code"
+    },
+    "unit": {
+      "type": "string",
+      "enum": [
+        "meters",
+        "yards",
+        "pieces",
+        "kg",
+        "rolls",
+        "boxes",
+        "sets"
+      ],
+      "default": "pieces"
+    },
+    "quantity_on_hand": {
+      "type": "number",
+      "default": 0
+    },
+    "reorder_level": {
+      "type": "number",
+      "default": 0
+    },
+    "mrp": {
+      "type": "number",
+      "default": 0,
+      "description": "Maximum Retail Price"
+    },
+    "total_value": {
+      "type": "number",
+      "default": 0
+    },
+    "warehouse_location": {
+      "type": "string"
+    },
+    "supplier": {
+      "type": "string"
+    },
+    "image_url": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "sku",
+    "name",
+    "category",
+    "unit"
+  ]
+}

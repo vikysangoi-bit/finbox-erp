@@ -1,0 +1,291 @@
+{
+  "name": "CustomRole",
+  "type": "object",
+  "properties": {
+    "role_name": {
+      "type": "string",
+      "description": "Custom role name"
+    },
+    "description": {
+      "type": "string",
+      "description": "Role description"
+    },
+    "permissions": {
+      "type": "object",
+      "description": "Module-wise permissions",
+      "properties": {
+        "order_to_cash": {
+          "type": "object",
+          "properties": {
+            "sales_orders": {
+              "type": "object",
+              "properties": {
+                "view": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "edit": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "delete": {
+                  "type": "boolean",
+                  "default": false
+                }
+              }
+            },
+            "invoices": {
+              "type": "object",
+              "properties": {
+                "view": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "edit": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "delete": {
+                  "type": "boolean",
+                  "default": false
+                }
+              }
+            },
+            "credit_notes": {
+              "type": "object",
+              "properties": {
+                "view": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "edit": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "delete": {
+                  "type": "boolean",
+                  "default": false
+                }
+              }
+            },
+            "receipts": {
+              "type": "object",
+              "properties": {
+                "view": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "edit": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "delete": {
+                  "type": "boolean",
+                  "default": false
+                }
+              }
+            }
+          }
+        },
+        "procure_to_pay": {
+          "type": "object",
+          "properties": {
+            "purchase_orders": {
+              "type": "object",
+              "properties": {
+                "view": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "edit": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "delete": {
+                  "type": "boolean",
+                  "default": false
+                }
+              }
+            },
+            "goods_receipts": {
+              "type": "object",
+              "properties": {
+                "view": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "edit": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "delete": {
+                  "type": "boolean",
+                  "default": false
+                }
+              }
+            },
+            "vendor_bills": {
+              "type": "object",
+              "properties": {
+                "view": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "edit": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "delete": {
+                  "type": "boolean",
+                  "default": false
+                }
+              }
+            },
+            "debit_notes": {
+              "type": "object",
+              "properties": {
+                "view": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "edit": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "delete": {
+                  "type": "boolean",
+                  "default": false
+                }
+              }
+            },
+            "payments": {
+              "type": "object",
+              "properties": {
+                "view": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "edit": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "delete": {
+                  "type": "boolean",
+                  "default": false
+                }
+              }
+            }
+          }
+        },
+        "accounting": {
+          "type": "object",
+          "properties": {
+            "chart_of_accounts": {
+              "type": "object",
+              "properties": {
+                "view": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "edit": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "delete": {
+                  "type": "boolean",
+                  "default": false
+                }
+              }
+            },
+            "journal_entries": {
+              "type": "object",
+              "properties": {
+                "view": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "edit": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "delete": {
+                  "type": "boolean",
+                  "default": false
+                }
+              }
+            }
+          }
+        },
+        "inventory": {
+          "type": "object",
+          "properties": {
+            "items": {
+              "type": "object",
+              "properties": {
+                "view": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "edit": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "delete": {
+                  "type": "boolean",
+                  "default": false
+                }
+              }
+            },
+            "transactions": {
+              "type": "object",
+              "properties": {
+                "view": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "edit": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "delete": {
+                  "type": "boolean",
+                  "default": false
+                }
+              }
+            }
+          }
+        },
+        "reports": {
+          "type": "object",
+          "properties": {
+            "view": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        }
+      }
+    },
+    "approver_for": {
+      "type": "array",
+      "description": "Forms this role can approve",
+      "items": {
+        "type": "string",
+        "enum": [
+          "sales_orders",
+          "purchase_orders",
+          "journal_entries",
+          "inventory_transactions",
+          "vendor_bills"
+        ]
+      }
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "required": [
+    "role_name"
+  ]
+}

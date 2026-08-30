@@ -1,0 +1,83 @@
+{
+  "name": "CreditNote",
+  "type": "object",
+  "properties": {
+    "customerCode": {
+      "type": "string",
+      "description": "Customer account code"
+    },
+    "customerName": {
+      "type": "string",
+      "description": "Customer name"
+    },
+    "invoiceNo": {
+      "type": "string",
+      "description": "Invoice number reference (optional)"
+    },
+    "creditNoteNo": {
+      "type": "string",
+      "description": "Credit note number"
+    },
+    "cnDate": {
+      "type": "string",
+      "format": "date",
+      "description": "Credit note date"
+    },
+    "cnCurrency": {
+      "type": "string",
+      "enum": [
+        "USD",
+        "INR"
+      ],
+      "default": "USD",
+      "description": "Credit note currency"
+    },
+    "cnNetValue": {
+      "type": "number",
+      "default": 0,
+      "description": "Net value before tax"
+    },
+    "cnTaxValue": {
+      "type": "number",
+      "default": 0,
+      "description": "Tax amount"
+    },
+    "cnValue": {
+      "type": "number",
+      "default": 0,
+      "description": "Total credit note value"
+    },
+    "cnStatus": {
+      "type": "string",
+      "enum": [
+        "Applied",
+        "Adjustment"
+      ],
+      "default": "Adjustment",
+      "description": "Credit note status - Applied if mapped to invoice, Adjustment otherwise"
+    },
+    "invoiceId": {
+      "type": "string",
+      "description": "Invoice ID reference"
+    },
+    "updated_by": {
+      "type": "string"
+    },
+    "deleted_by": {
+      "type": "string"
+    },
+    "deleted_on": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "is_deleted": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "required": [
+    "creditNoteNo",
+    "customerCode",
+    "cnDate"
+  ]
+}

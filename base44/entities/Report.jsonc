@@ -1,0 +1,85 @@
+{
+  "name": "Report",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Report name"
+    },
+    "description": {
+      "type": "string"
+    },
+    "report_type": {
+      "type": "string",
+      "enum": [
+        "financial",
+        "inventory",
+        "purchase",
+        "custom"
+      ],
+      "description": "Type of report"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "balance_sheet",
+        "income_statement",
+        "cash_flow",
+        "inventory_turnover",
+        "inventory_aging",
+        "po_variance",
+        "custom"
+      ]
+    },
+    "config": {
+      "type": "object",
+      "description": "Report configuration (filters, columns, etc.)",
+      "properties": {
+        "date_from": {
+          "type": "string"
+        },
+        "date_to": {
+          "type": "string"
+        },
+        "currency": {
+          "type": "string"
+        },
+        "grouping": {
+          "type": "string"
+        },
+        "filters": {
+          "type": "object"
+        },
+        "columns": {
+          "type": "array"
+        },
+        "sort_by": {
+          "type": "string"
+        }
+      }
+    },
+    "is_favorite": {
+      "type": "boolean",
+      "default": false
+    },
+    "last_run": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "schedule": {
+      "type": "string",
+      "enum": [
+        "none",
+        "daily",
+        "weekly",
+        "monthly"
+      ],
+      "default": "none"
+    }
+  },
+  "required": [
+    "name",
+    "report_type",
+    "category"
+  ]
+}

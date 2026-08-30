@@ -1,0 +1,274 @@
+{
+  "name": "SalesOrder",
+  "type": "object",
+  "properties": {
+    "orderFormNo": {
+      "type": "string",
+      "description": "Order form number"
+    },
+    "customerCode": {
+      "type": "string",
+      "description": "Customer account code"
+    },
+    "customerName": {
+      "type": "string",
+      "description": "Customer name (auto-filled from Account)"
+    },
+    "customerBrand": {
+      "type": "string",
+      "description": "Customer brand (auto-filled from Account)"
+    },
+    "customerAddress": {
+      "type": "string",
+      "description": "Customer address (auto-filled from Account)"
+    },
+    "customerCountry": {
+      "type": "string",
+      "description": "Customer country (auto-filled from Account)"
+    },
+    "customerGstId": {
+      "type": "string",
+      "description": "Customer GST ID (auto-filled from Account)"
+    },
+    "orderFormValue": {
+      "type": "number",
+      "default": 0,
+      "description": "Total order value"
+    },
+    "paymentTerm": {
+      "type": "string",
+      "enum": [
+        "full_advance",
+        "net_7",
+        "net_30",
+        "net_45",
+        "net_60",
+        "net_90"
+      ],
+      "description": "Payment terms"
+    },
+    "paymentTermFrom": {
+      "type": "string",
+      "description": "Payment term start reference"
+    },
+    "expectedDelivery": {
+      "type": "string",
+      "format": "date",
+      "description": "Expected delivery date"
+    },
+    "orderTerm": {
+      "type": "string",
+      "enum": [
+        "6_months",
+        "1_year",
+        "2_years",
+        "3_years",
+        "5_years"
+      ],
+      "description": "Order term duration"
+    },
+    "startDate": {
+      "type": "string",
+      "format": "date",
+      "description": "Order start date"
+    },
+    "endDate": {
+      "type": "string",
+      "format": "date",
+      "description": "Order end date"
+    },
+    "autoRenewal": {
+      "type": "string",
+      "enum": [
+        "Yes",
+        "No"
+      ],
+      "default": "No",
+      "description": "Auto renewal option"
+    },
+    "leadSource": {
+      "type": "string",
+      "enum": [
+        "Direct",
+        "Indirect"
+      ],
+      "description": "Lead source type"
+    },
+    "partnerName": {
+      "type": "string",
+      "description": "Partner name"
+    },
+    "salesPersonName": {
+      "type": "string",
+      "description": "Sales person name"
+    },
+    "contactPersonName": {
+      "type": "string",
+      "description": "Contact person name"
+    },
+    "contactPersonEmail": {
+      "type": "string",
+      "format": "email",
+      "description": "Contact person email"
+    },
+    "contactPersonPhone": {
+      "type": "string",
+      "description": "Contact person phone"
+    },
+    "serviceName": {
+      "type": "string",
+      "enum": [
+        "DaaS",
+        "GaaS",
+        "AI Photoshoot"
+      ],
+      "description": "Service name"
+    },
+    "uom": {
+      "type": "string",
+      "enum": [
+        "SKU",
+        "Tech_pack"
+      ],
+      "description": "Unit of measurement"
+    },
+    "inclusions": {
+      "type": "string",
+      "description": "Inclusions details"
+    },
+    "unitPrice": {
+      "type": "number",
+      "default": 0,
+      "description": "Unit price"
+    },
+    "billingFrequency": {
+      "type": "string",
+      "enum": [
+        "One_Time",
+        "ARR",
+        "MRR"
+      ],
+      "description": "Billing frequency"
+    },
+    "specialTerms": {
+      "type": "string",
+      "description": "Special terms and conditions"
+    },
+    "gaasLineItems": {
+      "type": "array",
+      "description": "GaaS service line items",
+      "items": {
+        "type": "object",
+        "properties": {
+          "itemCode": {
+            "type": "string",
+            "description": "Item code for mapping"
+          },
+          "articleNo": {
+            "type": "string",
+            "description": "Article number / EAN"
+          },
+          "styleID": {
+            "type": "string",
+            "description": "Style ID"
+          },
+          "itemName": {
+            "type": "string"
+          },
+          "itemCategory": {
+            "type": "string",
+            "description": "Item category"
+          },
+          "description": {
+            "type": "string"
+          },
+          "composition": {
+            "type": "string"
+          },
+          "size": {
+            "type": "string"
+          },
+          "color": {
+            "type": "string"
+          },
+          "hsnCode": {
+            "type": "string",
+            "description": "HSN code"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "rate": {
+            "type": "number"
+          },
+          "expectedDeliveryDate": {
+            "type": "string",
+            "format": "date"
+          }
+        }
+      }
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "approved",
+        "rejected",
+        "signed",
+        "expired",
+        "cancelled"
+      ],
+      "default": "draft"
+    },
+    "currency": {
+      "type": "string",
+      "default": "USD"
+    },
+    "notes": {
+      "type": "string"
+    },
+    "attachments": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "approved_by": {
+      "type": "string",
+      "description": "Email of approver"
+    },
+    "approved_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "rejection_reason": {
+      "type": "string"
+    },
+    "updated_by": {
+      "type": "string"
+    },
+    "deleted_by": {
+      "type": "string"
+    },
+    "deleted_on": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "is_deleted": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "required": [
+    "orderFormNo",
+    "customerCode"
+  ]
+}

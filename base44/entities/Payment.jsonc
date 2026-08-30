@@ -1,0 +1,83 @@
+{
+  "name": "Payment",
+  "type": "object",
+  "properties": {
+    "accountCode": {
+      "type": "string",
+      "description": "Account code"
+    },
+    "supplier": {
+      "type": "string",
+      "description": "Supplier name"
+    },
+    "billNo": {
+      "type": "string",
+      "description": "Vendor bill number reference"
+    },
+    "paymentDate": {
+      "type": "string",
+      "format": "date",
+      "description": "Payment date"
+    },
+    "paymentCurrency": {
+      "type": "string",
+      "enum": [
+        "USD",
+        "INR"
+      ],
+      "default": "USD",
+      "description": "Payment currency"
+    },
+    "paymentValue": {
+      "type": "number",
+      "default": 0,
+      "description": "Payment amount"
+    },
+    "tdsHoldValue": {
+      "type": "number",
+      "default": 0,
+      "description": "TDS hold value"
+    },
+    "gstHoldValue": {
+      "type": "number",
+      "default": 0,
+      "description": "GST hold value"
+    },
+    "otherHoldValue": {
+      "type": "number",
+      "default": 0,
+      "description": "Other hold value"
+    },
+    "utr": {
+      "type": "string",
+      "description": "UTR/Transaction reference"
+    },
+    "vendorBillId": {
+      "type": "string",
+      "description": "Vendor bill ID reference"
+    },
+    "notes": {
+      "type": "string"
+    },
+    "updated_by": {
+      "type": "string"
+    },
+    "deleted_by": {
+      "type": "string"
+    },
+    "deleted_on": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "is_deleted": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "required": [
+    "supplier",
+    "billNo",
+    "paymentDate",
+    "paymentValue"
+  ]
+}

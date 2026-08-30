@@ -1,0 +1,219 @@
+{
+  "name": "Account",
+  "type": "object",
+  "properties": {
+    "code": {
+      "type": "string",
+      "description": "Account code (e.g., 1001)"
+    },
+    "name": {
+      "type": "string",
+      "description": "Account name"
+    },
+    "brand": {
+      "type": "string",
+      "description": "Brand name"
+    },
+    "alias": {
+      "type": "string",
+      "description": "Account alias"
+    },
+    "parentAccount": {
+      "type": "string",
+      "description": "Parent account ID for hierarchy"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "asset",
+        "liability",
+        "equity",
+        "revenue",
+        "expense"
+      ],
+      "description": "Account type"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "current_asset",
+        "fixed_asset",
+        "current_liability",
+        "long_term_liability",
+        "equity",
+        "operating_revenue",
+        "other_revenue",
+        "cost_of_goods",
+        "operating_expense",
+        "other_expense"
+      ],
+      "description": "Account category"
+    },
+    "currency": {
+      "type": "string",
+      "default": "USD",
+      "description": "Default currency for this account"
+    },
+    "openingBalance": {
+      "type": "number",
+      "default": 0,
+      "description": "Opening balance"
+    },
+    "currentBalance": {
+      "type": "number",
+      "default": 0,
+      "description": "Current balance"
+    },
+    "active": {
+      "type": "boolean",
+      "default": true
+    },
+    "description": {
+      "type": "string"
+    },
+    "contactType": {
+      "type": "string",
+      "enum": [
+        "business",
+        "finance",
+        "operations"
+      ],
+      "description": "Type of contact"
+    },
+    "contactPerson": {
+      "type": "string",
+      "description": "Contact person name"
+    },
+    "phone": {
+      "type": "string"
+    },
+    "email": {
+      "type": "string",
+      "format": "email"
+    },
+    "address": {
+      "type": "string",
+      "description": "Address"
+    },
+    "city": {
+      "type": "string",
+      "description": "City"
+    },
+    "state": {
+      "type": "string",
+      "description": "State or Province"
+    },
+    "country": {
+      "type": "string"
+    },
+    "region": {
+      "type": "string"
+    },
+    "pincode": {
+      "type": "string",
+      "description": "Postal/PIN code"
+    },
+    "placeOfSupply": {
+      "type": "string",
+      "description": "Place of supply for tax purposes"
+    },
+    "paymentTerms": {
+      "type": "string",
+      "enum": [
+        "net_7",
+        "net_15",
+        "net_30",
+        "net_45",
+        "net_60",
+        "net_90",
+        "cod",
+        "advance"
+      ],
+      "description": "Payment terms"
+    },
+    "creditLimit": {
+      "type": "number",
+      "default": 0,
+      "description": "Credit limit"
+    },
+    "taxId": {
+      "type": "string",
+      "description": "General Tax ID"
+    },
+    "msme": {
+      "type": "string",
+      "enum": [
+        "Micro",
+        "Small",
+        "Medium",
+        "Large"
+      ],
+      "description": "MSME classification (for Trade Payable accounts)"
+    },
+    "gstId": {
+      "type": "string",
+      "description": "GST ID"
+    },
+    "panId": {
+      "type": "string",
+      "description": "PAN (Permanent Account Number)"
+    },
+    "tanId": {
+      "type": "string",
+      "description": "TAN (Tax Deduction Account Number)"
+    },
+    "vatId": {
+      "type": "string",
+      "description": "VAT ID"
+    },
+    "cinLlpin": {
+      "type": "string",
+      "description": "CIN/LLPIN"
+    },
+    "coi": {
+      "type": "string",
+      "description": "COI"
+    },
+    "supplierCategory": {
+      "type": "string",
+      "enum": [
+        "garment_mfg",
+        "testing_lab",
+        "logistics",
+        "cha",
+        "forwarder",
+        "insurance",
+        "sales_partner",
+        "fabric",
+        "trims",
+        "packaging",
+        "other"
+      ],
+      "description": "Vendor category (only for liability > current liability > Trade Payable)"
+    },
+    "updated_by": {
+      "type": "string",
+      "description": "Email of user who last updated"
+    },
+    "deleted_by": {
+      "type": "string",
+      "description": "Email of user who deleted this record"
+    },
+    "deleted_on": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When this record was soft deleted"
+    },
+    "is_deleted": {
+      "type": "boolean",
+      "default": false,
+      "description": "Soft delete flag"
+    }
+  },
+  "required": [
+    "code",
+    "name",
+    "type",
+    "category"
+  ]
+}

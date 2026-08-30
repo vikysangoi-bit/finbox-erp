@@ -1,0 +1,84 @@
+{
+  "name": "Receipt",
+  "type": "object",
+  "properties": {
+    "customerCode": {
+      "type": "string",
+      "description": "Customer account code"
+    },
+    "customerName": {
+      "type": "string",
+      "description": "Customer name"
+    },
+    "invoiceNo": {
+      "type": "string",
+      "description": "Invoice number reference"
+    },
+    "receiptDate": {
+      "type": "string",
+      "format": "date",
+      "description": "Receipt date"
+    },
+    "receiptCurrency": {
+      "type": "string",
+      "enum": [
+        "USD",
+        "INR"
+      ],
+      "default": "USD",
+      "description": "Receipt currency"
+    },
+    "receiptValue": {
+      "type": "number",
+      "default": 0,
+      "description": "Receipt amount"
+    },
+    "tdsHoldValue": {
+      "type": "number",
+      "default": 0,
+      "description": "TDS hold value"
+    },
+    "gstHoldValue": {
+      "type": "number",
+      "default": 0,
+      "description": "GST hold value"
+    },
+    "otherHoldValue": {
+      "type": "number",
+      "default": 0,
+      "description": "Other hold value"
+    },
+    "utr": {
+      "type": "string",
+      "description": "UTR/Transaction reference"
+    },
+    "receiverBank": {
+      "type": "string",
+      "description": "Receiver bank name"
+    },
+    "invoiceId": {
+      "type": "string",
+      "description": "Invoice ID reference"
+    },
+    "updated_by": {
+      "type": "string"
+    },
+    "deleted_by": {
+      "type": "string"
+    },
+    "deleted_on": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "is_deleted": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "required": [
+    "customerCode",
+    "invoiceNo",
+    "receiptDate",
+    "receiptValue"
+  ]
+}

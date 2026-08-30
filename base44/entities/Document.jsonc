@@ -1,0 +1,54 @@
+{
+  "name": "Document",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "file_url": {
+      "type": "string"
+    },
+    "file_type": {
+      "type": "string"
+    },
+    "file_size": {
+      "type": "number",
+      "description": "Size in bytes"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "invoices",
+        "purchase_orders",
+        "contracts",
+        "reports",
+        "compliance",
+        "other"
+      ],
+      "default": "other"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "related_entity": {
+      "type": "string",
+      "description": "Entity type this document relates to"
+    },
+    "related_entity_id": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "uploaded_by": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "name",
+    "file_url"
+  ]
+}

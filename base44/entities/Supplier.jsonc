@@ -1,0 +1,105 @@
+{
+  "name": "Supplier",
+  "type": "object",
+  "properties": {
+    "code": {
+      "type": "string",
+      "description": "Supplier code"
+    },
+    "name": {
+      "type": "string",
+      "description": "Supplier name"
+    },
+    "contact_person": {
+      "type": "string"
+    },
+    "email": {
+      "type": "string",
+      "format": "email"
+    },
+    "phone": {
+      "type": "string"
+    },
+    "address": {
+      "type": "string"
+    },
+    "city": {
+      "type": "string"
+    },
+    "country": {
+      "type": "string"
+    },
+    "payment_terms": {
+      "type": "string",
+      "enum": [
+        "net_7",
+        "net_15",
+        "net_30",
+        "net_45",
+        "net_60",
+        "net_90",
+        "cod",
+        "advance"
+      ],
+      "default": "net_30"
+    },
+    "currency": {
+      "type": "string",
+      "default": "USD"
+    },
+    "credit_limit": {
+      "type": "number",
+      "default": 0
+    },
+    "current_balance": {
+      "type": "number",
+      "default": 0,
+      "description": "Amount currently owed to supplier"
+    },
+    "tax_id": {
+      "type": "string"
+    },
+    "bank_details": {
+      "type": "object",
+      "properties": {
+        "bank_name": {
+          "type": "string"
+        },
+        "account_number": {
+          "type": "string"
+        },
+        "swift_code": {
+          "type": "string"
+        }
+      }
+    },
+    "rating": {
+      "type": "number",
+      "minimum": 1,
+      "maximum": 5,
+      "description": "Supplier rating (1-5 stars)"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "fabric",
+        "trims",
+        "accessories",
+        "packaging",
+        "services",
+        "other"
+      ]
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "code",
+    "name"
+  ]
+}

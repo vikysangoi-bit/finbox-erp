@@ -1,0 +1,39 @@
+{
+  "name": "Currency",
+  "type": "object",
+  "properties": {
+    "code": {
+      "type": "string",
+      "description": "ISO currency code (e.g., USD, EUR)"
+    },
+    "name": {
+      "type": "string"
+    },
+    "symbol": {
+      "type": "string"
+    },
+    "exchange_rate": {
+      "type": "number",
+      "default": 1,
+      "description": "Exchange rate to base currency"
+    },
+    "is_base": {
+      "type": "boolean",
+      "default": false,
+      "description": "Is this the base currency"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true
+    },
+    "last_updated": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "code",
+    "name",
+    "symbol"
+  ]
+}

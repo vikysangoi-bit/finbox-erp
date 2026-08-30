@@ -1,0 +1,188 @@
+{
+  "name": "Invoice",
+  "type": "object",
+  "properties": {
+    "customerCode": {
+      "type": "string",
+      "description": "Customer account code from Trade Receivables"
+    },
+    "customerName": {
+      "type": "string",
+      "description": "Customer name (auto-filled from Account)"
+    },
+    "serviceName": {
+      "type": "string",
+      "enum": [
+        "DaaS",
+        "GaaS",
+        "AI Photoshoot"
+      ],
+      "description": "Service name"
+    },
+    "orderFormNo": {
+      "type": "string",
+      "description": "Sales order form number"
+    },
+    "gon_number": {
+      "type": "string",
+      "description": "Goods Outward Note / Dispatch number (optional for 3-way match)"
+    },
+    "invoiceNo": {
+      "type": "string",
+      "description": "Invoice number"
+    },
+    "invoiceDate": {
+      "type": "string",
+      "format": "date",
+      "description": "Invoice date"
+    },
+    "invoiceCurrency": {
+      "type": "string",
+      "enum": [
+        "USD",
+        "INR"
+      ],
+      "default": "USD",
+      "description": "Invoice currency"
+    },
+    "invoiceNetValue": {
+      "type": "number",
+      "default": 0,
+      "description": "Net value before tax"
+    },
+    "invoiceTaxValue": {
+      "type": "number",
+      "default": 0,
+      "description": "Tax amount"
+    },
+    "invoiceValue": {
+      "type": "number",
+      "default": 0,
+      "description": "Total invoice value"
+    },
+    "invoiceSharedOn": {
+      "type": "string",
+      "format": "date",
+      "description": "Date invoice was shared"
+    },
+    "paymentTerms": {
+      "type": "string",
+      "enum": [
+        "net_7",
+        "net_30",
+        "net_60",
+        "net_90"
+      ],
+      "description": "Payment terms"
+    },
+    "paymentDueDate": {
+      "type": "string",
+      "format": "date",
+      "description": "Payment due date"
+    },
+    "invoiceStatus": {
+      "type": "string",
+      "enum": [
+        "Open",
+        "Paid",
+        "Partially paid"
+      ],
+      "default": "Open",
+      "description": "Invoice status"
+    },
+    "invoiceType": {
+      "type": "string",
+      "enum": [
+        "Tax",
+        "Proforma"
+      ],
+      "default": "Tax",
+      "description": "Invoice type"
+    },
+    "lineItems": {
+      "type": "array",
+      "description": "Invoice line items",
+      "items": {
+        "type": "object",
+        "properties": {
+          "itemCode": {
+            "type": "string",
+            "description": "Item code for mapping"
+          },
+          "articleNo": {
+            "type": "string",
+            "description": "Article number / EAN"
+          },
+          "styleID": {
+            "type": "string",
+            "description": "Style ID"
+          },
+          "itemCategory": {
+            "type": "string",
+            "description": "Item category"
+          },
+          "description": {
+            "type": "string"
+          },
+          "composition": {
+            "type": "string"
+          },
+          "size": {
+            "type": "string"
+          },
+          "color": {
+            "type": "string"
+          },
+          "hsnCode": {
+            "type": "string",
+            "description": "HSN code"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "rate": {
+            "type": "number"
+          },
+          "amount": {
+            "type": "number"
+          }
+        }
+      }
+    },
+    "salesOrderId": {
+      "type": "string",
+      "description": "Sales order ID reference"
+    },
+    "customerBrand": {
+      "type": "string",
+      "description": "Customer brand (from Sales Order)"
+    },
+    "customerRegion": {
+      "type": "string",
+      "description": "Customer region (from Account)"
+    },
+    "salesPersonName": {
+      "type": "string",
+      "description": "Sales person name (from Sales Order)"
+    },
+    "updated_by": {
+      "type": "string"
+    },
+    "deleted_by": {
+      "type": "string"
+    },
+    "deleted_on": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "is_deleted": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "required": [
+    "invoiceNo",
+    "customerCode",
+    "invoiceDate"
+  ]
+}

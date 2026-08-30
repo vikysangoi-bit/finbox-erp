@@ -1,0 +1,142 @@
+{
+  "name": "DebitNote",
+  "type": "object",
+  "properties": {
+    "accountCode": {
+      "type": "string",
+      "description": "Account code"
+    },
+    "supplier": {
+      "type": "string",
+      "description": "Supplier name"
+    },
+    "billNo": {
+      "type": "string",
+      "description": "Vendor bill number reference"
+    },
+    "debitNoteNo": {
+      "type": "string",
+      "description": "Debit note number"
+    },
+    "dnDate": {
+      "type": "string",
+      "format": "date",
+      "description": "Debit note date"
+    },
+    "dnCurrency": {
+      "type": "string",
+      "enum": [
+        "USD",
+        "INR"
+      ],
+      "default": "USD",
+      "description": "Debit note currency"
+    },
+    "dnNetValue": {
+      "type": "number",
+      "default": 0,
+      "description": "Net value before tax"
+    },
+    "dnTaxValue": {
+      "type": "number",
+      "default": 0,
+      "description": "Tax amount"
+    },
+    "dnValue": {
+      "type": "number",
+      "default": 0,
+      "description": "Total debit note value"
+    },
+    "dnStatus": {
+      "type": "string",
+      "enum": [
+        "Applied",
+        "Adjustment"
+      ],
+      "default": "Adjustment",
+      "description": "Debit note status - Applied if mapped to bill, Adjustment otherwise"
+    },
+    "lineItems": {
+      "type": "array",
+      "description": "Debit note line items",
+      "items": {
+        "type": "object",
+        "properties": {
+          "itemCode": {
+            "type": "string",
+            "description": "Item code for mapping"
+          },
+          "articleNo": {
+            "type": "string",
+            "description": "Article number / EAN"
+          },
+          "styleID": {
+            "type": "string",
+            "description": "Style ID"
+          },
+          "itemCategory": {
+            "type": "string",
+            "description": "Item category"
+          },
+          "description": {
+            "type": "string"
+          },
+          "composition": {
+            "type": "string"
+          },
+          "size": {
+            "type": "string"
+          },
+          "color": {
+            "type": "string"
+          },
+          "hsnCode": {
+            "type": "string",
+            "description": "HSN code"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "rate": {
+            "type": "number"
+          },
+          "net_amount": {
+            "type": "number"
+          },
+          "tax_amount": {
+            "type": "number"
+          },
+          "gross_amount": {
+            "type": "number"
+          }
+        }
+      }
+    },
+    "vendorBillId": {
+      "type": "string",
+      "description": "Vendor bill ID reference"
+    },
+    "notes": {
+      "type": "string"
+    },
+    "updated_by": {
+      "type": "string"
+    },
+    "deleted_by": {
+      "type": "string"
+    },
+    "deleted_on": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "is_deleted": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "required": [
+    "debitNoteNo",
+    "dnDate",
+    "supplier"
+  ]
+}
